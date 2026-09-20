@@ -95,6 +95,13 @@ export function ActiveSession({
   const [drafts, setDrafts] = useState<Record<string, SetDraft>>({})
   const [confirmFinish, setConfirmFinish] = useState(false)
   const alertedFor = useRef<number | null>(null)
+  /** Salto automatico al siguiente ejercicio, pendiente de dispararse. */
+  const advanceTimer = useRef<number | undefined>(undefined)
+
+  useEffect(() => () => window.clearTimeout(advanceTimer.current), [])
+
+  /** Cualquier cosa que hagas a mano cancela el salto automatico. */
+  const cancelAdvance = () => window.clearTimeout(advanceTimer.current)
 
   useEffect(() => saveSessionPlan(plan), [plan])
   useEffect(() => saveRestTimer(restTimer), [restTimer])
@@ -191,6 +198,8 @@ export function ActiveSession({
 
   const goToExercise = useCallback(
     (index: number) => {
+      // Si te mueves tu, manda lo que tu hiciste.
+      window.clearTimeout(advanceTimer.current)
       if (index < 0 || index >= links.length) return
       setPlan((current) => ({ ...current, exerciseIndex: index }))
       setOpenKey(null)
@@ -243,7 +252,7 @@ export function ActiveSession({
     const top = topRecord(hits)
     if (!top) return
     vibrate(settings.vibration, [20, 60, 30])
-    showToast(recordMessage(top, currentName))
+    showToast(recordMessage(top, currentName), 'record')
   }
 
   const completeRow = (row: Row) => {
@@ -276,6 +285,25 @@ export function ActiveSession({
         alertedFor.current = null
         setRestTimer(startRest(currentExerciseId, restSeconds, Date.now()))
       }
+
+      // Con la ultima serie de trabajo hecha, el ejercicio se da por terminado.
+      // Los calentamientos que queden sin marcar no lo impiden.
+      const pendingWork = rows.some(
+        (item) => item.type === 'work' && !item.log && item.key !== row.key,
+      )
+      if (row.type === 'work' && !pendingWork) {
+        const next = links[exerciseIndex + 1]
+        window.clearTimeout(advanceTimer.current)
+        // Un momento para ver la serie marcada antes de cambiar de pantalla.
+        advanceTimer.current = window.setTimeout(() => {
+          if (next) {
+            goToExercise(exerciseIndex + 1)
+            showToast(`Siguiente: ${exerciseName(state, next.exerciseId)}`)
+          } else {
+            showToast('Terminaste el ultimo ejercicio')
+          }
+        }, 1100)
+      }
     }
 
     setDrafts((current) => {
@@ -288,6 +316,7 @@ export function ActiveSession({
 
   const deleteRow = (row: Row) => {
     if (!row.log) return
+    cancelAdvance()
     const remaining = currentSets.filter((log) => log.id !== row.log?.id)
     remove('setLogs', row.log)
     clearRecordsOf(row.log.id)
@@ -321,6 +350,7 @@ export function ActiveSession({
   }
 
   const changeRowCount = (type: SetType, delta: 1 | -1) => {
+    cancelAdvance()
     const logged = currentSets.filter((log) => log.type === type).length
     const next = Math.max(logged, planned[type] + delta)
     setPlan((current) => ({
@@ -482,7 +512,10 @@ export function ActiveSession({
                           targetText={row.targetText}
                           weightStep={settings.weightStep}
                           isRecord={Boolean(row.log && recordSetIds.has(row.log.id))}
-                          onOpen={() => setOpenKey(row.key)}
+                          onOpen={() => {
+                            cancelAdvance()
+                            setOpenKey(row.key)
+                          }}
                           onChange={(draft) => setDraftOf(row, draft)}
                           onComplete={() => completeRow(row)}
                           onDelete={() => deleteRow(row)}
