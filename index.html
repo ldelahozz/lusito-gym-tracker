@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es" style="color-scheme: dark; background-color: #0d0f12">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0d0f12" />
+    <meta name="description" content="Registro de entrenamientos de gimnasio, offline y con sincronizacion." />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Lusito Gym" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <title>Lusito Gym Tracker</title>
+    <style>
+      /* Pintado antes de que cargue nada: la pantalla nunca aparece en blanco. */
+      html,
+      body,
+      #root {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        background-color: #0d0f12;
+        color: #e6e8eb;
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      }
+      #splash {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        background-color: #0d0f12;
+      }
+      #splash .mark {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background-color: #1b1f25;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: splash-pulse 1.6s ease-in-out infinite;
+      }
+      #splash .name {
+        font-size: 14px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #8a919c;
+      }
+      @keyframes splash-pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.45;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #splash .mark {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div id="splash">
+        <div class="mark">
+          <svg width="32" height="32" viewBox="0 0 64 64" aria-hidden="true">
+            <g fill="#4C8DFF">
+              <rect x="23" y="29.8" width="18" height="4.4" rx="2.2" />
+              <rect x="18.6" y="22.4" width="6" height="19.2" rx="2.3" />
+              <rect x="39.4" y="22.4" width="6" height="19.2" rx="2.3" />
+              <rect x="13.9" y="26.1" width="4.6" height="11.8" rx="1.9" />
+              <rect x="45.5" y="26.1" width="4.6" height="11.8" rx="1.9" />
+            </g>
+          </svg>
+        </div>
+        <div class="name">Lusito Gym Tracker</div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

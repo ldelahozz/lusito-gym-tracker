@@ -1,0 +1,130 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------
+   Paleta unica de la app. Solo tema oscuro: no existe tema claro.
+   Estos tokens generan utilidades de Tailwind (bg-surface, text-muted, ...)
+------------------------------------------------------------------- */
+@theme {
+  --color-canvas: #0d0f12;
+  --color-surface: #14171b;
+  --color-elevated: #1b1f25;
+  --color-line: #262b33;
+  --color-text: #e6e8eb;
+  --color-muted: #8a919c;
+  --color-accent: #4c8dff;
+  --color-accent-soft: rgb(76 141 255 / 0.12);
+  --color-accent-dim: rgb(76 141 255 / 0.45);
+
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --radius-card: 16px;
+  --radius-control: 12px;
+
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  html {
+    /* iPhone: evita que Safari reescale el texto al girar el telefono. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-canvas);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+    /* Sin retardo de 300 ms ni zoom por doble toque. */
+    touch-action: manipulation;
+  }
+
+  /* Los controles nativos (inputs, selects, scrollbars) tambien en oscuro. */
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color-scheme: dark;
+  }
+
+  /* iPhone hace zoom automatico si un campo tiene letra menor a 16 px. */
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em);
+  }
+
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-soft);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-canvas);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-line);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #333a44;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Respeta el area segura de Android/iOS (barra de gestos). */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

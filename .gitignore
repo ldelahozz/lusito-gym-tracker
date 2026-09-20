@@ -1,0 +1,26 @@
+# Dependencias
+node_modules
+
+# Build
+dist
+dev-dist
+*.local
+
+# Claves de Firebase (NUNCA subir)
+.env
+.env.local
+.env.*.local
+
+# Sistema / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Respaldos de entrenamientos (datos personales)
+*.gymbackup.json
+backups/
+
+# Permisos locales de Claude Code
+.claude/settings.local.json
