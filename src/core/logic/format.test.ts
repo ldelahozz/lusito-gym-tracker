@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { formatDuration, formatMinutesSeconds, formatRepRange, formatWeight } from './format'
+import {
+  formatDate,
+  formatDateTime,
+  formatDuration,
+  formatMinutesSeconds,
+  formatRepRange,
+  formatWeight,
+} from './format'
 
 describe('formatRepRange', () => {
   it('muestra el rango cuando hay dos numeros distintos', () => {
@@ -38,5 +45,19 @@ describe('formatWeight', () => {
   it('muestra decimales solo cuando los hay', () => {
     expect(formatWeight(60)).toBe('60')
     expect(formatWeight(62.5)).toBe('62.5')
+  })
+})
+
+describe('formatDate y formatDateTime', () => {
+  it('escribe la fecha corta', () => {
+    expect(formatDate(new Date(2024, 8, 15, 19, 30).getTime())).toBe('15 sep')
+  })
+
+  it('agrega el dia de la semana y la hora', () => {
+    expect(formatDateTime(new Date(2024, 8, 15, 19, 30).getTime())).toBe('dom 15 sep, 19:30')
+  })
+
+  it('rellena los minutos con cero', () => {
+    expect(formatDateTime(new Date(2024, 0, 1, 9, 5).getTime())).toBe('lun 1 ene, 9:05')
   })
 })

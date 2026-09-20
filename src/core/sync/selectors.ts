@@ -69,3 +69,31 @@ export function findSessionNote(state: DataState, sessionId: string, exerciseId:
 export function exerciseHasHistory(state: DataState, exerciseId: string): boolean {
   return visible(state.setLogs).some((log) => log.exerciseId === exerciseId)
 }
+
+/** Records personales que apuntan a una serie concreta. */
+export function recordsOfSet(state: DataState, setLogId: string) {
+  return visible(state.personalRecords).filter((record) => record.setLogId === setLogId)
+}
+
+/** Series de una sesion, agrupadas por ejercicio en el orden en que se hicieron. */
+export function sessionSetsByExercise(state: DataState, sessionId: string) {
+  const sets = visible(state.setLogs).filter((log) => log.sessionId === sessionId)
+  const order: string[] = []
+  const groups = new Map<string, typeof sets>()
+
+  for (const log of [...sets].sort((a, b) => a.completedAt - b.completedAt)) {
+    if (!groups.has(log.exerciseId)) {
+      groups.set(log.exerciseId, [])
+      order.push(log.exerciseId)
+    }
+    groups.get(log.exerciseId)?.push(log)
+  }
+
+  return order.map((exerciseId) => ({
+    exerciseId,
+    sets: (groups.get(exerciseId) ?? []).sort(
+      (a, b) =>
+        (a.type === b.type ? 0 : a.type === 'warmup' ? -1 : 1) || a.setIndex - b.setIndex,
+    ),
+  }))
+}

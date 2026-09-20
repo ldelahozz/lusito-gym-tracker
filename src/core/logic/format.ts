@@ -36,3 +36,34 @@ export function formatRepRange(repsMin: number, repsMax: number): string {
   const max = Math.max(repsMin, repsMax)
   return min === max ? String(min) : `${min}-${max}`
 }
+
+export const MONTHS_SHORT = [
+  'ene',
+  'feb',
+  'mar',
+  'abr',
+  'may',
+  'jun',
+  'jul',
+  'ago',
+  'sep',
+  'oct',
+  'nov',
+  'dic',
+] as const
+
+const DAYS_SHORT = ['dom', 'lun', 'mar', 'mie', 'jue', 'vie', 'sab'] as const
+
+/** "15 sep" */
+export function formatDate(timestamp: number): string {
+  const date = new Date(timestamp)
+  return `${date.getDate()} ${MONTHS_SHORT[date.getMonth()]}`
+}
+
+/** "mie 15 sep, 19:30" */
+export function formatDateTime(timestamp: number): string {
+  const date = new Date(timestamp)
+  const hours = date.getHours()
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${DAYS_SHORT[date.getDay()]} ${formatDate(timestamp)}, ${hours}:${minutes}`
+}

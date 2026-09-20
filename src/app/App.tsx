@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { Suspense, lazy, type ReactNode } from 'react'
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { isFirebaseConfigured } from '@/core/firebase'
 import { DataProvider } from '@/core/sync/DataProvider'
@@ -8,7 +8,6 @@ import { AuthProvider } from '@/features/auth/AuthProvider'
 import { useAuth } from '@/features/auth/auth-context'
 import { LoginScreen } from '@/features/auth/LoginScreen'
 import { SetupNeededScreen } from '@/features/auth/SetupNeededScreen'
-import { ProgressScreen } from '@/features/progress/ProgressScreen'
 import { ExerciseCatalogScreen } from '@/features/routines/ExerciseCatalogScreen'
 import { RoutineEditor } from '@/features/routines/RoutineEditor'
 import { WeekSplitScreen } from '@/features/routines/WeekSplitScreen'
@@ -17,6 +16,11 @@ import { TrainScreen } from '@/features/session/TrainScreen'
 import { SettingsScreen } from '@/features/settings/SettingsScreen'
 import { AppShell } from './AppShell'
 import { LoadingScreen } from './LoadingScreen'
+
+// Progreso trae las graficas, que pesan. Se descarga la primera vez que se abre.
+const ProgressScreen = lazy(() =>
+  import('@/features/progress/ProgressScreen').then((module) => ({ default: module.ProgressScreen })),
+)
 
 /** Espera a que lleguen los datos guardados en el dispositivo (es casi instantaneo). */
 function DataGate({ children }: { children: ReactNode }) {
@@ -52,7 +56,14 @@ export function App() {
                 <Route path="/rutinas/ejercicios" element={<ExerciseCatalogScreen />} />
                 <Route path="/rutinas/split" element={<WeekSplitScreen />} />
                 <Route path="/rutinas/:routineId" element={<RoutineEditor />} />
-                <Route path="/progreso" element={<ProgressScreen />} />
+                <Route
+                  path="/progreso"
+                  element={
+                    <Suspense fallback={<LoadingScreen label="Abriendo tus graficas" />}>
+                      <ProgressScreen />
+                    </Suspense>
+                  }
+                />
                 <Route path="/ajustes" element={<SettingsScreen />} />
               </Route>
               <Route path="*" element={<Navigate to="/entrenar" replace />} />
