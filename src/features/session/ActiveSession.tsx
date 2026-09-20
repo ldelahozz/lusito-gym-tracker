@@ -14,7 +14,7 @@ import { IconButton } from '@/core/ui/IconButton'
 import { useToast } from '@/core/ui/toast-context'
 import { useChrome } from '@/app/chrome-context'
 import { SyncIndicator } from '@/app/SyncIndicator'
-import { unlockAudio, notifyRestFinished, restFinishedFeedback, tapFeedback } from '@/core/feedback'
+import { unlockAudio, notifyRestFinished, restFinishedFeedback, tapFeedback, vibrate } from '@/core/feedback'
 import { formatDuration, formatRepRange } from '@/core/logic/format'
 import {
   equivalentPreviousSet,
@@ -28,6 +28,7 @@ import {
   startRest,
   type RestTimer,
 } from '@/core/logic/restTimer'
+import { detectRecords, recordMessage, topRecord, type PrSet } from '@/core/logic/prs'
 import { renumberSets, rowCount, switchSetType } from '@/core/logic/setRows'
 import { endSession, isPaused, pauseSession, resumeSession, sessionElapsedMs } from '@/core/logic/sessionDuration'
 import { newId } from '@/core/model/ids'
@@ -61,6 +62,7 @@ export type SessionSummary = {
   durationMs: number
   sets: number
   volume: number
+  records: number
 }
 
 export function ActiveSession({
@@ -159,6 +161,15 @@ export function ActiveSession({
     return [...build('warmup'), ...build('work')]
   }, [link, currentSets, previousSets, planned.warmup, planned.work])
 
+  /** Series que rompieron algun record: la insignia se mantiene aunque cierres la app. */
+  const recordSetIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (const record of Object.values(state.personalRecords)) {
+      if (!record.deleted) ids.add(record.setLogId)
+    }
+    return ids
+  }, [state.personalRecords])
+
   const firstIncomplete = rows.find((row) => !row.log)?.key ?? null
   const activeKey = openKey ?? firstIncomplete
   const workDone = currentSets.filter((log) => log.type === 'work').length
@@ -203,6 +214,38 @@ export function ActiveSession({
     goToExercise(exerciseIndex + (dx < 0 ? 1 : -1))
   }
 
+  /** Borra los records que apuntaban a una serie que se corrigio o se borro. */
+  const clearRecordsOf = (setLogId: string) => {
+    for (const record of Object.values(state.personalRecords)) {
+      if (!record.deleted && record.setLogId === setLogId) remove('personalRecords', record)
+    }
+  }
+
+  /** Revisa si la serie recien guardada rompio algun record y lo anota. */
+  const checkRecords = (log: PrSet) => {
+    if (log.type !== 'work') return
+    clearRecordsOf(log.id)
+
+    const hits = detectRecords(log, allSets)
+    if (hits.length === 0) return
+
+    for (const hit of hits) {
+      save('personalRecords', {
+        id: newId(),
+        exerciseId: hit.exerciseId,
+        kind: hit.kind,
+        value: hit.value,
+        setLogId: hit.setLogId,
+        achievedAt: hit.achievedAt,
+      })
+    }
+
+    const top = topRecord(hits)
+    if (!top) return
+    vibrate(settings.vibration, [20, 60, 30])
+    showToast(recordMessage(top, currentName))
+  }
+
   const completeRow = (row: Row) => {
     unlockAudio()
     tapFeedback(settings.vibration)
@@ -210,9 +253,11 @@ export function ActiveSession({
     const rir = row.type === 'work' ? draft.rir : 0
 
     if (row.log) {
-      save('setLogs', { ...row.log, weightKg: draft.weightKg, reps: draft.reps, rir })
+      const updated = { ...row.log, weightKg: draft.weightKg, reps: draft.reps, rir }
+      save('setLogs', updated)
+      checkRecords(updated)
     } else {
-      save('setLogs', {
+      const created = {
         id: newId(),
         sessionId: session.id,
         exerciseId: currentExerciseId,
@@ -222,7 +267,9 @@ export function ActiveSession({
         reps: draft.reps,
         rir,
         completedAt: Date.now(),
-      })
+      }
+      save('setLogs', created)
+      checkRecords(created)
       const shouldStartRest = row.type === 'work' || settings.warmupStartsTimer
       const restSeconds = row.type === 'warmup' ? link?.warmupRestSeconds : link?.restSeconds
       if (shouldStartRest && link && restSeconds && restSeconds > 0) {
@@ -243,6 +290,7 @@ export function ActiveSession({
     if (!row.log) return
     const remaining = currentSets.filter((log) => log.id !== row.log?.id)
     remove('setLogs', row.log)
+    clearRecordsOf(row.log.id)
     const changes = renumberSets(remaining)
     if (changes.length > 0) {
       saveMany(changes.map((doc) => ({ collection: 'setLogs' as const, doc })))
@@ -299,6 +347,14 @@ export function ActiveSession({
     return pending
   }, [links, sessionSets])
 
+  /** Cuantos records se rompieron en esta sesion. */
+  const sessionRecords = useMemo(() => {
+    const ids = new Set(sessionSets.map((log) => log.id))
+    return Object.values(state.personalRecords).filter(
+      (record) => !record.deleted && ids.has(record.setLogId),
+    ).length
+  }, [sessionSets, state.personalRecords])
+
   const finishSession = () => {
     const ended = endSession(session, Date.now())
     save('sessions', ended)
@@ -312,6 +368,7 @@ export function ActiveSession({
       durationMs: sessionElapsedMs(ended, Date.now()),
       sets: workSets.length,
       volume: workSets.reduce((total, log) => total + log.weightKg * log.reps, 0),
+      records: sessionRecords,
     })
   }
 
@@ -424,6 +481,7 @@ export function ActiveSession({
                           previousText={row.previousText}
                           targetText={row.targetText}
                           weightStep={settings.weightStep}
+                          isRecord={Boolean(row.log && recordSetIds.has(row.log.id))}
                           onOpen={() => setOpenKey(row.key)}
                           onChange={(draft) => setDraftOf(row, draft)}
                           onComplete={() => completeRow(row)}

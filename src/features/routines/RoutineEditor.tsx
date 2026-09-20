@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowDown, ArrowLeft, ArrowUp, ChevronDown, Dumbbell, Plus, Trash, X } from 'lucide-react'
+import { ArrowDown, ArrowLeft, ArrowUp, Check, ChevronDown, Dumbbell, Plus, Trash, X } from 'lucide-react'
 import { Button } from '@/core/ui/Button'
 import { Card } from '@/core/ui/Card'
-import { DurationField } from '@/core/ui/DurationField'
+import { DurationWheel } from '@/core/ui/DurationWheel'
 import { EmptyState } from '@/core/ui/EmptyState'
 import { Field } from '@/core/ui/Field'
 import { IconButton } from '@/core/ui/IconButton'
@@ -181,32 +181,33 @@ function ExerciseCard({
           </div>
 
           <Field label="Descanso entre series de trabajo">
-            <DurationField
+            <DurationWheel
               value={link.restSeconds}
               onChange={(restSeconds) => onChange({ ...link, restSeconds })}
               ariaLabel="Descanso entre series de trabajo"
             />
           </Field>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Calentamiento">
-              <NumberField
-                value={link.warmupSets}
-                onChange={(warmupSets) => onChange({ ...link, warmupSets })}
-                min={0}
-                max={10}
-                suffix="series"
-                ariaLabel="Series de calentamiento"
-              />
-            </Field>
-            <Field label="Descanso calentamiento">
-              <DurationField
+          <Field label="Series de calentamiento">
+            <NumberField
+              value={link.warmupSets}
+              onChange={(warmupSets) => onChange({ ...link, warmupSets })}
+              min={0}
+              max={10}
+              suffix="series"
+              ariaLabel="Series de calentamiento"
+            />
+          </Field>
+
+          {link.warmupSets > 0 && (
+            <Field label="Descanso entre calentamientos">
+              <DurationWheel
                 value={link.warmupRestSeconds}
                 onChange={(warmupRestSeconds) => onChange({ ...link, warmupRestSeconds })}
                 ariaLabel="Descanso entre calentamientos"
               />
             </Field>
-          </div>
+          )}
 
           <ExerciseVideoCard exerciseId={link.exerciseId} exerciseName={name} />
 
@@ -281,6 +282,12 @@ export function RoutineEditor() {
     })
     setExpandedId(id)
     setAdding(false)
+  }
+
+  const finishEditing = () => {
+    commitName()
+    showToast('Rutina guardada')
+    navigate('/rutinas')
   }
 
   const move = (link: RoutineExercise, direction: -1 | 1) => {
@@ -358,6 +365,16 @@ export function RoutineEditor() {
             Agregar ejercicio
           </button>
         )}
+
+        <div className="flex flex-col items-center gap-2 pt-2">
+          <Button variant="primary" size="lg" className="w-full" onClick={finishEditing}>
+            <Check size={20} />
+            Guardar rutina
+          </Button>
+          <p className="text-xs text-muted text-center">
+            Cada cambio se guarda solo mientras editas, aqui o en el celular.
+          </p>
+        </div>
       </div>
     </Screen>
   )

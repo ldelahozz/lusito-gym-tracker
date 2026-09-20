@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Dumbbell, Play } from 'lucide-react'
+import { Dumbbell, Play, Trophy } from 'lucide-react'
 import { Button } from '@/core/ui/Button'
 import { Modal } from '@/core/ui/Modal'
 import { Card } from '@/core/ui/Card'
@@ -93,6 +93,7 @@ export function TrainScreen() {
           </Button>
         }
       >
+        <div className="flex flex-col gap-3">
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="p-3 rounded-control bg-surface">
             <p className="text-xs text-muted">Duracion</p>
@@ -110,6 +111,14 @@ export function TrainScreen() {
               {formatWeight(Math.round(summary?.volume ?? 0))} kg
             </p>
           </div>
+        </div>
+
+        {(summary?.records ?? 0) > 0 && (
+          <p className="flex items-center justify-center gap-2 h-11 rounded-control bg-accent-soft text-accent text-sm">
+            <Trophy size={16} />
+            {summary?.records === 1 ? '1 record nuevo' : `${summary?.records} records nuevos`}
+          </p>
+        )}
         </div>
       </Modal>
     </Screen>
