@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Dumbbell, Play, Trophy } from 'lucide-react'
+import { CalendarDays, Dumbbell, Moon, Play, Trophy } from 'lucide-react'
 import { Button } from '@/core/ui/Button'
 import { Modal } from '@/core/ui/Modal'
 import { Card } from '@/core/ui/Card'
 import { EmptyState } from '@/core/ui/EmptyState'
 import { Screen } from '@/core/ui/Screen'
 import { formatDuration, formatWeight } from '@/core/logic/format'
+import { WEEKDAYS, isSplitEmpty, normalizeSplit, weekdayIndex } from '@/core/logic/weekPlan'
 import { newId } from '@/core/model/ids'
 import type { Routine } from '@/core/model/types'
 import { useData } from '@/core/sync/data-context'
@@ -15,7 +16,7 @@ import { ActiveSession, type SessionSummary } from './ActiveSession'
 import { clearSessionState } from './session-storage'
 
 export function TrainScreen() {
-  const { state, save } = useData()
+  const { state, settings, save } = useData()
   const navigate = useNavigate()
 
   const activeSession = useMemo(
@@ -29,10 +30,24 @@ export function TrainScreen() {
   const routines = useMemo(() => listRoutines(state), [state])
   const [summary, setSummary] = useState<SessionSummary | null>(null)
 
+  const split = useMemo(() => normalizeSplit(settings.weeklySplit), [settings.weeklySplit])
+  const hasSplit = !isSplitEmpty(split)
+  const todayIndex = weekdayIndex(new Date())
+  // Una rutina archivada o borrada deja el dia como descanso.
+  const todayRoutine = routines.find((routine) => routine.id === split[todayIndex]) ?? null
+  const otherRoutines = todayRoutine
+    ? routines.filter((routine) => routine.id !== todayRoutine.id)
+    : routines
+
   if (activeSession) {
     return (
       <ActiveSession key={activeSession.id} session={activeSession} onFinished={setSummary} />
     )
+  }
+
+  const exerciseCountText = (routineId: string) => {
+    const count = listRoutineExercises(state, routineId).length
+    return count === 0 ? 'Sin ejercicios' : `${count} ${count === 1 ? 'ejercicio' : 'ejercicios'}`
   }
 
   const startSession = (routine: Routine) => {
@@ -61,24 +76,86 @@ export function TrainScreen() {
           }
         />
       ) : (
-        <div className="flex flex-col gap-3 md:grid md:grid-cols-2 md:gap-4">
-          {routines.map((routine) => {
-            const count = listRoutineExercises(state, routine.id).length
-            return (
-              <Card key={routine.id} className="p-4 flex items-center gap-3">
-                <div className="min-w-0 flex-1">
-                  <p className="text-[15px] font-medium truncate">{routine.name}</p>
-                  <p className="text-sm text-muted">
-                    {count === 0 ? 'Sin ejercicios' : `${count} ${count === 1 ? 'ejercicio' : 'ejercicios'}`}
-                  </p>
+        <div className="flex flex-col gap-5">
+          {hasSplit ? (
+            <Card className="p-5 flex flex-col gap-4 border-accent-dim">
+              <p className="text-xs uppercase tracking-wider text-muted">
+                {WEEKDAYS[todayIndex]} &middot; Hoy toca
+              </p>
+
+              {todayRoutine ? (
+                <>
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-semibold truncate">{todayRoutine.name}</h2>
+                    <p className="text-sm text-muted">{exerciseCountText(todayRoutine.id)}</p>
+                  </div>
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={() => startSession(todayRoutine)}
+                    disabled={listRoutineExercises(state, todayRoutine.id).length === 0}
+                  >
+                    <Play size={20} />
+                    Empezar
+                  </Button>
+                </>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Moon size={22} className="text-muted shrink-0" />
+                  <div className="min-w-0">
+                    <h2 className="text-lg font-semibold">Descanso</h2>
+                    <p className="text-sm text-muted">Hoy no te toca entrenar.</p>
+                  </div>
                 </div>
-                <Button variant="primary" onClick={() => startSession(routine)} disabled={count === 0}>
-                  <Play size={18} />
-                  Empezar
-                </Button>
-              </Card>
-            )
-          })}
+              )}
+
+              <button
+                type="button"
+                onClick={() => navigate('/rutinas/split')}
+                className="self-start text-xs text-muted hover:text-text transition-colors duration-150"
+              >
+                Cambiar el split semanal
+              </button>
+            </Card>
+          ) : (
+            <button
+              type="button"
+              onClick={() => navigate('/rutinas/split')}
+              className="flex items-center justify-center gap-2 h-14 rounded-card border border-dashed border-line text-muted hover:text-text hover:border-accent-dim transition-colors duration-150"
+            >
+              <CalendarDays size={18} />
+              Arma tu split semanal
+            </button>
+          )}
+
+          {otherRoutines.length > 0 && (
+            <section className="flex flex-col gap-3">
+              <h2 className="px-1 text-xs uppercase tracking-wider text-muted">
+                {todayRoutine ? 'Otras rutinas' : 'Tus rutinas'}
+              </h2>
+              <div className="flex flex-col gap-3 md:grid md:grid-cols-2 md:gap-4">
+                {otherRoutines.map((routine) => {
+                  const count = listRoutineExercises(state, routine.id).length
+                  return (
+                    <Card key={routine.id} className="p-4 flex items-center gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[15px] font-medium truncate">{routine.name}</p>
+                        <p className="text-sm text-muted">{exerciseCountText(routine.id)}</p>
+                      </div>
+                      <Button
+                        variant="primary"
+                        onClick={() => startSession(routine)}
+                        disabled={count === 0}
+                      >
+                        <Play size={18} />
+                        Empezar
+                      </Button>
+                    </Card>
+                  )
+                })}
+              </div>
+            </section>
+          )}
         </div>
       )}
 

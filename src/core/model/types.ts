@@ -120,6 +120,8 @@ export type Settings = SyncFields & {
   warmupStartsTimer: boolean
   sound: boolean
   vibration: boolean
+  /** Que rutina toca cada dia, de lunes a domingo. null es descanso. */
+  weeklySplit: (string | null)[]
 }
 
 export const SETTINGS_ID = 'app'
@@ -130,6 +132,7 @@ export const DEFAULT_SETTINGS = {
   warmupStartsTimer: false,
   sound: true,
   vibration: true,
+  weeklySplit: [null, null, null, null, null, null, null] as (string | null)[],
 } as const
 
 export const DEFAULT_REST_SECONDS = 120

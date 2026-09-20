@@ -11,6 +11,7 @@ import { SetupNeededScreen } from '@/features/auth/SetupNeededScreen'
 import { ProgressScreen } from '@/features/progress/ProgressScreen'
 import { ExerciseCatalogScreen } from '@/features/routines/ExerciseCatalogScreen'
 import { RoutineEditor } from '@/features/routines/RoutineEditor'
+import { WeekSplitScreen } from '@/features/routines/WeekSplitScreen'
 import { RoutinesScreen } from '@/features/routines/RoutinesScreen'
 import { TrainScreen } from '@/features/session/TrainScreen'
 import { SettingsScreen } from '@/features/settings/SettingsScreen'
@@ -49,6 +50,7 @@ export function App() {
                 <Route path="/entrenar" element={<TrainScreen />} />
                 <Route path="/rutinas" element={<RoutinesScreen />} />
                 <Route path="/rutinas/ejercicios" element={<ExerciseCatalogScreen />} />
+                <Route path="/rutinas/split" element={<WeekSplitScreen />} />
                 <Route path="/rutinas/:routineId" element={<RoutineEditor />} />
                 <Route path="/progreso" element={<ProgressScreen />} />
                 <Route path="/ajustes" element={<SettingsScreen />} />

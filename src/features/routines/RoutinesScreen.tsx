@@ -7,6 +7,7 @@ import {
   ArrowUp,
   ChevronRight,
   Copy,
+  CalendarDays,
   ListChecks,
   Plus,
   Trash,
@@ -18,6 +19,7 @@ import { EmptyState } from '@/core/ui/EmptyState'
 import { IconButton } from '@/core/ui/IconButton'
 import { Screen } from '@/core/ui/Screen'
 import { useToast } from '@/core/ui/toast-context'
+import { daysUsing, removeRoutineFromSplit } from '@/core/logic/weekPlan'
 import { newId } from '@/core/model/ids'
 import type { Routine } from '@/core/model/types'
 import { useData } from '@/core/sync/data-context'
@@ -25,7 +27,7 @@ import { listRoutineExercises, listRoutines, nextOrder } from '@/core/sync/selec
 import { buildReorder, buildRoutineCopy, routineHasHistory } from './routine-actions'
 
 export function RoutinesScreen() {
-  const { state, save, saveMany, remove } = useData()
+  const { state, settings, save, saveMany, remove } = useData()
   const { showToast } = useToast()
   const navigate = useNavigate()
   const [showArchived, setShowArchived] = useState(false)
@@ -70,6 +72,13 @@ export function RoutinesScreen() {
       remove('routineExercises', link)
     }
     remove('routines', pendingDelete)
+    // Si estaba en el split semanal, ese dia queda en descanso.
+    if (daysUsing(settings.weeklySplit, pendingDelete.id).length > 0) {
+      save('settings', {
+        ...settings,
+        weeklySplit: removeRoutineFromSplit(settings.weeklySplit, pendingDelete.id),
+      })
+    }
     setPendingDelete(null)
     showToast('Rutina eliminada')
   }
@@ -80,6 +89,10 @@ export function RoutinesScreen() {
       description="Arma tus rutinas aqui. Se sincronizan solas con el celular."
       actions={
         <>
+          <Button onClick={() => navigate('/rutinas/split')}>
+            <CalendarDays size={18} />
+            Split semanal
+          </Button>
           <Button onClick={() => navigate('/rutinas/ejercicios')}>Ejercicios</Button>
           <Button variant="primary" onClick={createRoutine}>
             <Plus size={18} />
