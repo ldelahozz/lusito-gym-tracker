@@ -1,5 +1,7 @@
+import { useMemo, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { AppMark } from './AppMark'
+import { ChromeContext } from './chrome-context'
 import { NAV_ITEMS } from './nav'
 import { SyncIndicator } from './SyncIndicator'
 import { cn } from '@/core/ui/cn'
@@ -77,23 +79,29 @@ function BottomNav() {
 
 export function AppShell() {
   const title = useSectionTitle()
+  const [hideHeader, setHideHeader] = useState(false)
+  const chrome = useMemo(() => ({ hideHeader, setHideHeader }), [hideHeader])
 
   return (
-    <div className="min-h-full flex bg-canvas">
-      <SideNav />
+    <ChromeContext.Provider value={chrome}>
+      <div className="min-h-full flex bg-canvas">
+        <SideNav />
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="md:hidden sticky top-0 z-10 flex items-center justify-between gap-3 h-14 px-4 border-b border-line bg-canvas/95 backdrop-blur pt-safe">
-          <h1 className="text-base font-semibold truncate">{title}</h1>
-          <SyncIndicator />
-        </header>
+        <div className="flex-1 flex flex-col min-w-0">
+          {!hideHeader && (
+            <header className="md:hidden sticky top-0 z-10 flex items-center justify-between gap-3 h-14 px-4 border-b border-line bg-canvas/95 backdrop-blur pt-safe">
+              <h1 className="text-base font-semibold truncate">{title}</h1>
+              <SyncIndicator />
+            </header>
+          )}
 
-        <main className="flex-1 min-w-0 pb-20 md:pb-0">
-          <Outlet />
-        </main>
+          <main className="flex-1 min-w-0 pb-20 md:pb-0">
+            <Outlet />
+          </main>
+        </div>
+
+        <BottomNav />
       </div>
-
-      <BottomNav />
-    </div>
+    </ChromeContext.Provider>
   )
 }

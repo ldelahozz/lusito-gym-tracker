@@ -6,6 +6,7 @@ import { ConfirmDialog } from '@/core/ui/ConfirmDialog'
 import { Screen } from '@/core/ui/Screen'
 import { useAuth } from '@/features/auth/auth-context'
 import { InstallCard } from './InstallCard'
+import { PreferencesCard } from './PreferencesCard'
 
 function initialsOf(name: string | null, email: string | null): string {
   const source = name?.trim() || email?.trim() || '?'
@@ -41,6 +42,11 @@ export function SettingsScreen() {
               Cerrar sesion
             </Button>
           </Card>
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h2 className="text-xs uppercase tracking-wider text-muted px-1">Entrenamiento</h2>
+          <PreferencesCard />
         </section>
 
         <section className="flex flex-col gap-3">
