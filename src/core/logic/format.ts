@@ -29,3 +29,10 @@ export function formatDuration(ms: number): string {
 export function formatWeight(kg: number): string {
   return Number.isInteger(kg) ? String(kg) : String(Math.round(kg * 100) / 100)
 }
+
+/** Rango de repeticiones objetivo: 6 y 8 -> "6-8"; 8 y 8 -> "8". */
+export function formatRepRange(repsMin: number, repsMax: number): string {
+  const min = Math.min(repsMin, repsMax)
+  const max = Math.max(repsMin, repsMax)
+  return min === max ? String(min) : `${min}-${max}`
+}

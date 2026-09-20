@@ -15,7 +15,7 @@ import { useToast } from '@/core/ui/toast-context'
 import { useChrome } from '@/app/chrome-context'
 import { SyncIndicator } from '@/app/SyncIndicator'
 import { unlockAudio, notifyRestFinished, restFinishedFeedback, tapFeedback } from '@/core/feedback'
-import { formatDuration } from '@/core/logic/format'
+import { formatDuration, formatRepRange } from '@/core/logic/format'
 import {
   equivalentPreviousSet,
   prefillFor,
@@ -51,7 +51,7 @@ type Row = {
   index: number
   log: SetLog | undefined
   previousText: string | null
-  /** Objetivo de esa serie segun la rutina ("8 reps @RIR 2"). */
+  /** Objetivo de esa serie segun la rutina ("6-8 reps @RIR 2"). */
   targetText: string | null
   defaults: SetDraft
 }
@@ -140,10 +140,19 @@ export function ActiveSession({
           index,
           log,
           previousText: previousLabel(previous),
-          targetText: target ? `Objetivo ${target.reps} reps @RIR ${target.rir}` : null,
+          targetText: target
+            ? `Objetivo ${formatRepRange(target.repsMin, target.repsMax)} reps @RIR ${target.rir}`
+            : null,
           defaults: log
             ? { weightKg: log.weightKg, reps: log.reps, rir: log.rir }
-            : prefillFor({ previousSets, currentSets, type, setIndex: index, planned: target }),
+            : prefillFor({
+                previousSets,
+                currentSets,
+                type,
+                setIndex: index,
+                // Sin historial se arranca en el extremo bajo del rango.
+                planned: target ? { reps: target.repsMin, rir: target.rir } : null,
+              }),
         }
       })
     }

@@ -12,7 +12,7 @@ import { NumberField } from '@/core/ui/NumberField'
 import { Screen } from '@/core/ui/Screen'
 import { cn } from '@/core/ui/cn'
 import { useToast } from '@/core/ui/toast-context'
-import { formatMinutesSeconds } from '@/core/logic/format'
+import { formatMinutesSeconds, formatRepRange } from '@/core/logic/format'
 import { newId } from '@/core/model/ids'
 import {
   DEFAULT_REST_SECONDS,
@@ -30,8 +30,13 @@ import { ExerciseVideoCard } from './ExerciseVideoCard'
 
 function summaryOf(link: RoutineExercise): string {
   const count = link.workSets.length
+  const first = link.workSets[0]
+  const sameTarget =
+    first &&
+    link.workSets.every((set) => set.repsMin === first.repsMin && set.repsMax === first.repsMax)
+  const series = `${count} ${count === 1 ? 'serie' : 'series'}`
   const parts = [
-    `${count} ${count === 1 ? 'serie' : 'series'}`,
+    sameTarget ? `${series} de ${formatRepRange(first.repsMin, first.repsMax)} reps` : series,
     link.warmupSets > 0 ? `${link.warmupSets} calent.` : 'sin calent.',
     `${formatMinutesSeconds(link.restSeconds)} descanso`,
   ]
@@ -51,46 +56,54 @@ function PlannedSetRow({
   onChange: (next: PlannedSet) => void
   onRemove: () => void
 }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="grid place-items-center size-7 shrink-0 rounded-full bg-elevated text-xs text-muted tabular-nums">
-        {position}
-      </span>
+  // El minimo nunca puede quedar por encima del maximo: el otro extremo se acomoda solo.
+  const setMin = (repsMin: number) => onChange({ ...set, repsMin, repsMax: Math.max(repsMin, set.repsMax) })
+  const setMax = (repsMax: number) => onChange({ ...set, repsMax, repsMin: Math.min(repsMax, set.repsMin) })
 
-      <label className="flex-1 min-w-0 flex items-center gap-1.5">
-        <span className="sr-only">Repeticiones objetivo de la serie {position}</span>
+  return (
+    <div className="rounded-control border border-line p-2.5 flex flex-col gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs uppercase tracking-wider text-muted">Serie {position}</span>
+        <IconButton
+          icon={Trash}
+          label={`Quitar serie ${position}`}
+          size={15}
+          className="size-8"
+          disabled={!canRemove}
+          onClick={onRemove}
+        />
+      </div>
+
+      <div className="grid grid-cols-[2.5rem_1fr_0.75rem_1fr] items-center gap-2">
+        <span className="text-xs text-muted">Reps</span>
         <NumberField
           compact
-          value={set.reps}
-          onChange={(reps) => onChange({ ...set, reps })}
+          value={set.repsMin}
+          onChange={setMin}
           min={1}
           max={100}
-          suffix="reps"
-          ariaLabel={`Repeticiones objetivo, serie ${position}`}
+          ariaLabel={`Repeticiones minimas, serie ${position}`}
         />
-      </label>
+        <span className="text-center text-sm text-muted">a</span>
+        <NumberField
+          compact
+          value={set.repsMax}
+          onChange={setMax}
+          min={1}
+          max={100}
+          ariaLabel={`Repeticiones maximas, serie ${position}`}
+        />
 
-      <label className="flex-1 min-w-0 flex items-center gap-1.5">
-        <span className="sr-only">RIR objetivo de la serie {position}</span>
+        <span className="text-xs text-muted">RIR</span>
         <NumberField
           compact
           value={set.rir}
           onChange={(rir) => onChange({ ...set, rir })}
           min={0}
           max={5}
-          suffix="RIR"
           ariaLabel={`RIR objetivo, serie ${position}`}
         />
-      </label>
-
-      <IconButton
-        icon={Trash}
-        label={`Quitar serie ${position}`}
-        size={16}
-        className="size-10"
-        disabled={!canRemove}
-        onClick={onRemove}
-      />
+      </div>
     </div>
   )
 }

@@ -34,10 +34,20 @@ export type Routine = SyncFields & {
 
 /** Objetivo de una serie planeada dentro de una rutina. */
 export type PlannedSet = {
-  /** Repeticiones objetivo. */
-  reps: number
+  /** Minimo del rango de repeticiones objetivo. */
+  repsMin: number
+  /** Maximo del rango. Si es igual al minimo, el objetivo es un numero fijo. */
+  repsMax: number
   /** RIR objetivo (repeticiones en reserva). */
   rir: number
+}
+
+/** Forma antigua de una serie planeada: un solo numero de repeticiones. */
+export type LegacyPlannedSet = {
+  reps?: number
+  repsMin?: number
+  repsMax?: number
+  rir?: number
 }
 
 export type RoutineExercise = SyncFields & {
@@ -55,7 +65,8 @@ export type RoutineExercise = SyncFields & {
 }
 
 /** Forma antigua del registro, para poder leer rutinas creadas antes del cambio. */
-export type LegacyRoutineExercise = RoutineExercise & {
+export type LegacyRoutineExercise = Omit<RoutineExercise, 'workSets'> & {
+  workSets?: LegacyPlannedSet[]
   targetSets?: number
   repRange?: { min: number; max: number } | null
 }
@@ -129,7 +140,18 @@ export const DEFAULT_TARGET_RIR = 2
 export const RIR_VALUES = [0, 1, 2, 3, 4, 5] as const
 
 export function defaultPlannedSet(): PlannedSet {
-  return { reps: DEFAULT_TARGET_REPS, rir: DEFAULT_TARGET_RIR }
+  return { repsMin: DEFAULT_TARGET_REPS, repsMax: DEFAULT_TARGET_REPS, rir: DEFAULT_TARGET_RIR }
+}
+
+/** Convierte una serie planeada de cualquier version a la forma actual. */
+export function normalizePlannedSet(raw: LegacyPlannedSet | null | undefined): PlannedSet {
+  const min = raw?.repsMin ?? raw?.reps ?? DEFAULT_TARGET_REPS
+  const max = raw?.repsMax ?? raw?.reps ?? min
+  return {
+    repsMin: Math.min(min, max),
+    repsMax: Math.max(min, max),
+    rir: raw?.rir ?? DEFAULT_TARGET_RIR,
+  }
 }
 
 /**
@@ -140,14 +162,14 @@ export function defaultPlannedSet(): PlannedSet {
 export function normalizeRoutineExercise(raw: LegacyRoutineExercise): RoutineExercise {
   const workSets =
     Array.isArray(raw.workSets) && raw.workSets.length > 0
-      ? raw.workSets.map((set) => ({
-          reps: set?.reps ?? DEFAULT_TARGET_REPS,
-          rir: set?.rir ?? DEFAULT_TARGET_RIR,
-        }))
-      : Array.from({ length: Math.max(1, raw.targetSets ?? DEFAULT_TARGET_SETS) }, () => ({
-          reps: raw.repRange?.min ?? DEFAULT_TARGET_REPS,
-          rir: DEFAULT_TARGET_RIR,
-        }))
+      ? raw.workSets.map(normalizePlannedSet)
+      : Array.from({ length: Math.max(1, raw.targetSets ?? DEFAULT_TARGET_SETS) }, () =>
+          normalizePlannedSet({
+            repsMin: raw.repRange?.min ?? DEFAULT_TARGET_REPS,
+            repsMax: raw.repRange?.max ?? raw.repRange?.min ?? DEFAULT_TARGET_REPS,
+            rir: DEFAULT_TARGET_RIR,
+          }),
+        )
 
   return {
     id: raw.id,
