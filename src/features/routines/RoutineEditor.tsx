@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowDown, ArrowLeft, ArrowUp, ChevronDown, Dumbbell, Trash } from 'lucide-react'
+import { ArrowDown, ArrowLeft, ArrowUp, ChevronDown, Dumbbell, Plus, Trash, X } from 'lucide-react'
 import { Button } from '@/core/ui/Button'
 import { Card } from '@/core/ui/Card'
+import { DurationField } from '@/core/ui/DurationField'
 import { EmptyState } from '@/core/ui/EmptyState'
 import { Field } from '@/core/ui/Field'
 import { IconButton } from '@/core/ui/IconButton'
@@ -11,25 +12,90 @@ import { NumberField } from '@/core/ui/NumberField'
 import { Screen } from '@/core/ui/Screen'
 import { cn } from '@/core/ui/cn'
 import { useToast } from '@/core/ui/toast-context'
+import { formatMinutesSeconds } from '@/core/logic/format'
 import { newId } from '@/core/model/ids'
-import { DEFAULT_REST_SECONDS, DEFAULT_TARGET_SETS, type RoutineExercise } from '@/core/model/types'
+import {
+  DEFAULT_REST_SECONDS,
+  DEFAULT_TARGET_SETS,
+  DEFAULT_WARMUP_REST_SECONDS,
+  defaultPlannedSet,
+  type PlannedSet,
+  type RoutineExercise,
+} from '@/core/model/types'
 import { useData } from '@/core/sync/data-context'
 import { exerciseName, listRoutineExercises, nextOrder } from '@/core/sync/selectors'
-import { formatRest } from '@/core/logic/format'
 import { buildReorder } from './routine-actions'
 import { ExercisePicker } from './ExercisePicker'
+import { ExerciseVideoCard } from './ExerciseVideoCard'
 
 function summaryOf(link: RoutineExercise): string {
+  const count = link.workSets.length
   const parts = [
-    `${link.targetSets} ${link.targetSets === 1 ? 'serie' : 'series'}`,
+    `${count} ${count === 1 ? 'serie' : 'series'}`,
     link.warmupSets > 0 ? `${link.warmupSets} calent.` : 'sin calent.',
-    `${formatRest(link.restSeconds)} descanso`,
+    `${formatMinutesSeconds(link.restSeconds)} descanso`,
   ]
-  if (link.repRange) parts.push(`${link.repRange.min}-${link.repRange.max} reps`)
   return parts.join(' · ')
 }
 
-function ExerciseRow({
+function PlannedSetRow({
+  position,
+  set,
+  canRemove,
+  onChange,
+  onRemove,
+}: {
+  position: number
+  set: PlannedSet
+  canRemove: boolean
+  onChange: (next: PlannedSet) => void
+  onRemove: () => void
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="grid place-items-center size-7 shrink-0 rounded-full bg-elevated text-xs text-muted tabular-nums">
+        {position}
+      </span>
+
+      <label className="flex-1 min-w-0 flex items-center gap-1.5">
+        <span className="sr-only">Repeticiones objetivo de la serie {position}</span>
+        <NumberField
+          compact
+          value={set.reps}
+          onChange={(reps) => onChange({ ...set, reps })}
+          min={1}
+          max={100}
+          suffix="reps"
+          ariaLabel={`Repeticiones objetivo, serie ${position}`}
+        />
+      </label>
+
+      <label className="flex-1 min-w-0 flex items-center gap-1.5">
+        <span className="sr-only">RIR objetivo de la serie {position}</span>
+        <NumberField
+          compact
+          value={set.rir}
+          onChange={(rir) => onChange({ ...set, rir })}
+          min={0}
+          max={5}
+          suffix="RIR"
+          ariaLabel={`RIR objetivo, serie ${position}`}
+        />
+      </label>
+
+      <IconButton
+        icon={Trash}
+        label={`Quitar serie ${position}`}
+        size={16}
+        className="size-10"
+        disabled={!canRemove}
+        onClick={onRemove}
+      />
+    </div>
+  )
+}
+
+function ExerciseCard({
   link,
   name,
   index,
@@ -50,7 +116,21 @@ function ExerciseRow({
   onMove: (direction: -1 | 1) => void
   onRemove: () => void
 }) {
-  const range = link.repRange
+  const updateSet = (position: number, next: PlannedSet) => {
+    onChange({
+      ...link,
+      workSets: link.workSets.map((set, i) => (i === position ? next : set)),
+    })
+  }
+
+  const addSet = () => {
+    const last = link.workSets[link.workSets.length - 1] ?? defaultPlannedSet()
+    onChange({ ...link, workSets: [...link.workSets, { ...last }] })
+  }
+
+  const removeSet = (position: number) => {
+    onChange({ ...link, workSets: link.workSets.filter((_, i) => i !== position) })
+  }
 
   return (
     <Card className={cn('overflow-hidden', expanded && 'border-accent-dim')}>
@@ -66,76 +146,56 @@ function ExerciseRow({
       </div>
 
       {expanded && (
-        <div className="px-4 pb-4 flex flex-col gap-4 border-t border-line pt-4">
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Series de trabajo">
-              <NumberField
-                value={link.targetSets}
-                onChange={(value) => onChange({ ...link, targetSets: value })}
-                min={1}
-                max={20}
-                ariaLabel="Series de trabajo"
-              />
-            </Field>
-            <Field label="Calentamiento">
-              <NumberField
-                value={link.warmupSets}
-                onChange={(value) => onChange({ ...link, warmupSets: value })}
-                min={0}
-                max={10}
-                ariaLabel="Series de calentamiento"
-              />
-            </Field>
+        <div className="px-4 pb-4 flex flex-col gap-5 border-t border-line pt-4">
+          <div className="flex flex-col gap-2">
+            <span className="text-xs uppercase tracking-wider text-muted">Series de trabajo</span>
+            <div className="flex flex-col gap-2">
+              {link.workSets.map((set, position) => (
+                <PlannedSetRow
+                  key={position}
+                  position={position + 1}
+                  set={set}
+                  canRemove={link.workSets.length > 1}
+                  onChange={(next) => updateSet(position, next)}
+                  onRemove={() => removeSet(position)}
+                />
+              ))}
+            </div>
+            <Button size="sm" onClick={addSet} className="self-start">
+              <Plus size={16} />
+              Agregar serie
+            </Button>
           </div>
 
-          <Field label="Descanso" hint={`Cuenta regresiva de ${formatRest(link.restSeconds)} al terminar cada serie.`}>
-            <NumberField
+          <Field label="Descanso entre series de trabajo">
+            <DurationField
               value={link.restSeconds}
-              onChange={(value) => onChange({ ...link, restSeconds: value })}
-              min={0}
-              max={600}
-              step={15}
-              suffix="s"
-              ariaLabel="Segundos de descanso"
+              onChange={(restSeconds) => onChange({ ...link, restSeconds })}
+              ariaLabel="Descanso entre series de trabajo"
             />
           </Field>
 
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-xs uppercase tracking-wider text-muted">Rango de reps</span>
-              <Button
-                size="sm"
-                variant={range ? 'secondary' : 'ghost'}
-                onClick={() =>
-                  onChange({ ...link, repRange: range ? null : { min: 8, max: 12 } })
-                }
-              >
-                {range ? 'Quitar' : 'Agregar'}
-              </Button>
-            </div>
-            {range && (
-              <div className="grid grid-cols-2 gap-3">
-                <NumberField
-                  value={range.min}
-                  onChange={(value) =>
-                    onChange({ ...link, repRange: { min: value, max: Math.max(value, range.max) } })
-                  }
-                  min={1}
-                  max={50}
-                  ariaLabel="Repeticiones minimas"
-                />
-                <NumberField
-                  value={range.max}
-                  onChange={(value) =>
-                    onChange({ ...link, repRange: { min: Math.min(range.min, value), max: value } })
-                  }
-                  min={1}
-                  max={50}
-                  ariaLabel="Repeticiones maximas"
-                />
-              </div>
-            )}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Calentamiento">
+              <NumberField
+                value={link.warmupSets}
+                onChange={(warmupSets) => onChange({ ...link, warmupSets })}
+                min={0}
+                max={10}
+                suffix="series"
+                ariaLabel="Series de calentamiento"
+              />
+            </Field>
+            <Field label="Descanso calentamiento">
+              <DurationField
+                value={link.warmupRestSeconds}
+                onChange={(warmupRestSeconds) => onChange({ ...link, warmupRestSeconds })}
+                ariaLabel="Descanso entre calentamientos"
+              />
+            </Field>
           </div>
+
+          <ExerciseVideoCard exerciseId={link.exerciseId} exerciseName={name} />
 
           <div className="flex items-center gap-1 -ml-2">
             <IconButton icon={ArrowUp} label="Subir" disabled={index === 0} onClick={() => onMove(-1)} />
@@ -160,6 +220,7 @@ export function RoutineEditor() {
   const { showToast } = useToast()
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [name, setName] = useState('')
+  const [adding, setAdding] = useState(false)
 
   const routine = state.routines[routineId]
   const links = useMemo(() => listRoutineExercises(state, routineId), [state, routineId])
@@ -200,12 +261,13 @@ export function RoutineEditor() {
       routineId,
       exerciseId,
       order: nextOrder(links),
-      targetSets: DEFAULT_TARGET_SETS,
+      workSets: Array.from({ length: DEFAULT_TARGET_SETS }, defaultPlannedSet),
       warmupSets: settings.defaultWarmupSets,
       restSeconds: DEFAULT_REST_SECONDS,
-      repRange: null,
+      warmupRestSeconds: DEFAULT_WARMUP_REST_SECONDS,
     })
     setExpandedId(id)
+    setAdding(false)
   }
 
   const move = (link: RoutineExercise, direction: -1 | 1) => {
@@ -224,53 +286,65 @@ export function RoutineEditor() {
         </Button>
       }
     >
-      <div className="flex flex-col gap-6 md:grid md:grid-cols-[1fr_320px] md:items-start md:gap-8">
-        <div className="flex flex-col gap-4 min-w-0">
-          <Field label="Nombre de la rutina">
-            <Input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              onBlur={commitName}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') event.currentTarget.blur()
-              }}
-              placeholder="Empuje, Pierna, Espalda..."
-            />
-          </Field>
+      <div className="mx-auto w-full max-w-2xl flex flex-col gap-4">
+        <Field label="Nombre de la rutina">
+          <Input
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            onBlur={commitName}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') event.currentTarget.blur()
+            }}
+            placeholder="Empuje, Pierna, Espalda..."
+          />
+        </Field>
 
-          {links.length === 0 ? (
-            <EmptyState
-              icon={Dumbbell}
-              title="Sin ejercicios todavia"
-              description="Agrega el primero con el buscador. Puedes escribir cualquier nombre."
-            />
-          ) : (
-            <div className="flex flex-col gap-3">
-              {links.map((link, index) => (
-                <ExerciseRow
-                  key={link.id}
-                  link={link}
-                  name={exerciseName(state, link.exerciseId)}
-                  index={index}
-                  total={links.length}
-                  expanded={expandedId === link.id}
-                  onToggle={() => setExpandedId(expandedId === link.id ? null : link.id)}
-                  onChange={(next) => save('routineExercises', next)}
-                  onMove={(direction) => move(link, direction)}
-                  onRemove={() => {
-                    remove('routineExercises', link)
-                    showToast('Ejercicio quitado de la rutina')
-                  }}
-                />
-              ))}
+        {links.length === 0 ? (
+          <EmptyState
+            icon={Dumbbell}
+            title="Sin ejercicios todavia"
+            description="Agrega el primero con el boton de abajo. Puedes escribir cualquier nombre."
+          />
+        ) : (
+          <div className="flex flex-col gap-3">
+            {links.map((link, index) => (
+              <ExerciseCard
+                key={link.id}
+                link={link}
+                name={exerciseName(state, link.exerciseId)}
+                index={index}
+                total={links.length}
+                expanded={expandedId === link.id}
+                onToggle={() => setExpandedId(expandedId === link.id ? null : link.id)}
+                onChange={(next) => save('routineExercises', next)}
+                onMove={(direction) => move(link, direction)}
+                onRemove={() => {
+                  remove('routineExercises', link)
+                  showToast('Ejercicio quitado de la rutina')
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {adding ? (
+          <Card className="p-3 flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold">Agregar ejercicio</h2>
+              <IconButton icon={X} label="Cancelar" size={18} onClick={() => setAdding(false)} />
             </div>
-          )}
-        </div>
-
-        <Card className="p-4 flex flex-col gap-3 md:sticky md:top-8">
-          <h2 className="text-sm font-semibold">Agregar ejercicio</h2>
-          <ExercisePicker onPick={addExercise} />
-        </Card>
+            <ExercisePicker onPick={addExercise} />
+          </Card>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setAdding(true)}
+            className="flex items-center justify-center gap-2 h-14 rounded-card border border-dashed border-line text-muted hover:text-text hover:border-accent-dim transition-colors duration-150"
+          >
+            <Plus size={18} />
+            Agregar ejercicio
+          </button>
+        )}
       </div>
     </Screen>
   )

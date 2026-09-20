@@ -141,3 +141,30 @@ describe('previousLabel', () => {
     expect(previousLabel(undefined)).toBeNull()
   })
 })
+
+describe('prefillFor con objetivo planeado', () => {
+  it('sin historial, arranca con las reps y el RIR objetivo de la rutina', () => {
+    expect(
+      prefillFor({
+        previousSets: [],
+        currentSets: [],
+        type: 'work',
+        setIndex: 0,
+        planned: { reps: 6, rir: 1 },
+      }),
+    ).toEqual({ weightKg: FIRST_TIME_VALUES.weightKg, reps: 6, rir: 1 })
+  })
+
+  it('el historial siempre gana sobre el objetivo planeado', () => {
+    const previous = [set('s2', 'work', 0, 80, 5, 0)]
+    expect(
+      prefillFor({
+        previousSets: previous,
+        currentSets: [],
+        type: 'work',
+        setIndex: 0,
+        planned: { reps: 6, rir: 1 },
+      }),
+    ).toEqual({ weightKg: 80, reps: 5, rir: 0 })
+  })
+})

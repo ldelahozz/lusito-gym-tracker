@@ -38,6 +38,7 @@ import { useNow } from '@/core/useNow'
 import { useWakeLock } from '@/core/useWakeLock'
 import { NotesPanel } from './NotesPanel'
 import { RestBar } from './RestBar'
+import { SessionVideoButton } from './SessionVideoButton'
 import { SetRow, type SetDraft } from './SetRow'
 import { clearSessionState, loadRestTimer, loadSessionPlan, saveRestTimer, saveSessionPlan } from './session-storage'
 
@@ -50,6 +51,8 @@ type Row = {
   index: number
   log: SetLog | undefined
   previousText: string | null
+  /** Objetivo de esa serie segun la rutina ("8 reps @RIR 2"). */
+  targetText: string | null
   defaults: SetDraft
 }
 
@@ -118,7 +121,7 @@ export function ActiveSession({
 
   const planned = plan.rows[currentExerciseId] ?? {
     warmup: link?.warmupSets ?? 0,
-    work: link?.targetSets ?? 0,
+    work: link?.workSets.length ?? 0,
   }
 
   const rows = useMemo<Row[]>(() => {
@@ -129,6 +132,7 @@ export function ActiveSession({
       return Array.from({ length: total }, (_, index) => {
         const log = logs.find((item) => item.setIndex === index)
         const previous = equivalentPreviousSet(previousSets, type, index)
+        const target = type === 'work' ? (link.workSets[index] ?? null) : null
         return {
           key: `${type}:${index}`,
           type,
@@ -136,9 +140,10 @@ export function ActiveSession({
           index,
           log,
           previousText: previousLabel(previous),
+          targetText: target ? `Objetivo ${target.reps} reps @RIR ${target.rir}` : null,
           defaults: log
             ? { weightKg: log.weightKg, reps: log.reps, rir: log.rir }
-            : prefillFor({ previousSets, currentSets, type, setIndex: index }),
+            : prefillFor({ previousSets, currentSets, type, setIndex: index, planned: target }),
         }
       })
     }
@@ -210,9 +215,10 @@ export function ActiveSession({
         completedAt: Date.now(),
       })
       const shouldStartRest = row.type === 'work' || settings.warmupStartsTimer
-      if (shouldStartRest && link) {
+      const restSeconds = row.type === 'warmup' ? link?.warmupRestSeconds : link?.restSeconds
+      if (shouldStartRest && link && restSeconds && restSeconds > 0) {
         alertedFor.current = null
-        setRestTimer(startRest(currentExerciseId, link.restSeconds, Date.now()))
+        setRestTimer(startRest(currentExerciseId, restSeconds, Date.now()))
       }
     }
 
@@ -279,7 +285,7 @@ export function ActiveSession({
       const logged = sessionSets.filter(
         (log) => log.exerciseId === item.exerciseId && log.type === 'work',
       ).length
-      pending += Math.max(0, item.targetSets - logged)
+      pending += Math.max(0, item.workSets.length - logged)
     }
     return pending
   }, [links, sessionSets])
@@ -353,9 +359,9 @@ export function ActiveSession({
                 <h1 className="text-lg font-semibold truncate">{currentName}</h1>
                 <p className="text-xs text-muted">
                   {workDone} de {planned.work} series
-                  {link.repRange ? ` · ${link.repRange.min}-${link.repRange.max} reps` : ''}
                 </p>
               </div>
+              <SessionVideoButton exerciseId={currentExerciseId} exerciseName={currentName} />
               <IconButton
                 icon={ChevronRight}
                 label="Siguiente ejercicio"
@@ -407,6 +413,7 @@ export function ActiveSession({
                           open={activeKey === row.key}
                           draft={draftOf(row)}
                           previousText={row.previousText}
+                          targetText={row.targetText}
                           weightStep={settings.weightStep}
                           onOpen={() => setOpenKey(row.key)}
                           onChange={(draft) => setDraftOf(row, draft)}

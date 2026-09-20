@@ -20,6 +20,7 @@ type Props = {
   open: boolean
   draft: SetDraft
   previousText: string | null
+  targetText: string | null
   weightStep: number
   isRecord?: boolean
   onOpen: () => void
@@ -36,6 +37,7 @@ export function SetRow({
   open,
   draft,
   previousText,
+  targetText,
   weightStep,
   isRecord,
   onOpen,
@@ -86,10 +88,10 @@ export function SetRow({
   return (
     <div className="flex flex-col gap-3 p-3 rounded-control bg-surface border border-accent-dim">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs uppercase tracking-wider text-muted">
+        <span className="text-xs uppercase tracking-wider text-muted shrink-0">
           {type === 'warmup' ? 'Calentamiento' : 'Serie'} {position}
         </span>
-        {previousText && <span className="text-xs text-muted truncate">{previousText}</span>}
+        <span className="text-xs text-muted truncate">{previousText ?? targetText ?? ''}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-2">

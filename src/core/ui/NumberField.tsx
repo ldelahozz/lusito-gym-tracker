@@ -13,6 +13,8 @@ type Props = {
   decimals?: number
   className?: string
   ariaLabel?: string
+  /** Version mas baja, para pantallas de configuracion donde hay muchos campos. */
+  compact?: boolean
 }
 
 function round(value: number, decimals: number): number {
@@ -34,6 +36,7 @@ export function NumberField({
   decimals = 0,
   className,
   ariaLabel,
+  compact,
 }: Props) {
   const [text, setText] = useState(() => value.toFixed(decimals))
   const [editing, setEditing] = useState(false)
@@ -61,9 +64,13 @@ export function NumberField({
         onClick={() => bump(-1)}
         disabled={value <= min}
         aria-label="Restar"
-        className="grid place-items-center size-12 shrink-0 rounded-l-control text-muted hover:text-text disabled:opacity-25 disabled:pointer-events-none"
+        className={cn(
+          'grid place-items-center shrink-0 rounded-l-control text-muted hover:text-text',
+          'disabled:opacity-25 disabled:pointer-events-none',
+          compact ? 'size-10' : 'size-12',
+        )}
       >
-        <Minus size={20} />
+        <Minus size={compact ? 16 : 20} />
       </button>
 
       <div className="flex-1 flex items-baseline justify-center gap-1 min-w-0">
@@ -80,7 +87,10 @@ export function NumberField({
           onKeyDown={(event) => {
             if (event.key === 'Enter') event.currentTarget.blur()
           }}
-          className="w-full min-w-0 bg-transparent text-center text-[17px] font-medium tabular-nums outline-none"
+          className={cn(
+            'w-full min-w-0 bg-transparent text-center font-medium tabular-nums outline-none',
+            compact ? 'text-[15px]' : 'text-[17px]',
+          )}
         />
         {suffix && <span className="text-xs text-muted shrink-0 pr-1">{suffix}</span>}
       </div>
@@ -90,9 +100,13 @@ export function NumberField({
         onClick={() => bump(1)}
         disabled={value >= max}
         aria-label="Sumar"
-        className="grid place-items-center size-12 shrink-0 rounded-r-control text-muted hover:text-text disabled:opacity-25 disabled:pointer-events-none"
+        className={cn(
+          'grid place-items-center shrink-0 rounded-r-control text-muted hover:text-text',
+          'disabled:opacity-25 disabled:pointer-events-none',
+          compact ? 'size-10' : 'size-12',
+        )}
       >
-        <Plus size={20} />
+        <Plus size={compact ? 16 : 20} />
       </button>
     </div>
   )

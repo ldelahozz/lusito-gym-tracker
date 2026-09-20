@@ -32,19 +32,32 @@ export type Routine = SyncFields & {
   archived: boolean
 }
 
-export type RepRange = {
-  min: number
-  max: number
+/** Objetivo de una serie planeada dentro de una rutina. */
+export type PlannedSet = {
+  /** Repeticiones objetivo. */
+  reps: number
+  /** RIR objetivo (repeticiones en reserva). */
+  rir: number
 }
 
 export type RoutineExercise = SyncFields & {
   routineId: string
   exerciseId: string
   order: number
-  targetSets: number
+  /** Una entrada por serie de trabajo, cada una con su propio objetivo. */
+  workSets: PlannedSet[]
+  /** Cuantas series de calentamiento se proponen. */
   warmupSets: number
+  /** Descanso entre series de trabajo, en segundos. */
   restSeconds: number
-  repRange: RepRange | null
+  /** Descanso entre series de calentamiento, normalmente mas corto. */
+  warmupRestSeconds: number
+}
+
+/** Forma antigua del registro, para poder leer rutinas creadas antes del cambio. */
+export type LegacyRoutineExercise = RoutineExercise & {
+  targetSets?: number
+  repRange?: { min: number; max: number } | null
 }
 
 export type Session = SyncFields & {
@@ -109,5 +122,45 @@ export const DEFAULT_SETTINGS = {
 } as const
 
 export const DEFAULT_REST_SECONDS = 120
+export const DEFAULT_WARMUP_REST_SECONDS = 60
 export const DEFAULT_TARGET_SETS = 3
+export const DEFAULT_TARGET_REPS = 8
+export const DEFAULT_TARGET_RIR = 2
 export const RIR_VALUES = [0, 1, 2, 3, 4, 5] as const
+
+export function defaultPlannedSet(): PlannedSet {
+  return { reps: DEFAULT_TARGET_REPS, rir: DEFAULT_TARGET_RIR }
+}
+
+/**
+ * Completa los campos que falten en un ejercicio de rutina.
+ * Sirve para leer rutinas guardadas con la forma anterior (numero de series
+ * y rango de reps) y convertirlas a la nueva (una serie por entrada).
+ */
+export function normalizeRoutineExercise(raw: LegacyRoutineExercise): RoutineExercise {
+  const workSets =
+    Array.isArray(raw.workSets) && raw.workSets.length > 0
+      ? raw.workSets.map((set) => ({
+          reps: set?.reps ?? DEFAULT_TARGET_REPS,
+          rir: set?.rir ?? DEFAULT_TARGET_RIR,
+        }))
+      : Array.from({ length: Math.max(1, raw.targetSets ?? DEFAULT_TARGET_SETS) }, () => ({
+          reps: raw.repRange?.min ?? DEFAULT_TARGET_REPS,
+          rir: DEFAULT_TARGET_RIR,
+        }))
+
+  return {
+    id: raw.id,
+    updatedAt: raw.updatedAt,
+    deviceId: raw.deviceId,
+    deviceKind: raw.deviceKind,
+    deleted: raw.deleted,
+    routineId: raw.routineId,
+    exerciseId: raw.exerciseId,
+    order: raw.order,
+    workSets,
+    warmupSets: raw.warmupSets ?? 0,
+    restSeconds: raw.restSeconds ?? DEFAULT_REST_SECONDS,
+    warmupRestSeconds: raw.warmupRestSeconds ?? DEFAULT_WARMUP_REST_SECONDS,
+  }
+}

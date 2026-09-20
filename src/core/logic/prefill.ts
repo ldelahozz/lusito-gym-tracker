@@ -93,15 +93,18 @@ export function equivalentPreviousSet<S extends PrefillSet>(
  * Orden de preferencia:
  *  1. La serie equivalente de la sesion anterior.
  *  2. La ultima serie del mismo tipo ya registrada hoy.
- *  3. Valores de arranque, solo la primerisima vez.
+ *  3. El objetivo planeado en la rutina, si lo hay.
+ *  4. Valores de arranque, solo la primerisima vez.
  */
 export function prefillFor<S extends PrefillSet>(params: {
   previousSets: readonly S[]
   currentSets: readonly S[]
   type: SetType
   setIndex: number
+  /** Objetivo planeado en la rutina, si lo hay. Solo se usa cuando no hay historial. */
+  planned?: { reps: number; rir: number } | null
 }): PrefillValues {
-  const { previousSets, currentSets, type, setIndex } = params
+  const { previousSets, currentSets, type, setIndex, planned } = params
 
   const equivalent = equivalentPreviousSet(previousSets, type, setIndex)
   if (equivalent) {
@@ -114,6 +117,10 @@ export function prefillFor<S extends PrefillSet>(params: {
   const lastToday = todaySameType[todaySameType.length - 1]
   if (lastToday) {
     return { weightKg: lastToday.weightKg, reps: lastToday.reps, rir: lastToday.rir }
+  }
+
+  if (planned) {
+    return { weightKg: FIRST_TIME_VALUES.weightKg, reps: planned.reps, rir: planned.rir }
   }
 
   return { ...FIRST_TIME_VALUES }

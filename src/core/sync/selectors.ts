@@ -2,7 +2,7 @@
  * Lecturas sobre la copia en memoria de los datos.
  * Todas ignoran lo borrado y devuelven las listas ya ordenadas.
  */
-import type { Exercise, Routine, RoutineExercise } from '@/core/model/types'
+import { normalizeRoutineExercise, type Exercise, type LegacyRoutineExercise, type Routine, type RoutineExercise } from '@/core/model/types'
 import type { DataState } from './data-context'
 
 function visible<T extends { deleted: boolean }>(table: Record<string, T>): T[] {
@@ -19,6 +19,7 @@ export function listRoutineExercises(state: DataState, routineId: string): Routi
   return visible(state.routineExercises)
     .filter((link) => link.routineId === routineId)
     .sort((a, b) => a.order - b.order)
+    .map((link) => normalizeRoutineExercise(link as LegacyRoutineExercise))
 }
 
 export function listExercises(state: DataState, includeArchived = false): Exercise[] {

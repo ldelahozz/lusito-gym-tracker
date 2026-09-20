@@ -1,5 +1,13 @@
 /** Formatos de texto compartidos por varias pantallas. */
 
+/** 150 -> "2:30" (siempre minutos y segundos) */
+export function formatMinutesSeconds(totalSeconds: number): string {
+  const safe = Math.max(0, Math.round(totalSeconds))
+  const minutes = Math.floor(safe / 60)
+  const seconds = safe % 60
+  return `${minutes}:${String(seconds).padStart(2, '0')}`
+}
+
 /** 120 -> "2:00", 45 -> "45s" */
 export function formatRest(seconds: number): string {
   const minutes = Math.floor(seconds / 60)

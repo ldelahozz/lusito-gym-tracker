@@ -1,7 +1,7 @@
 /** Acciones sobre rutinas que se usan desde varias pantallas. */
 import { newId } from '@/core/model/ids'
-import type { Routine, RoutineExercise } from '@/core/model/types'
-import type { CollectionName, DocOf } from '@/core/sync/collections'
+import type { Routine } from '@/core/model/types'
+import type { CollectionName } from '@/core/sync/collections'
 import type { DataState, NewDoc } from '@/core/sync/data-context'
 import { listRoutineExercises, listRoutines, nextOrder } from '@/core/sync/selectors'
 
@@ -37,10 +37,10 @@ export function buildRoutineCopy(state: DataState, routine: Routine): SaveEntry[
         routineId: copyId,
         exerciseId: link.exerciseId,
         order: link.order,
-        targetSets: link.targetSets,
+        workSets: link.workSets.map((set) => ({ ...set })),
         warmupSets: link.warmupSets,
         restSeconds: link.restSeconds,
-        repRange: link.repRange,
+        warmupRestSeconds: link.warmupRestSeconds,
       } as NewDoc<'routineExercises'>,
     })
   }
@@ -67,22 +67,4 @@ export function buildReorder<T extends { id: string; order: number }>(
     { ...current, order: neighbour.order },
     { ...neighbour, order: current.order },
   ]
-}
-
-export type RoutineExerciseDraft = Pick<
-  DocOf<'routineExercises'>,
-  'id' | 'routineId' | 'exerciseId' | 'order' | 'targetSets' | 'warmupSets' | 'restSeconds' | 'repRange'
->
-
-export function toDraft(link: RoutineExercise): RoutineExerciseDraft {
-  return {
-    id: link.id,
-    routineId: link.routineId,
-    exerciseId: link.exerciseId,
-    order: link.order,
-    targetSets: link.targetSets,
-    warmupSets: link.warmupSets,
-    restSeconds: link.restSeconds,
-    repRange: link.repRange,
-  }
 }
