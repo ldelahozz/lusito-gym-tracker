@@ -1,13 +1,47 @@
 rules_version = '2';
 
 // Reglas de seguridad de Lusito Gym Tracker.
-// Cada persona que entra con su cuenta de Google recibe su propia carpeta
-// users/{uid} y SOLO puede leer y escribir dentro de ella.
+//
+// 1. Solo entran los correos de la lista de invitados (coleccion "guests",
+//    un documento por correo, en minusculas).
+// 2. Cada invitado recibe su propia carpeta users/{uid} y SOLO puede leer y
+//    escribir dentro de ella: nadie ve los datos de nadie.
+// 3. El dueño es el invitado con admin: true. Ese documento se crea a mano,
+//    una sola vez, desde la consola de Firebase. Desde la app, el dueño puede
+//    invitar y quitar personas, pero nadie puede hacerse dueño.
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    function signedIn() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email_verified == true;
+    }
+
+    function guestPath() {
+      return /databases/$(database)/documents/guests/$(request.auth.token.email);
+    }
+
+    function isGuest() {
+      return signedIn() && exists(guestPath());
+    }
+
+    function isAdmin() {
+      return isGuest() && get(guestPath()).data.get('admin', false) == true;
+    }
+
     match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isGuest() && request.auth.uid == userId;
+    }
+
+    match /guests/{email} {
+      // Cada quien puede ver si esta invitado; el dueño ve la lista completa.
+      allow read: if signedIn() && (request.auth.token.email == email || isAdmin());
+      // El dueño invita y quita personas, pero no puede crear otro dueño ni quitarse a si mismo.
+      allow create, update: if isAdmin()
+        && request.resource.data.get('admin', false) == false
+        && request.resource.data.get('email', '') == email;
+      allow delete: if isAdmin() && resource.data.get('admin', false) == false;
     }
 
     // Todo lo que no este explicitamente permitido, queda prohibido.

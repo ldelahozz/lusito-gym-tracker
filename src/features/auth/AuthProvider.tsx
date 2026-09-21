@@ -9,6 +9,7 @@ import {
 } from 'firebase/auth'
 import { clearIndexedDbPersistence, terminate } from 'firebase/firestore'
 import { getFirebase, googleProvider } from '@/core/firebase'
+import { clearSyncCursors } from '@/core/sync/cursors'
 import { clearSessionState } from '@/features/session/session-storage'
 import { AuthContext, type AuthStatus } from './auth-context'
 
@@ -95,6 +96,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await firebaseSignOut(auth)
     // El descanso en curso y la pantalla del entrenamiento tampoco pasan a la otra cuenta.
     clearSessionState()
+    // La copia local se borra abajo: los marcadores de "hasta donde ya baje" tambien.
+    clearSyncCursors()
     try {
       await terminate(db)
       await clearIndexedDbPersistence(db)

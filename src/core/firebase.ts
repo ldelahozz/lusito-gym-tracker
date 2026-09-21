@@ -13,6 +13,7 @@ import {
   type Auth,
 } from 'firebase/auth'
 import {
+  CACHE_SIZE_UNLIMITED,
   initializeFirestore,
   persistentLocalCache,
   persistentMultipleTabManager,
@@ -55,7 +56,13 @@ export function getFirebase(): { app: FirebaseApp; auth: Auth; db: Firestore } {
     void setPersistence(auth, browserLocalPersistence).catch(() => undefined)
 
     db = initializeFirestore(app, {
-      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+        // Sin limite: la app confia en que lo ya bajado sigue en el dispositivo y solo
+        // pide a la nube lo nuevo. Si Firebase borrara registros viejos para hacer
+        // espacio, desaparecerian de la pantalla. Aun con años de historial son pocos MB.
+        cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+      }),
     })
   }
   return { app, auth, db }

@@ -4,11 +4,14 @@ import { Button } from '@/core/ui/Button'
 import { Card } from '@/core/ui/Card'
 import { ConfirmDialog } from '@/core/ui/ConfirmDialog'
 import { Screen } from '@/core/ui/Screen'
+import { useAccess } from '@/features/access/access-context'
+import { GuestsCard } from '@/features/access/GuestsCard'
 import { useAuth } from '@/features/auth/auth-context'
 import { BackupCard } from './BackupCard'
 import { DangerZone } from './DangerZone'
 import { InstallCard } from './InstallCard'
 import { PreferencesCard } from './PreferencesCard'
+import { SyncCard } from './SyncCard'
 
 function initialsOf(name: string | null, email: string | null): string {
   const source = name?.trim() || email?.trim() || '?'
@@ -18,6 +21,7 @@ function initialsOf(name: string | null, email: string | null): string {
 
 export function SettingsScreen() {
   const { user, signOut } = useAuth()
+  const { isAdmin } = useAccess()
   const [confirmingSignOut, setConfirmingSignOut] = useState(false)
 
   return (
@@ -46,6 +50,13 @@ export function SettingsScreen() {
           </Card>
         </section>
 
+        {isAdmin && (
+          <section className="flex flex-col gap-3">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted px-1">Invitados</h2>
+            <GuestsCard />
+          </section>
+        )}
+
         <section className="flex flex-col gap-3">
           <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted px-1">Entrenamiento</h2>
           <PreferencesCard />
@@ -59,6 +70,7 @@ export function SettingsScreen() {
         <section className="flex flex-col gap-3">
           <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted px-1">Aplicación</h2>
           <InstallCard />
+          <SyncCard />
         </section>
 
         <section className="flex flex-col gap-3">

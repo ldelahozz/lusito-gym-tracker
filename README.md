@@ -5,7 +5,7 @@ el entrenamiento y se sincroniza sola entre celular y PC. Tema oscuro, en españ
 
 - **Celular:** registrar series durante el entrenamiento, con una mano.
 - **PC:** armar rutinas y revisar el progreso.
-- **Cada cuenta de Google tiene su propio espacio privado.**
+- **Cada cuenta de Google tiene su propio espacio privado.** Solo entran los correos invitados.
 
 ## Qué hace
 
@@ -14,7 +14,7 @@ el entrenamiento y se sincroniza sola entre celular y PC. Tema oscuro, en españ
 | **Entrenar** | Te dice qué rutina toca hoy según tu split semanal. Durante la sesión ves un ejercicio a la vez, con peso, reps y RIR de la vez pasada ya escritos: registrar una serie es un toque. Descanso con cuenta regresiva, vibración y sonido. Avisa récords al momento. Puedes saltarte un ejercicio y la próxima vez te lo recuerda. |
 | **Rutinas** | Rutinas con sus ejercicios en orden. Cada serie con su rango de reps (6-8) y RIR objetivo, descanso con ruedita de minutos y segundos. Split semanal (qué rutina va cada día). Catálogo de ejercicios: renombrar, fusionar, archivar. |
 | **Progreso** | Por rutina, sesión contra sesión: qué ejercicios subieron, se quedaron igual o bajaron, con la diferencia de peso, reps y RIR serie por serie. Detalle por ejercicio con gráfica e historial, incluidas las veces que te lo saltaste. |
-| **Ajustes** | Paso del peso, calentamientos, sonido, vibración y avisos. Respaldo en archivo y borrado definitivo. |
+| **Ajustes** | Paso del peso, calentamientos, sonido, vibración y avisos. Respaldo en archivo, borrado definitivo y, para el dueño, la lista de invitados. |
 
 ## Correr en local
 
@@ -66,10 +66,41 @@ y el aviso visual.
 - Todo lo que registras se guarda **primero en el dispositivo** y se ve al instante,
   con o sin internet.
 - Cuando hay señal, se sube solo a la nube (Firestore) y aparece en tus otros dispositivos.
+- **Al abrir, solo se baja lo que cambió** desde la última vez: cada registro lleva la hora
+  en que la nube lo recibió y cada dispositivo recuerda hasta dónde ya bajó
+  (`src/core/logic/deltaSync.ts`). Lo demás sale de la memoria del dispositivo, gratis.
+  La primera vez en cada dispositivo, y una vez al mes por seguridad, se baja todo.
+  Si algo no cuadra: Ajustes → Sincronización → *Volver a bajar todo*.
 - Si el mismo registro se editó en dos lados, **gana la versión del celular**
   (regla aislada en `src/core/logic/conflict.ts`).
 - Borrar desde las pantallas normales solo marca el registro como borrado, para que el
-  borrado también se sincronice. El borrado definitivo vive aparte, en Ajustes.
+  borrado también se sincronice. El borrado definitivo vive aparte, en Ajustes: deja en la
+  nube solo una marca vacía, sin datos, para que los otros dispositivos también lo quiten.
+
+## Lista de invitados
+
+Solo pueden entrar los correos de la lista. Cada invitado tiene su propio espacio privado.
+Lo hacen valer las reglas de `firestore.rules`, no la pantalla.
+
+**Configurarla, una sola vez** (en este orden, o el dueño se queda fuera):
+
+1. En Firebase: **Firestore Database → Datos → Iniciar colección**. ID de la colección:
+   `guests`. ID del documento: tu correo **en minúsculas**. Dos campos:
+   `email` (string) con tu correo, y `admin` (boolean) en `true`.
+2. En Firebase: **Firestore Database → Reglas**, pegar el contenido de `firestore.rules` y
+   **Publicar**.
+
+Después, desde la app: **Ajustes → Invitados** para invitar o quitar correos (solo lo ve el
+dueño). Quien entre sin invitación ve una pantalla que le pide pedir acceso.
+
+## Cuánta gente cabe gratis
+
+El plan gratis de Firebase da 50,000 lecturas y 20,000 escrituras al día, y 1 GiB de espacio
+en total, compartidos entre todos. Como al abrir solo se baja lo nuevo, cada persona gasta
+unas decenas de lecturas al día: caben cientos. Lo primero que se llenaría es el espacio,
+después de años de uso de unas decenas de personas. El proyecto está en el plan sin
+tarjeta: si algún día se pasara, la sincronización se pausa hasta el día siguiente y nunca
+se cobra nada.
 
 ## Respaldar y restaurar
 
@@ -94,7 +125,8 @@ En Ajustes → Borrado definitivo, con confirmación explícita:
   hacer pruebas.
 - **Rutinas o ejercicios archivados**, con todo su historial.
 
-Desaparece de la nube y de todos los dispositivos. Solo se puede recuperar con un respaldo.
+Sus datos desaparecen de la nube y de todos los dispositivos. Solo se puede recuperar con un
+respaldo.
 
 ## Estructura
 
@@ -105,5 +137,5 @@ src/
     logic/    lógica pura con pruebas: récords, progreso, prellenado, respaldo, conflictos…
     sync/     espejo en memoria de Firestore y escrituras sin esperar a la nube
     ui/       botones, campos, ventanas, avisos
-  features/   pantallas: auth, session (Entrenar), routines, progress, settings
+  features/   pantallas: auth, access (invitados), session (Entrenar), routines, progress, settings
 ```

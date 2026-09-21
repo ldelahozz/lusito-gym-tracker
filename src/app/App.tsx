@@ -6,6 +6,7 @@ import { useData } from '@/core/sync/data-context'
 import { ToastProvider } from '@/core/ui/ToastProvider'
 import { AuthProvider } from '@/features/auth/AuthProvider'
 import { useAuth } from '@/features/auth/auth-context'
+import { AccessGate } from '@/features/access/AccessGate'
 import { LoginScreen } from '@/features/auth/LoginScreen'
 import { SetupNeededScreen } from '@/features/auth/SetupNeededScreen'
 import { ExerciseCatalogScreen } from '@/features/routines/ExerciseCatalogScreen'
@@ -35,9 +36,11 @@ function AuthGate({ children }: { children: ReactNode }) {
   if (status === 'loading') return <LoadingScreen />
   if (status === 'signed-out' || !user) return <LoginScreen />
   return (
-    <DataProvider uid={user.uid}>
-      <DataGate>{children}</DataGate>
-    </DataProvider>
+    <AccessGate uid={user.uid} email={user.email ?? ''}>
+      <DataProvider uid={user.uid}>
+        <DataGate>{children}</DataGate>
+      </DataProvider>
+    </AccessGate>
   )
 }
 
