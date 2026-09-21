@@ -18,8 +18,8 @@ import { AppShell } from './AppShell'
 import { LoadingScreen } from './LoadingScreen'
 
 // Progreso trae las graficas, que pesan. Se descarga la primera vez que se abre.
-const ProgressScreen = lazy(() =>
-  import('@/features/progress/ProgressScreen').then((module) => ({ default: module.ProgressScreen })),
+const ProgressRoutes = lazy(() =>
+  import('@/features/progress/ProgressRoutes').then((module) => ({ default: module.ProgressRoutes })),
 )
 
 /** Espera a que lleguen los datos guardados en el dispositivo (es casi instantaneo). */
@@ -57,10 +57,10 @@ export function App() {
                 <Route path="/rutinas/split" element={<WeekSplitScreen />} />
                 <Route path="/rutinas/:routineId" element={<RoutineEditor />} />
                 <Route
-                  path="/progreso"
+                  path="/progreso/*"
                   element={
                     <Suspense fallback={<LoadingScreen label="Abriendo tus graficas" />}>
-                      <ProgressScreen />
+                      <ProgressRoutes />
                     </Suspense>
                   }
                 />

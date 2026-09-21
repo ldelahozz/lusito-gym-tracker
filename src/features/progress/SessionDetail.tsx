@@ -6,7 +6,7 @@ import { Modal } from '@/core/ui/Modal'
 import { NumberField } from '@/core/ui/NumberField'
 import { useToast } from '@/core/ui/toast-context'
 import { formatDateTime, formatDuration, formatWeight } from '@/core/logic/format'
-import { sessionDuration } from '@/core/logic/weeks'
+import { sessionElapsedMs } from '@/core/logic/sessionDuration'
 import type { SetLog } from '@/core/model/types'
 import { useData } from '@/core/sync/data-context'
 import { exerciseName, recordsOfSet, sessionSetsByExercise } from '@/core/sync/selectors'
@@ -120,7 +120,8 @@ export function SessionDetail({
   )
 
   const routineName = session ? (state.routines[session.routineId]?.name ?? 'Entrenamiento') : ''
-  const duration = session ? sessionDuration(session) : null
+  const duration =
+    session && session.endedAt !== null ? sessionElapsedMs(session, session.endedAt) : null
 
   const close = () => {
     setOpenSet(null)

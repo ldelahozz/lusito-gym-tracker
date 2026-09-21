@@ -5,6 +5,8 @@ import {
   formatDuration,
   formatMinutesSeconds,
   formatRepRange,
+  formatSetLine,
+  formatSigned,
   formatWeight,
 } from './format'
 
@@ -59,5 +61,27 @@ describe('formatDate y formatDateTime', () => {
 
   it('rellena los minutos con cero', () => {
     expect(formatDateTime(new Date(2024, 0, 1, 9, 5).getTime())).toBe('lun 1 ene, 9:05')
+  })
+})
+
+describe('formatSigned', () => {
+  it('pone el signo mas cuando sube', () => {
+    expect(formatSigned(2.5)).toBe('+2.5')
+    expect(formatSigned(1)).toBe('+1')
+  })
+
+  it('usa el signo menos tipografico cuando baja', () => {
+    expect(formatSigned(-1)).toBe('−1')
+  })
+
+  it('cero va sin signo, aunque venga con restos de decimales', () => {
+    expect(formatSigned(0)).toBe('0')
+    expect(formatSigned(0.0000001)).toBe('0')
+  })
+})
+
+describe('formatSetLine', () => {
+  it('escribe peso, repeticiones y RIR en una linea', () => {
+    expect(formatSetLine({ weightKg: 62.5, reps: 9, rir: 1 })).toBe('62.5 kg × 9 · RIR 1')
   })
 })

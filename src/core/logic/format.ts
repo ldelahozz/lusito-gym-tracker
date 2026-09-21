@@ -67,3 +67,16 @@ export function formatDateTime(timestamp: number): string {
   const minutes = String(date.getMinutes()).padStart(2, '0')
   return `${DAYS_SHORT[date.getDay()]} ${formatDate(timestamp)}, ${hours}:${minutes}`
 }
+
+/** Diferencia con signo: 2.5 -> "+2.5", -1 -> "−1" (signo menos tipografico), 0 -> "0". */
+export function formatSigned(value: number): string {
+  const rounded = Math.round(value * 100) / 100
+  if (rounded === 0) return '0'
+  const text = formatWeight(Math.abs(rounded))
+  return rounded > 0 ? `+${text}` : `\u2212${text}`
+}
+
+/** Una serie en una linea: "62.5 kg × 9 · RIR 1" */
+export function formatSetLine(set: { weightKg: number; reps: number; rir: number }): string {
+  return `${formatWeight(set.weightKg)} kg × ${set.reps} · RIR ${set.rir}`
+}
