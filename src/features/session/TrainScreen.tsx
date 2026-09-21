@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, Dumbbell, Moon, Play, SkipForward, Trophy } from 'lucide-react'
+import { CalendarDays, ChevronRight, Dumbbell, HardDriveDownload, Moon, Play, SkipForward, Trophy } from 'lucide-react'
 import { Button } from '@/core/ui/Button'
 import { Modal } from '@/core/ui/Modal'
 import { Card } from '@/core/ui/Card'
 import { EmptyState } from '@/core/ui/EmptyState'
 import { Screen } from '@/core/ui/Screen'
+import { backupReminderDue, daysSince } from '@/core/logic/backup'
 import { formatDuration, formatWeight } from '@/core/logic/format'
 import { WEEKDAYS, isSplitEmpty, normalizeSplit, weekdayIndex } from '@/core/logic/weekPlan'
 import { newId } from '@/core/model/ids'
@@ -35,6 +36,17 @@ export function TrainScreen() {
   const todayIndex = weekdayIndex(new Date())
   // Una rutina archivada o borrada deja el dia como descanso.
   const todayRoutine = routines.find((routine) => routine.id === split[todayIndex]) ?? null
+  // Recordatorio discreto de respaldo: mas de 30 dias sin exportar.
+  const firstActivityAt = useMemo(() => {
+    const starts = Object.values(state.sessions)
+      .filter((session) => !session.deleted && session.endedAt !== null)
+      .map((session) => session.startedAt)
+    return starts.length > 0 ? Math.min(...starts) : null
+  }, [state.sessions])
+  const now = Date.now()
+  const backupDue = backupReminderDue({ lastExportAt: settings.lastExportAt, firstActivityAt, now })
+  const backupDays = daysSince(settings.lastExportAt ?? firstActivityAt ?? now, now)
+
   const otherRoutines = todayRoutine
     ? routines.filter((routine) => routine.id !== todayRoutine.id)
     : routines
@@ -156,6 +168,22 @@ export function TrainScreen() {
                 })}
               </div>
             </section>
+          )}
+
+          {backupDue && (
+            <button
+              type="button"
+              onClick={() => navigate('/ajustes')}
+              className="flex items-center gap-2.5 min-h-12 px-3 rounded-control border border-dashed border-line text-left text-sm text-muted hover:text-text transition-colors duration-150"
+            >
+              <HardDriveDownload size={16} className="shrink-0" />
+              <span className="flex-1 min-w-0">
+                {settings.lastExportAt === null
+                  ? 'Todavia no guardas un respaldo de tus datos'
+                  : `Hace ${backupDays} dias que no guardas un respaldo`}
+              </span>
+              <ChevronRight size={16} className="shrink-0" />
+            </button>
           )}
         </div>
       )}

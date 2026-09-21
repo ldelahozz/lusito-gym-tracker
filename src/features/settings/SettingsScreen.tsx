@@ -5,6 +5,8 @@ import { Card } from '@/core/ui/Card'
 import { ConfirmDialog } from '@/core/ui/ConfirmDialog'
 import { Screen } from '@/core/ui/Screen'
 import { useAuth } from '@/features/auth/auth-context'
+import { BackupCard } from './BackupCard'
+import { DangerZone } from './DangerZone'
 import { InstallCard } from './InstallCard'
 import { PreferencesCard } from './PreferencesCard'
 
@@ -50,8 +52,18 @@ export function SettingsScreen() {
         </section>
 
         <section className="flex flex-col gap-3">
+          <h2 className="text-xs uppercase tracking-wider text-muted px-1">Respaldo</h2>
+          <BackupCard />
+        </section>
+
+        <section className="flex flex-col gap-3">
           <h2 className="text-xs uppercase tracking-wider text-muted px-1">Aplicacion</h2>
           <InstallCard />
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h2 className="text-xs uppercase tracking-wider text-muted px-1">Borrado definitivo</h2>
+          <DangerZone />
         </section>
       </div>
 

@@ -167,14 +167,18 @@ export function DataProvider({ uid, children }: { uid: string; children: ReactNo
   const destroy = useCallback(
     async (docs: Array<{ collection: CollectionName; id: string }>) => {
       const { db } = getFirebase()
+      // Todos los lotes se encolan de una vez: sin internet, la pantalla ya los ve
+      // borrados y la nube se entera al volver la conexion.
+      const commits: Promise<void>[] = []
       for (let start = 0; start < docs.length; start += 450) {
         const batch = writeBatch(db)
         for (const entry of docs.slice(start, start + 450)) {
           pendingWrites.current.delete(`${entry.collection}/${entry.id}`)
           batch.delete(doc(db, 'users', uid, entry.collection, entry.id))
         }
-        await batch.commit()
+        commits.push(batch.commit())
       }
+      await Promise.all(commits)
     },
     [uid],
   )

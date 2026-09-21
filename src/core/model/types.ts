@@ -124,6 +124,8 @@ export type Settings = SyncFields & {
   vibration: boolean
   /** Que rutina toca cada dia, de lunes a domingo. null es descanso. */
   weeklySplit: (string | null)[]
+  /** Cuando se exporto el ultimo respaldo, o null si nunca. */
+  lastExportAt: number | null
 }
 
 export const SETTINGS_ID = 'app'
@@ -135,6 +137,7 @@ export const DEFAULT_SETTINGS = {
   sound: true,
   vibration: true,
   weeklySplit: [null, null, null, null, null, null, null] as (string | null)[],
+  lastExportAt: null as number | null,
 } as const
 
 export const DEFAULT_REST_SECONDS = 120
