@@ -74,29 +74,33 @@ function PlannedSetRow({
         />
       </div>
 
-      <div className="grid grid-cols-[2.5rem_1fr_0.75rem_1fr] items-center gap-2">
-        <span className="text-xs text-muted">Reps</span>
+      {/* Etiquetas arriba: asi cada campo usa todo el ancho y el numero siempre cabe. */}
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-2 gap-y-1">
+        <span className="text-xs text-muted">Reps mínimas</span>
+        <span />
+        <span className="text-xs text-muted">Reps máximas</span>
         <NumberField
           compact
           value={set.repsMin}
           onChange={setMin}
           min={1}
           max={100}
-          ariaLabel={`Repeticiones minimas, serie ${position}`}
+          ariaLabel={`Repeticiones mínimas, serie ${position}`}
         />
-        <span className="text-center text-sm text-muted">a</span>
+        <span className="text-sm text-muted">a</span>
         <NumberField
           compact
           value={set.repsMax}
           onChange={setMax}
           min={1}
           max={100}
-          ariaLabel={`Repeticiones maximas, serie ${position}`}
+          ariaLabel={`Repeticiones máximas, serie ${position}`}
         />
 
-        <span className="text-xs text-muted">RIR</span>
+        <span className="text-xs text-muted mt-1.5 col-start-1">RIR objetivo</span>
         <NumberField
           compact
+          className="col-start-1"
           value={set.rir}
           onChange={(rir) => onChange({ ...set, rir })}
           min={0}

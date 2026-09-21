@@ -57,6 +57,13 @@ export function NumberField({
     onChange(round(Math.min(max, Math.max(min, value + direction * step)), decimals))
   }
 
+  // Los botones se angostan un poco si falta espacio, pero el numero siempre se ve completo.
+  const buttonClass = cn(
+    'grid place-items-center shrink min-w-8 text-muted hover:text-text',
+    'disabled:opacity-25 disabled:pointer-events-none',
+    compact ? 'h-10 w-10' : 'h-12 w-12',
+  )
+
   return (
     <div className={cn('flex items-center gap-1 rounded-control bg-elevated border border-line', className)}>
       <button
@@ -64,20 +71,17 @@ export function NumberField({
         onClick={() => bump(-1)}
         disabled={value <= min}
         aria-label="Restar"
-        className={cn(
-          'grid place-items-center shrink-0 rounded-l-control text-muted hover:text-text',
-          'disabled:opacity-25 disabled:pointer-events-none',
-          compact ? 'size-10' : 'size-12',
-        )}
+        className={cn(buttonClass, 'rounded-l-control')}
       >
         <Minus size={compact ? 16 : 20} />
       </button>
 
-      <div className="flex-1 flex items-baseline justify-center gap-1 min-w-0">
+      <div className="flex-1 flex items-baseline justify-center gap-1 min-w-min">
         <input
           value={text}
           aria-label={ariaLabel}
           inputMode="decimal"
+          style={{ minWidth: `${Math.max(text.length, 1) + 0.5}ch` }}
           onFocus={(event) => {
             setEditing(true)
             event.currentTarget.select()
@@ -100,11 +104,7 @@ export function NumberField({
         onClick={() => bump(1)}
         disabled={value >= max}
         aria-label="Sumar"
-        className={cn(
-          'grid place-items-center shrink-0 rounded-r-control text-muted hover:text-text',
-          'disabled:opacity-25 disabled:pointer-events-none',
-          compact ? 'size-10' : 'size-12',
-        )}
+        className={cn(buttonClass, 'rounded-r-control')}
       >
         <Plus size={compact ? 16 : 20} />
       </button>

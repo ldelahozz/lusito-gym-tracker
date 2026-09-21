@@ -57,7 +57,7 @@ function SetLine({
 
   return (
     <div className="flex flex-col gap-2 p-3 rounded-control bg-surface border border-accent-dim">
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <NumberField
           compact
           value={draft.weightKg}
