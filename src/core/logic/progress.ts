@@ -14,6 +14,7 @@
  * Solo cuentan series de trabajo de sesiones terminadas.
  */
 import { estimateOneRepMax } from './e1rm'
+import { hasWorkSets, skippedOf } from './skips'
 
 export type ProgressSet = {
   id: string
@@ -33,6 +34,8 @@ export type ProgressSession = {
   startedAt: number
   endedAt: number | null
   deleted?: boolean
+  /** Ejercicios que te saltaste en esa sesion. */
+  skippedExerciseIds?: readonly string[] | null
 }
 
 /** Una vez que hiciste un ejercicio. */
@@ -184,6 +187,8 @@ export type RoutineSummary = {
   down: number
   /** Ejercicios hechos por primera vez en esa rutina. */
   fresh: number
+  /** Ejercicios que te saltaste en esa ultima sesion. */
+  skipped: number
 }
 
 /**
@@ -205,8 +210,11 @@ export function routineSummary(params: {
     same: 0,
     down: 0,
     fresh: 0,
+    skipped: 0,
   }
   if (!last) return summary
+
+  summary.skipped = skippedIn(last, sets).length
 
   const exerciseIds = new Set(
     sets
@@ -224,4 +232,25 @@ export function routineSummary(params: {
     else summary.fresh += 1
   }
   return summary
+}
+
+/**
+ * Ejercicios que te saltaste en una sesion. Por si acaso, deja fuera los que
+ * al final si tienen series de trabajo.
+ */
+export function skippedIn(session: ProgressSession, sets: readonly ProgressSet[]): string[] {
+  return skippedOf(session).filter((exerciseId) => !hasWorkSets(sets, session.id, exerciseId))
+}
+
+/** Sesiones terminadas en las que te saltaste un ejercicio, de la mas vieja a la mas nueva. */
+export function skippedSessions<T extends ProgressSession>(params: {
+  sets: readonly ProgressSet[]
+  sessions: readonly T[]
+  exerciseId: string
+  routineId?: string
+}): T[] {
+  const { sets, sessions, exerciseId, routineId } = params
+  return finishedSessions(sessions, routineId).filter((session) =>
+    skippedIn(session, sets).includes(exerciseId),
+  )
 }

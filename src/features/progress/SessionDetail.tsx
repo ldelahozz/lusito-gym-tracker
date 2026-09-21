@@ -10,6 +10,7 @@ import { sessionElapsedMs } from '@/core/logic/sessionDuration'
 import type { SetLog } from '@/core/model/types'
 import { useData } from '@/core/sync/data-context'
 import { exerciseName, recordsOfSet, sessionSetsByExercise } from '@/core/sync/selectors'
+import { removeSessionCascade } from './session-actions'
 
 type Draft = { weightKg: number; reps: number; rir: number }
 
@@ -144,13 +145,7 @@ export function SessionDetail({
 
   const deleteSession = () => {
     if (!session) return
-    for (const group of groups) {
-      for (const log of group.sets) {
-        remove('setLogs', log)
-        for (const record of recordsOfSet(state, log.id)) remove('personalRecords', record)
-      }
-    }
-    remove('sessions', session)
+    removeSessionCascade(state, remove, session.id)
     setConfirmDelete(false)
     close()
     showToast('Sesion borrada')

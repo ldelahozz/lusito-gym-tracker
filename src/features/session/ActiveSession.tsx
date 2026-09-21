@@ -7,6 +7,8 @@ import {
   Pause,
   Play,
   Plus,
+  SkipForward,
+  Undo2,
 } from 'lucide-react'
 import { Button } from '@/core/ui/Button'
 import { ConfirmDialog } from '@/core/ui/ConfirmDialog'
@@ -15,7 +17,7 @@ import { useToast } from '@/core/ui/toast-context'
 import { useChrome } from '@/app/chrome-context'
 import { SyncIndicator } from '@/app/SyncIndicator'
 import { unlockAudio, notifyRestFinished, restFinishedFeedback, tapFeedback, vibrate } from '@/core/feedback'
-import { formatDuration, formatRepRange } from '@/core/logic/format'
+import { formatDate, formatDuration, formatRepRange } from '@/core/logic/format'
 import {
   equivalentPreviousSet,
   prefillFor,
@@ -30,6 +32,7 @@ import {
 } from '@/core/logic/restTimer'
 import { detectRecords, recordMessage, topRecord, type PrSet } from '@/core/logic/prs'
 import { renumberSets, rowCount, switchSetType } from '@/core/logic/setRows'
+import { finalSkipped, setSkipped, skippedLastTime, skippedOf } from '@/core/logic/skips'
 import { endSession, isPaused, pauseSession, resumeSession, sessionElapsedMs } from '@/core/logic/sessionDuration'
 import { newId } from '@/core/model/ids'
 import type { Session, SetLog, SetType } from '@/core/model/types'
@@ -63,6 +66,7 @@ export type SessionSummary = {
   sets: number
   volume: number
   records: number
+  skipped: number
 }
 
 export function ActiveSession({
@@ -181,6 +185,23 @@ export function ActiveSession({
   const activeKey = openKey ?? firstIncomplete
   const workDone = currentSets.filter((log) => log.type === 'work').length
 
+  /** Ejercicios que marcaste como saltados en esta sesion. */
+  const skipped = useMemo(() => skippedOf(session), [session])
+  const isSkipped = skipped.includes(currentExerciseId) && workDone === 0
+  /** Si la vez pasada de esta rutina te saltaste este ejercicio, para avisarte. */
+  const lastSkip = useMemo(
+    () =>
+      currentExerciseId
+        ? skippedLastTime({
+            sessions: Object.values(state.sessions),
+            routineId: session.routineId,
+            exerciseId: currentExerciseId,
+            currentSessionId: session.id,
+          })
+        : null,
+    [state.sessions, session.routineId, session.id, currentExerciseId],
+  )
+
   const draftOf = (row: Row): SetDraft => drafts[`${currentExerciseId}:${row.key}`] ?? row.defaults
 
   const setDraftOf = (row: Row, draft: SetDraft) => {
@@ -279,6 +300,9 @@ export function ActiveSession({
       }
       save('setLogs', created)
       checkRecords(created)
+      if (row.type === 'work' && skipped.includes(currentExerciseId)) {
+        save('sessions', { ...session, skippedExerciseIds: setSkipped(skipped, currentExerciseId, false) })
+      }
       const shouldStartRest = row.type === 'work' || settings.warmupStartsTimer
       const restSeconds = row.type === 'warmup' ? link?.warmupRestSeconds : link?.restSeconds
       if (shouldStartRest && link && restSeconds && restSeconds > 0) {
@@ -359,6 +383,23 @@ export function ActiveSession({
     }))
   }
 
+  const skipExercise = () => {
+    cancelAdvance()
+    tapFeedback(settings.vibration)
+    save('sessions', { ...session, skippedExerciseIds: setSkipped(skipped, currentExerciseId, true) })
+    const next = links[exerciseIndex + 1]
+    if (next) {
+      goToExercise(exerciseIndex + 1)
+      showToast(`Saltaste ${currentName}. Siguiente: ${exerciseName(state, next.exerciseId)}`)
+    } else {
+      showToast(`Saltaste ${currentName}`)
+    }
+  }
+
+  const unskipExercise = () => {
+    save('sessions', { ...session, skippedExerciseIds: setSkipped(skipped, currentExerciseId, false) })
+  }
+
   const togglePause = () => {
     const updated = isPaused(session)
       ? resumeSession(session, Date.now())
@@ -369,13 +410,14 @@ export function ActiveSession({
   const pendingWorkSets = useMemo(() => {
     let pending = 0
     for (const item of links) {
+      if (skipped.includes(item.exerciseId)) continue
       const logged = sessionSets.filter(
         (log) => log.exerciseId === item.exerciseId && log.type === 'work',
       ).length
       pending += Math.max(0, item.workSets.length - logged)
     }
     return pending
-  }, [links, sessionSets])
+  }, [links, sessionSets, skipped])
 
   /** Cuantos records se rompieron en esta sesion. */
   const sessionRecords = useMemo(() => {
@@ -386,7 +428,13 @@ export function ActiveSession({
   }, [sessionSets, state.personalRecords])
 
   const finishSession = () => {
-    const ended = endSession(session, Date.now())
+    const skippedFinal = finalSkipped({
+      planned: links.map((item) => item.exerciseId),
+      marked: skipped,
+      sets: sessionSets,
+      sessionId: session.id,
+    })
+    const ended = { ...endSession(session, Date.now()), skippedExerciseIds: skippedFinal }
     save('sessions', ended)
     const workSets = sessionSets.filter((log) => log.type === 'work')
     setRestTimer(null)
@@ -399,6 +447,7 @@ export function ActiveSession({
       sets: workSets.length,
       volume: workSets.reduce((total, log) => total + log.weightKg * log.reps, 0),
       records: sessionRecords,
+      skipped: skippedFinal.length,
     })
   }
 
@@ -465,6 +514,38 @@ export function ActiveSession({
                 onClick={() => goToExercise(exerciseIndex + 1)}
               />
             </div>
+
+            {isSkipped ? (
+              <div className="flex items-center gap-3 pl-3 pr-1.5 py-1.5 rounded-control bg-surface border border-line">
+                <SkipForward size={16} className="text-muted shrink-0" />
+                <p className="flex-1 min-w-0 text-sm">Saltaste este ejercicio</p>
+                <Button size="sm" variant="ghost" onClick={unskipExercise}>
+                  <Undo2 size={16} />
+                  Deshacer
+                </Button>
+              </div>
+            ) : (
+              (lastSkip || workDone === 0) && (
+                <div className="flex flex-col gap-2">
+                  {lastSkip && (
+                    <p className="flex items-center justify-center gap-1.5 px-1 text-xs text-muted">
+                      <SkipForward size={13} className="shrink-0" />
+                      La vez pasada ({formatDate(lastSkip.startedAt)}) te lo saltaste
+                    </p>
+                  )}
+                  {workDone === 0 && (
+                    <button
+                      type="button"
+                      onClick={skipExercise}
+                      className="self-end inline-flex items-center gap-1.5 h-11 px-3 rounded-control border border-line text-sm text-muted hover:text-text transition-colors duration-150"
+                    >
+                      <SkipForward size={15} />
+                      Saltar ejercicio
+                    </button>
+                  )}
+                </div>
+              )
+            )}
 
             {(['warmup', 'work'] as const).map((type) => {
               const typeRows = rows.filter((row) => row.type === type)
@@ -553,7 +634,7 @@ export function ActiveSession({
         title="Finalizar sesion"
         description={
           pendingWorkSets > 0
-            ? `Quedan ${pendingWorkSets} series sin registrar. Puedes terminar igual: se guarda lo que si hiciste.`
+            ? `Quedan ${pendingWorkSets} series sin registrar. Puedes terminar igual: se guarda lo que si hiciste, y los ejercicios sin ninguna serie quedan como saltados.`
             : 'Se guarda la duracion y todo lo registrado.'
         }
         confirmLabel="Finalizar"

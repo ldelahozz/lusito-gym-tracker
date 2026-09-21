@@ -17,6 +17,9 @@ function summaryLine(summary: RoutineSummary): string {
   if (summary.same > 0) parts.push(`${summary.same} igual`)
   if (summary.down > 0) parts.push(`${summary.down} ${summary.down === 1 ? 'bajo' : 'bajaron'}`)
   if (summary.fresh > 0) parts.push(`${summary.fresh} ${summary.fresh === 1 ? 'nuevo' : 'nuevos'}`)
+  if (summary.skipped > 0) {
+    parts.push(`${summary.skipped} ${summary.skipped === 1 ? 'saltado' : 'saltados'}`)
+  }
   return parts.join(' · ')
 }
 

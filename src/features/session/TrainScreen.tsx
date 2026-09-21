@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, Dumbbell, Moon, Play, Trophy } from 'lucide-react'
+import { CalendarDays, Dumbbell, Moon, Play, SkipForward, Trophy } from 'lucide-react'
 import { Button } from '@/core/ui/Button'
 import { Modal } from '@/core/ui/Modal'
 import { Card } from '@/core/ui/Card'
@@ -59,6 +59,7 @@ export function TrainScreen() {
       endedAt: null,
       pausedMs: 0,
       pausedAt: null,
+      skippedExerciseIds: [],
     })
   }
 
@@ -194,6 +195,13 @@ export function TrainScreen() {
           <p className="flex items-center justify-center gap-2 h-11 rounded-control bg-accent-soft text-accent text-sm">
             <Trophy size={16} />
             {summary?.records === 1 ? '1 record nuevo' : `${summary?.records} records nuevos`}
+          </p>
+        )}
+
+        {(summary?.skipped ?? 0) > 0 && (
+          <p className="flex items-center justify-center gap-2 text-sm text-muted">
+            <SkipForward size={15} />
+            {summary?.skipped === 1 ? '1 ejercicio saltado' : `${summary?.skipped} ejercicios saltados`}
           </p>
         )}
         </div>

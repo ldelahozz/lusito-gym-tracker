@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Dumbbell } from 'lucide-react'
+import { ArrowLeft, Dumbbell, SkipForward } from 'lucide-react'
 import { Button } from '@/core/ui/Button'
 import { Card } from '@/core/ui/Card'
 import { EmptyState } from '@/core/ui/EmptyState'
@@ -10,15 +10,29 @@ import { formatDate, formatWeight } from '@/core/logic/format'
 import {
   compareSets,
   exerciseHistory,
+  skippedSessions,
   trendBetween,
   type ExerciseSession,
 } from '@/core/logic/progress'
+import type { SetLog } from '@/core/model/types'
 import { useData } from '@/core/sync/data-context'
 import { exerciseName } from '@/core/sync/selectors'
 import { ProgressChart } from './ProgressChart'
 import { SetCompareRow, TrendBadge } from './progress-ui'
 
 type Metric = 'topWeight' | 'bestE1rm' | 'totalReps' | 'volume'
+
+/** Cada vez en la lista: o lo hiciste (con su comparacion) o te lo saltaste. */
+type Entry =
+  | {
+      kind: 'done'
+      sessionId: string
+      startedAt: number
+      routineId: string
+      item: ExerciseSession<SetLog>
+      previous: ExerciseSession<SetLog> | undefined
+    }
+  | { kind: 'skipped'; sessionId: string; startedAt: number; routineId: string }
 
 const METRICS: Array<{ key: Metric; label: string; format: (value: number) => string }> = [
   { key: 'topWeight', label: 'Peso maximo', format: (value) => formatWeight(Math.round(value * 10) / 10) },
@@ -82,16 +96,36 @@ export function ExerciseProgress() {
   const sets = useMemo(() => Object.values(state.setLogs), [state.setLogs])
   const sessions = useMemo(() => Object.values(state.sessions), [state.sessions])
 
+  const scopeRoutine = onlyRoutine && fromRoutine ? fromRoutine : undefined
+
   const history = useMemo(
-    () =>
-      exerciseHistory({
-        sets,
-        sessions,
-        exerciseId,
-        routineId: onlyRoutine && fromRoutine ? fromRoutine : undefined,
-      }),
-    [sets, sessions, exerciseId, onlyRoutine, fromRoutine],
+    () => exerciseHistory({ sets, sessions, exerciseId, routineId: scopeRoutine }),
+    [sets, sessions, exerciseId, scopeRoutine],
   )
+
+  const skipped = useMemo(
+    () => skippedSessions({ sets, sessions, exerciseId, routineId: scopeRoutine }),
+    [sets, sessions, exerciseId, scopeRoutine],
+  )
+
+  /** Todo junto, de lo mas nuevo a lo mas viejo. Cada vez hecha se compara con la anterior hecha. */
+  const entries = useMemo<Entry[]>(() => {
+    const done: Entry[] = history.map((item, index) => ({
+      kind: 'done',
+      sessionId: item.sessionId,
+      startedAt: item.startedAt,
+      routineId: item.routineId,
+      item,
+      previous: history[index - 1],
+    }))
+    const missed: Entry[] = skipped.map((session) => ({
+      kind: 'skipped',
+      sessionId: session.id,
+      startedAt: session.startedAt,
+      routineId: session.routineId,
+    }))
+    return [...done, ...missed].sort((a, b) => b.startedAt - a.startedAt)
+  }, [history, skipped])
 
   const name = exerciseName(state, exerciseId)
   const routineName = fromRoutine ? (state.routines[fromRoutine]?.name ?? 'esta rutina') : null
@@ -102,8 +136,6 @@ export function ExerciseProgress() {
     label: formatDate(item.startedAt),
     value: item[metric],
   }))
-
-  const newestFirst = [...history].reverse()
 
   const back = (
     <Button
@@ -131,7 +163,7 @@ export function ExerciseProgress() {
           </div>
         )}
 
-        {history.length === 0 ? (
+        {history.length === 0 && skipped.length === 0 ? (
           <EmptyState
             icon={Dumbbell}
             title="Sin registros"
@@ -142,14 +174,28 @@ export function ExerciseProgress() {
             <div className="flex gap-2">
               <Stat
                 label="Peso maximo"
-                value={`${formatWeight(Math.max(...history.map((item) => item.topWeight)))} kg`}
+                value={
+                  history.length > 0
+                    ? `${formatWeight(Math.max(...history.map((item) => item.topWeight)))} kg`
+                    : '-'
+                }
               />
               <Stat
                 label="1RM estimado"
-                value={`${Math.round(Math.max(...history.map((item) => item.bestE1rm)))} kg`}
+                value={
+                  history.length > 0
+                    ? `${Math.round(Math.max(...history.map((item) => item.bestE1rm)))} kg`
+                    : '-'
+                }
               />
               <Stat label="Veces" value={String(history.length)} />
             </div>
+            {skipped.length > 0 && (
+              <p className="-mt-2 px-1 flex items-center gap-1.5 text-xs text-muted">
+                <SkipForward size={13} />
+                Te lo saltaste {skipped.length} {skipped.length === 1 ? 'vez' : 'veces'}
+              </p>
+            )}
 
             <Card className="p-4 flex flex-col gap-3">
               <div className="flex gap-2 overflow-x-auto no-scrollbar">
@@ -164,32 +210,45 @@ export function ExerciseProgress() {
 
             <section className="flex flex-col gap-2">
               <h2 className="px-1 text-xs uppercase tracking-wider text-muted">Cada vez</h2>
-              {newestFirst.slice(0, visible).map((item, index) => {
-                // La lista va de la mas nueva a la mas vieja: la anterior es la siguiente en la lista.
-                const previous = newestFirst[index + 1]
-                return (
-                  <Card key={item.sessionId} className="p-4 flex flex-col gap-2">
+              {entries.slice(0, visible).map((entry) =>
+                entry.kind === 'skipped' ? (
+                  <Card key={entry.sessionId} className="p-4 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-muted">{formatDate(entry.startedAt)}</p>
+                      {!onlyRoutine && (
+                        <p className="text-xs text-muted truncate">
+                          {state.routines[entry.routineId]?.name ?? 'Rutina borrada'}
+                        </p>
+                      )}
+                    </div>
+                    <span className="inline-flex items-center gap-1 h-7 px-2.5 rounded-full text-xs whitespace-nowrap bg-elevated text-muted border border-line shrink-0">
+                      <SkipForward size={13} />
+                      Saltado
+                    </span>
+                  </Card>
+                ) : (
+                  <Card key={entry.sessionId} className="p-4 flex flex-col gap-2">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-sm font-medium">{formatDate(item.startedAt)}</p>
+                        <p className="text-sm font-medium">{formatDate(entry.startedAt)}</p>
                         {!onlyRoutine && (
                           <p className="text-xs text-muted truncate">
-                            {state.routines[item.routineId]?.name ?? 'Rutina borrada'}
+                            {state.routines[entry.routineId]?.name ?? 'Rutina borrada'}
                           </p>
                         )}
                       </div>
-                      <TrendBadge trend={trendBetween(item, previous)} className="shrink-0" />
+                      <TrendBadge trend={trendBetween(entry.item, entry.previous)} className="shrink-0" />
                     </div>
                     <div className="flex flex-col">
-                      {compareSets(item.sets, previous?.sets ?? []).map((row) => (
-                        <SetCompareRow key={row.position} row={row} firstTime={!previous} />
+                      {compareSets(entry.item.sets, entry.previous?.sets ?? []).map((row) => (
+                        <SetCompareRow key={row.position} row={row} firstTime={!entry.previous} />
                       ))}
                     </div>
                   </Card>
-                )
-              })}
+                ),
+              )}
 
-              {newestFirst.length > visible && (
+              {entries.length > visible && (
                 <Button className="self-center" onClick={() => setVisible((value) => value + PAGE)}>
                   Ver mas
                 </Button>

@@ -79,6 +79,8 @@ export type Session = SyncFields & {
   pausedMs: number
   /** Momento en que se pauso, o null si esta corriendo. */
   pausedAt: number | null
+  /** Ejercicios que te saltaste. Las sesiones viejas no lo traen. */
+  skippedExerciseIds?: string[]
 }
 
 export type SetType = 'warmup' | 'work'

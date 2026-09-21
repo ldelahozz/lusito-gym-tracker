@@ -5,6 +5,8 @@ import {
   finishedSessions,
   previousOf,
   routineSummary,
+  skippedIn,
+  skippedSessions,
   trendBetween,
   type ProgressSession,
   type ProgressSet,
@@ -219,7 +221,7 @@ describe('routineSummary', () => {
       set('c', 0, 12, 12, 2, { exerciseId: 'curl' }),
     ]
     const summary = routineSummary({ sets: mixed, sessions, routineId: 'upper' })
-    expect(summary).toEqual({ sessions: 3, lastAt: 3_000, up: 1, same: 1, down: 1, fresh: 1 })
+    expect(summary).toEqual({ sessions: 3, lastAt: 3_000, up: 1, same: 1, down: 1, fresh: 1, skipped: 0 })
   })
 
   it('una rutina sin sesiones queda en cero', () => {
@@ -230,6 +232,7 @@ describe('routineSummary', () => {
       same: 0,
       down: 0,
       fresh: 0,
+      skipped: 0,
     })
   })
 
@@ -242,5 +245,39 @@ describe('routineSummary', () => {
     const conOtra = [...sets, set('lower1', 0, 100, 10)]
     const summary = routineSummary({ sets: conOtra, sessions: otras, routineId: 'upper' })
     expect(summary.up).toBe(1)
+  })
+})
+
+describe('saltados en progreso', () => {
+  const conSaltos = [
+    session('a', 1_000),
+    session('b', 2_000, { skippedExerciseIds: ['curl'] }),
+    session('c', 3_000, { skippedExerciseIds: ['curl', 'press'] }),
+  ]
+
+  it('el resumen de la rutina cuenta los saltados de la ultima sesion', () => {
+    // En "c" hay series de press, asi que solo curl cuenta como saltado.
+    expect(routineSummary({ sets, sessions: conSaltos, routineId: 'upper' }).skipped).toBe(1)
+  })
+
+  it('un ejercicio marcado como saltado pero con series no cuenta como saltado', () => {
+    expect(skippedIn(conSaltos[2], sets)).toEqual(['curl'])
+  })
+
+  it('lista las sesiones en que se salto un ejercicio', () => {
+    expect(skippedSessions({ sets, sessions: conSaltos, exerciseId: 'curl' }).map((item) => item.id)).toEqual([
+      'b',
+      'c',
+    ])
+  })
+
+  it('las sesiones viejas sin lista no cuentan como saltadas', () => {
+    expect(skippedSessions({ sets, sessions, exerciseId: 'curl' })).toEqual([])
+  })
+
+  it('saltarse un ejercicio no rompe la comparacion con la ultima vez que si se hizo', () => {
+    const history = exerciseHistory({ sets, sessions: conSaltos, exerciseId: 'press' })
+    // b y c tienen press; la comparacion de c es contra b.
+    expect(previousOf(history, 'c')?.sessionId).toBe('b')
   })
 })
