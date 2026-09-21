@@ -9,6 +9,7 @@ import {
 } from 'firebase/auth'
 import { clearIndexedDbPersistence, terminate } from 'firebase/firestore'
 import { getFirebase, googleProvider } from '@/core/firebase'
+import { clearSessionState } from '@/features/session/session-storage'
 import { AuthContext, type AuthStatus } from './auth-context'
 
 /** Traduce los codigos de error de Firebase a algo entendible. */
@@ -92,6 +93,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     const { auth, db } = getFirebase()
     await firebaseSignOut(auth)
+    // El descanso en curso y la pantalla del entrenamiento tampoco pasan a la otra cuenta.
+    clearSessionState()
     try {
       await terminate(db)
       await clearIndexedDbPersistence(db)
