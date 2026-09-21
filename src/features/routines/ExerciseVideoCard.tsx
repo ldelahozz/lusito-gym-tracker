@@ -20,7 +20,7 @@ export function ExerciseVideoCard({ exerciseId, exerciseName }: Props) {
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs uppercase tracking-wider text-muted">Video de referencia</span>
+      <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Video de referencia</span>
 
       <input
         ref={inputRef}

@@ -15,6 +15,8 @@ type Props = {
   ariaLabel?: string
   /** Version mas baja, para pantallas de configuracion donde hay muchos campos. */
   compact?: boolean
+  /** Numeros grandes, para leerlos de un vistazo mientras entrenas. */
+  large?: boolean
 }
 
 function round(value: number, decimals: number): number {
@@ -37,6 +39,7 @@ export function NumberField({
   className,
   ariaLabel,
   compact,
+  large,
 }: Props) {
   const [text, setText] = useState(() => value.toFixed(decimals))
   const [editing, setEditing] = useState(false)
@@ -59,29 +62,38 @@ export function NumberField({
 
   // Los botones se angostan un poco si falta espacio, pero el numero siempre se ve completo.
   const buttonClass = cn(
-    'grid place-items-center shrink min-w-8 text-muted hover:text-text',
-    'disabled:opacity-25 disabled:pointer-events-none',
-    compact ? 'h-10 w-10' : 'h-12 w-12',
+    'surface-key grid place-items-center shrink min-w-8 rounded-[10px] text-muted hover:text-text',
+    'transition-transform duration-100 active:scale-90',
+    'disabled:opacity-30 disabled:pointer-events-none',
+    compact ? 'h-8 w-9' : large ? 'h-12 w-12' : 'h-10 w-10',
   )
+  const iconSize = compact ? 15 : large ? 22 : 18
 
   return (
-    <div className={cn('flex items-center gap-1 rounded-control bg-elevated border border-line', className)}>
+    <div
+      className={cn(
+        'surface-well flex items-center gap-1 rounded-control',
+        compact ? 'p-1' : 'p-1.5',
+        className,
+      )}
+    >
       <button
         type="button"
         onClick={() => bump(-1)}
         disabled={value <= min}
         aria-label="Restar"
-        className={cn(buttonClass, 'rounded-l-control')}
+        className={buttonClass}
       >
-        <Minus size={compact ? 16 : 20} />
+        <Minus size={iconSize} />
       </button>
 
-      <div className="flex-1 flex items-baseline justify-center gap-1 min-w-min">
+      {/* Tocar cualquier parte del centro abre el teclado; numero y unidad van juntos al centro. */}
+      <label className="flex-1 flex items-baseline justify-center gap-1 min-w-min cursor-text">
         <input
           value={text}
           aria-label={ariaLabel}
           inputMode="decimal"
-          style={{ minWidth: `${Math.max(text.length, 1) + 0.5}ch` }}
+          style={{ width: `${Math.max(text.length, 1) + 0.5}ch` }}
           onFocus={(event) => {
             setEditing(true)
             event.currentTarget.select()
@@ -92,21 +104,27 @@ export function NumberField({
             if (event.key === 'Enter') event.currentTarget.blur()
           }}
           className={cn(
-            'w-full min-w-0 bg-transparent text-center font-medium tabular-nums outline-none',
-            compact ? 'text-[15px]' : 'text-[17px]',
+            'min-w-0 bg-transparent text-center tabular-nums outline-none',
+            compact && 'text-[15px] font-medium',
+            !compact && !large && 'text-[17px] font-semibold',
+            large && 'text-[28px] leading-none font-extrabold tracking-tight',
           )}
         />
-        {suffix && <span className="text-xs text-muted shrink-0 pr-1">{suffix}</span>}
-      </div>
+        {suffix && (
+          <span className={cn('shrink-0 pr-1 text-muted', large ? 'text-sm font-medium' : 'text-xs')}>
+            {suffix}
+          </span>
+        )}
+      </label>
 
       <button
         type="button"
         onClick={() => bump(1)}
         disabled={value >= max}
         aria-label="Sumar"
-        className={cn(buttonClass, 'rounded-r-control')}
+        className={buttonClass}
       >
-        <Plus size={compact ? 16 : 20} />
+        <Plus size={iconSize} />
       </button>
     </div>
   )

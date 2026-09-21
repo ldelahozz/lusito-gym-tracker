@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  formatDaysAgo,
   formatDate,
   formatDateTime,
   formatDuration,
@@ -83,5 +84,16 @@ describe('formatSigned', () => {
 describe('formatSetLine', () => {
   it('escribe peso, repeticiones y RIR en una linea', () => {
     expect(formatSetLine({ weightKg: 62.5, reps: 9, rir: 1 })).toBe('62.5 kg × 9 · RIR 1')
+  })
+})
+
+describe('formatDaysAgo', () => {
+  const now = new Date(2024, 0, 10, 9).getTime()
+
+  it('cuenta por días de calendario', () => {
+    expect(formatDaysAgo(new Date(2024, 0, 10, 7).getTime(), now)).toBe('hoy')
+    // Anoche a las 23:00 ya es "ayer", aunque hayan pasado 10 horas.
+    expect(formatDaysAgo(new Date(2024, 0, 9, 23).getTime(), now)).toBe('ayer')
+    expect(formatDaysAgo(new Date(2024, 0, 7, 18).getTime(), now)).toBe('hace 3 días')
   })
 })

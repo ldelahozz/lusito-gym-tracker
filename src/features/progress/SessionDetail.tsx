@@ -42,7 +42,7 @@ function SetLine({
       <button
         type="button"
         onClick={onOpen}
-        className="w-full flex items-center gap-3 h-11 px-3 rounded-control bg-surface text-left"
+        className="w-full flex items-center gap-3 h-11 px-3 rounded-control surface-card text-left transition-transform duration-150 active:scale-[0.99]"
       >
         <span className="w-6 shrink-0 text-xs text-muted tabular-nums">
           {log.type === 'warmup' ? 'C' : position}
@@ -56,7 +56,7 @@ function SetLine({
   }
 
   return (
-    <div className="flex flex-col gap-2 p-3 rounded-control bg-surface border border-accent-dim">
+    <div className="flex flex-col gap-2 p-3 rounded-control surface-card border-accent-dim">
       <div className="grid grid-cols-2 gap-2">
         <NumberField
           compact
@@ -167,13 +167,13 @@ export function SessionDetail({
         }
       >
         <div className="flex gap-2 text-center">
-          <div className="flex-1 p-2 rounded-control bg-surface">
+          <div className="flex-1 p-2 rounded-control surface-well">
             <p className="text-[11px] text-muted">Duración</p>
             <p className="text-sm font-medium tabular-nums">
               {duration === null ? '-' : formatDuration(duration)}
             </p>
           </div>
-          <div className="flex-1 p-2 rounded-control bg-surface">
+          <div className="flex-1 p-2 rounded-control surface-well">
             <p className="text-[11px] text-muted">Series</p>
             <p className="text-sm font-medium tabular-nums">
               {groups.reduce(
@@ -182,7 +182,7 @@ export function SessionDetail({
               )}
             </p>
           </div>
-          <div className="flex-1 p-2 rounded-control bg-surface">
+          <div className="flex-1 p-2 rounded-control surface-well">
             <p className="text-[11px] text-muted">Volumen</p>
             <p className="text-sm font-medium tabular-nums">
               {formatWeight(
@@ -208,7 +208,7 @@ export function SessionDetail({
           <div className="flex flex-col gap-4">
             {groups.map((group) => (
               <section key={group.exerciseId} className="flex flex-col gap-1.5">
-                <h3 className="text-xs uppercase tracking-wider text-muted px-1">
+                <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted px-1">
                   {exerciseName(state, group.exerciseId)}
                 </h3>
                 {group.sets.map((log) => (

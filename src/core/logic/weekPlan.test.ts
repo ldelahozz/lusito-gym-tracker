@@ -5,6 +5,8 @@ import {
   normalizeSplit,
   removeRoutineFromSplit,
   setDayRoutine,
+  startOfWeek,
+  weekActivity,
   weekdayIndex,
 } from './weekPlan'
 
@@ -102,5 +104,45 @@ describe('removeRoutineFromSplit', () => {
   it('no toca las demás rutinas', () => {
     const split = normalizeSplit(['upper', 'lower'])
     expect(daysUsing(removeRoutineFromSplit(split, 'upper'), 'lower')).toEqual([1])
+  })
+})
+
+describe('weekActivity', () => {
+  // Miércoles 10 de enero de 2024, al mediodía.
+  const now = new Date(2024, 0, 10, 12).getTime()
+  const at = (day: number, hour = 18) => new Date(2024, 0, day, hour).getTime()
+  const done = (day: number) => ({ startedAt: at(day), endedAt: at(day, 19) })
+
+  it('la semana empieza el lunes a medianoche', () => {
+    expect(startOfWeek(now)).toBe(new Date(2024, 0, 8).getTime())
+  })
+
+  it('marca los días de esta semana con una sesión terminada', () => {
+    const week = weekActivity({ sessions: [done(8), done(9)], split: [], now })
+    expect(week.trained).toEqual([true, true, false, false, false, false, false])
+    expect(week.done).toBe(2)
+  })
+
+  it('no cuenta la semana pasada, ni sesiones en curso o borradas', () => {
+    const week = weekActivity({
+      sessions: [
+        done(7),
+        { startedAt: at(9), endedAt: null },
+        { ...done(10), deleted: true },
+      ],
+      split: [],
+      now,
+    })
+    expect(week.done).toBe(0)
+  })
+
+  it('dos sesiones el mismo día cuentan como un día', () => {
+    const week = weekActivity({ sessions: [done(8), { startedAt: at(8, 7), endedAt: at(8, 8) }], split: [], now })
+    expect(week.done).toBe(1)
+  })
+
+  it('cuenta los días planeados en el split', () => {
+    const week = weekActivity({ sessions: [], split: ['a', 'b', null, 'a', 'b', null, null], now })
+    expect(week.planned).toBe(4)
   })
 })

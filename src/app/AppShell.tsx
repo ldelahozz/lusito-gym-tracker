@@ -14,7 +14,7 @@ function useSectionTitle(): string {
 /** Navegacion lateral: solo en pantallas anchas (PC). */
 function SideNav() {
   return (
-    <aside className="hidden md:flex md:w-60 lg:w-64 shrink-0 flex-col gap-6 border-r border-line bg-surface px-4 py-6">
+    <aside className="hidden md:flex md:w-60 lg:w-64 shrink-0 flex-col gap-6 border-r border-line surface-glass sticky top-0 h-dvh px-4 py-6">
       <div className="flex items-center gap-3 px-2">
         <AppMark size={36} />
         <div className="min-w-0">
@@ -31,7 +31,9 @@ function SideNav() {
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-3 h-12 px-3 rounded-control text-[15px] transition-colors duration-150',
-                isActive ? 'bg-accent-soft text-accent font-medium' : 'text-muted hover:text-text hover:bg-elevated',
+                isActive
+                  ? 'bg-accent-soft text-accent-hi font-semibold shadow-[inset_0_0_0_1px_rgb(76_141_255/0.25)]'
+                  : 'text-muted hover:text-text hover:bg-elevated',
               )
             }
           >
@@ -48,11 +50,11 @@ function SideNav() {
   )
 }
 
-/** Navegacion inferior: solo en celular. */
+/** Navegacion inferior: solo en celular. Cristal oscuro que deja ver lo de atras. */
 function BottomNav() {
   return (
-    <nav className="md:hidden fixed inset-x-0 bottom-0 z-20 border-t border-line bg-elevated pb-safe">
-      <div className="flex">
+    <nav className="md:hidden fixed inset-x-0 bottom-0 z-20 border-t border-line/70 surface-glass pb-safe">
+      <div className="flex px-2">
         {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
@@ -60,13 +62,21 @@ function BottomNav() {
             className={({ isActive }) =>
               cn(
                 'flex-1 flex flex-col items-center justify-center gap-1 h-16 text-[11px] transition-colors duration-150',
-                isActive ? 'text-accent' : 'text-muted',
+                isActive ? 'text-accent-hi font-semibold' : 'text-muted',
               )
             }
           >
             {({ isActive }) => (
               <>
-                <Icon size={22} strokeWidth={isActive ? 2 : 1.75} />
+                {/* La seccion activa lleva una pastilla con brillo detras del icono. */}
+                <span
+                  className={cn(
+                    'grid place-items-center h-8 w-14 rounded-full transition-[background-color,box-shadow] duration-200',
+                    isActive && 'bg-accent-soft shadow-[0_0_18px_-4px_rgb(76_141_255/0.6)]',
+                  )}
+                >
+                  <Icon size={21} strokeWidth={isActive ? 2.1 : 1.75} />
+                </span>
                 {label}
               </>
             )}
@@ -80,27 +90,31 @@ function BottomNav() {
 export function AppShell() {
   const title = useSectionTitle()
   const [hideHeader, setHideHeader] = useState(false)
-  const chrome = useMemo(() => ({ hideHeader, setHideHeader }), [hideHeader])
+  const [hideNav, setHideNav] = useState(false)
+  const chrome = useMemo(
+    () => ({ hideHeader, setHideHeader, hideNav, setHideNav }),
+    [hideHeader, hideNav],
+  )
 
   return (
     <ChromeContext.Provider value={chrome}>
-      <div className="min-h-full flex bg-canvas">
+      <div className="min-h-full flex">
         <SideNav />
 
         <div className="flex-1 flex flex-col min-w-0">
           {!hideHeader && (
-            <header className="md:hidden sticky top-0 z-10 flex items-center justify-between gap-3 h-14 px-4 border-b border-line bg-canvas/95 backdrop-blur pt-safe">
-              <h1 className="text-base font-semibold truncate">{title}</h1>
+            <header className="md:hidden sticky top-0 z-10 flex items-center justify-between gap-3 h-14 px-4 border-b border-line/60 surface-glass pt-safe">
+              <h1 className="text-lg font-bold tracking-tight truncate">{title}</h1>
               <SyncIndicator />
             </header>
           )}
 
-          <main className="flex-1 min-w-0 pb-20 md:pb-0">
+          <main className={cn('flex-1 min-w-0 md:pb-0', hideNav ? 'pb-0' : 'pb-20')}>
             <Outlet />
           </main>
         </div>
 
-        <BottomNav />
+        {!hideNav && <BottomNav />}
       </div>
     </ChromeContext.Provider>
   )

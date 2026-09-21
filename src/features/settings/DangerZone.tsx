@@ -128,7 +128,7 @@ export function DangerZone() {
           archivedRoutines.map((routine) => (
             <div
               key={routine.id}
-              className="flex items-center gap-3 pl-3 pr-1 py-1 rounded-control bg-elevated border border-line"
+              className="flex items-center gap-3 pl-3 pr-1 py-1 rounded-control surface-well"
             >
               <span className="flex-1 min-w-0 text-sm truncate">{routine.name}</span>
               <Button size="sm" variant="ghost" onClick={() => askRoutine(routine.id, routine.name)}>
@@ -150,7 +150,7 @@ export function DangerZone() {
           archivedExercises.map((exercise) => (
             <div
               key={exercise.id}
-              className="flex items-center gap-3 pl-3 pr-1 py-1 rounded-control bg-elevated border border-line"
+              className="flex items-center gap-3 pl-3 pr-1 py-1 rounded-control surface-well"
             >
               <span className="flex-1 min-w-0 text-sm truncate">{exercise.name}</span>
               <Button size="sm" variant="ghost" onClick={() => askExercise(exercise.id, exercise.name)}>

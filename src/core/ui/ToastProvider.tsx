@@ -22,22 +22,27 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="fixed inset-x-0 bottom-24 md:bottom-8 z-40 flex flex-col items-center gap-2 px-4 pointer-events-none">
+      {/* En el celular salen arriba: abajo estan el descanso y los botones que mas se tocan. */}
+      <div className="fixed inset-x-0 top-[calc(env(safe-area-inset-top)+4.25rem)] md:top-auto md:bottom-8 z-40 flex flex-col items-center gap-2 px-4 pointer-events-none">
         {toasts.map((toast) => (
           <div
             key={toast.id}
             role="status"
             className={cn(
-              'flex items-center gap-2 max-w-sm px-4 py-3 rounded-control',
-              'bg-elevated border border-line shadow-lg shadow-black/40',
-              'text-sm animate-[modal-in_180ms_ease-out]',
-              toast.kind === 'record' && 'border-accent-dim',
+              'flex items-center gap-2.5 max-w-sm pl-2.5 pr-4 py-2.5 rounded-full',
+              'surface-glass border border-line shadow-[0_12px_30px_-12px_rgb(0_0_0/0.9)]',
+              'text-sm animate-[toast-in_220ms_var(--ease-spring)]',
+              toast.kind === 'record' && 'border-violet-dim animate-glow',
             )}
           >
             {toast.kind === 'record' ? (
-              <Award size={18} className="text-accent shrink-0" />
+              <span className="grid place-items-center size-8 shrink-0 rounded-full bg-violet-soft text-violet animate-pop">
+                <Award size={17} />
+              </span>
             ) : (
-              <Check size={18} className="text-accent shrink-0" />
+              <span className="grid place-items-center size-7 shrink-0 rounded-full bg-accent-soft text-accent">
+                <Check size={15} />
+              </span>
             )}
             <span>{toast.message}</span>
           </div>

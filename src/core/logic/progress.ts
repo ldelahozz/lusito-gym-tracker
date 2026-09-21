@@ -254,3 +254,37 @@ export function skippedSessions<T extends ProgressSession>(params: {
     skippedIn(session, sets).includes(exerciseId),
   )
 }
+
+/** "3 subieron · 1 igual · 1 bajó" (solo lo que no sea cero). */
+export function summaryText(summary: RoutineSummary): string {
+  const parts: string[] = []
+  if (summary.up > 0) parts.push(`${summary.up} ${summary.up === 1 ? 'subió' : 'subieron'}`)
+  if (summary.same > 0) parts.push(`${summary.same} igual`)
+  if (summary.down > 0) parts.push(`${summary.down} ${summary.down === 1 ? 'bajó' : 'bajaron'}`)
+  if (summary.fresh > 0) parts.push(`${summary.fresh} ${summary.fresh === 1 ? 'nuevo' : 'nuevos'}`)
+  if (summary.skipped > 0) {
+    parts.push(`${summary.skipped} ${summary.skipped === 1 ? 'saltado' : 'saltados'}`)
+  }
+  return parts.join(' · ')
+}
+
+/**
+ * Volumen de trabajo (peso × reps de las series de trabajo) de las ultimas
+ * sesiones de una rutina, de la mas vieja a la mas nueva. Para la mini grafica.
+ */
+export function routineVolumes(params: {
+  sets: readonly ProgressSet[]
+  sessions: readonly ProgressSession[]
+  routineId: string
+  limit?: number
+}): number[] {
+  const { sets, sessions, routineId, limit = 10 } = params
+  const recent = finishedSessions(sessions, routineId).slice(-limit)
+  const volumeOf = new Map(recent.map((session) => [session.id, 0]))
+  for (const set of sets) {
+    if (set.deleted || set.type !== 'work') continue
+    const current = volumeOf.get(set.sessionId)
+    if (current !== undefined) volumeOf.set(set.sessionId, current + set.weightKg * set.reps)
+  }
+  return recent.map((session) => Math.round(volumeOf.get(session.id) ?? 0))
+}

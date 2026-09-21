@@ -8,10 +8,13 @@ import {
   ChevronRight,
   Copy,
   CalendarDays,
+  Dumbbell,
   ListChecks,
+  MoreHorizontal,
   Plus,
   Trash,
 } from 'lucide-react'
+import { ActionSheet } from '@/core/ui/ActionSheet'
 import { Button } from '@/core/ui/Button'
 import { Card } from '@/core/ui/Card'
 import { ConfirmDialog } from '@/core/ui/ConfirmDialog'
@@ -19,7 +22,7 @@ import { EmptyState } from '@/core/ui/EmptyState'
 import { IconButton } from '@/core/ui/IconButton'
 import { Screen } from '@/core/ui/Screen'
 import { useToast } from '@/core/ui/toast-context'
-import { daysUsing, removeRoutineFromSplit } from '@/core/logic/weekPlan'
+import { WEEKDAYS_SHORT, daysUsing, removeRoutineFromSplit } from '@/core/logic/weekPlan'
 import { newId } from '@/core/model/ids'
 import type { Routine } from '@/core/model/types'
 import { useData } from '@/core/sync/data-context'
@@ -32,6 +35,7 @@ export function RoutinesScreen() {
   const navigate = useNavigate()
   const [showArchived, setShowArchived] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<Routine | null>(null)
+  const [menuFor, setMenuFor] = useState<Routine | null>(null)
 
   const routines = useMemo(() => listRoutines(state, showArchived), [state, showArchived])
   const archivedCount = useMemo(
@@ -83,87 +87,84 @@ export function RoutinesScreen() {
     showToast('Rutina eliminada')
   }
 
-  return (
-    <Screen
-      title="Rutinas"
-      description="Arma tus rutinas aquí. Se sincronizan solas con el celular."
-      actions={
-        <>
-          <Button onClick={() => navigate('/rutinas/split')}>
-            <CalendarDays size={18} />
-            Split semanal
-          </Button>
-          <Button onClick={() => navigate('/rutinas/ejercicios')}>Ejercicios</Button>
-          <Button variant="primary" onClick={createRoutine}>
-            <Plus size={18} />
-            Nueva rutina
-          </Button>
-        </>
-      }
+  const menuIndex = menuFor ? routines.findIndex((routine) => routine.id === menuFor.id) : -1
+
+  /** Accesos a lo que se configura aparte de las rutinas. */
+  const shortcut = (to: string, Icon: typeof CalendarDays, title: string, hint: string) => (
+    <button
+      type="button"
+      onClick={() => navigate(to)}
+      className="surface-card flex items-center gap-3 p-3 rounded-card text-left transition-transform duration-150 active:scale-[0.98] hover:border-accent-dim"
     >
+      <span className="grid place-items-center size-10 rounded-control bg-accent-soft text-accent-hi shrink-0">
+        <Icon size={19} />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold truncate">{title}</span>
+        <span className="block text-xs text-muted truncate">{hint}</span>
+      </span>
+    </button>
+  )
+
+  return (
+    <Screen title="Rutinas" description="Arma tus rutinas aquí. Se sincronizan solas con el celular.">
+      <div className="grid grid-cols-2 gap-2.5 mb-6">
+        {shortcut('/rutinas/split', CalendarDays, 'Split semanal', 'Qué va cada día')}
+        {shortcut('/rutinas/ejercicios', Dumbbell, 'Ejercicios', 'Tu catálogo')}
+      </div>
+
+      <div className="flex items-center justify-between gap-3 mb-3 px-1">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
+          {showArchived ? 'Todas tus rutinas' : 'Tus rutinas'}
+        </h2>
+        <Button variant="primary" size="sm" onClick={createRoutine}>
+          <Plus size={16} />
+          Nueva rutina
+        </Button>
+      </div>
+
       {routines.length === 0 ? (
         <EmptyState
           icon={ListChecks}
           title={showArchived ? 'No hay rutinas archivadas' : 'Todavía no hay rutinas'}
           description="Crea una rutina, ponle nombre y agrégale los ejercicios que haces."
-          action={
-            <Button variant="primary" onClick={createRoutine}>
-              <Plus size={18} />
-              Nueva rutina
-            </Button>
-          }
         />
       ) : (
-        <div className="flex flex-col gap-3 md:grid md:grid-cols-2 md:gap-4">
+        <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-4">
           {routines.map((routine, index) => {
             const exerciseCount = listRoutineExercises(state, routine.id).length
-            const hasHistory = routineHasHistory(state, routine.id)
+            const days = daysUsing(settings.weeklySplit, routine.id).map((day) => WEEKDAYS_SHORT[day])
             return (
-              <Card key={routine.id} className="p-3 pl-4 flex flex-col gap-2">
+              <Card
+                key={routine.id}
+                className="flex items-center gap-1 pr-1.5 animate-rise"
+                style={{ animationDelay: `${index * 40}ms` }}
+              >
                 <button
                   type="button"
                   onClick={() => navigate(`/rutinas/${routine.id}`)}
-                  className="flex items-center gap-3 text-left min-w-0"
+                  className="flex-1 min-w-0 flex items-center gap-3 p-3.5 pr-1 text-left"
                 >
+                  <span className="grid place-items-center size-11 rounded-control surface-well text-accent-hi shrink-0">
+                    <Dumbbell size={19} />
+                  </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-[15px] font-medium truncate">{routine.name}</span>
-                    <span className="block text-sm text-muted">
+                    <span className="block text-[15px] font-semibold truncate">{routine.name}</span>
+                    <span className="block text-sm text-muted truncate">
                       {exerciseCount === 0
                         ? 'Sin ejercicios'
                         : `${exerciseCount} ${exerciseCount === 1 ? 'ejercicio' : 'ejercicios'}`}
+                      {days.length > 0 && ` · ${days.join(', ')}`}
                       {routine.archived ? ' · Archivada' : ''}
                     </span>
                   </span>
                   <ChevronRight size={18} className="text-muted shrink-0" />
                 </button>
-
-                <div className="flex items-center gap-1 -ml-2">
-                  <IconButton
-                    icon={ArrowUp}
-                    label="Subir"
-                    disabled={index === 0}
-                    onClick={() => move(routine, -1)}
-                  />
-                  <IconButton
-                    icon={ArrowDown}
-                    label="Bajar"
-                    disabled={index === routines.length - 1}
-                    onClick={() => move(routine, 1)}
-                  />
-                  <IconButton icon={Copy} label="Duplicar" onClick={() => duplicate(routine)} />
-                  <IconButton
-                    icon={routine.archived ? ArchiveRestore : Archive}
-                    label={routine.archived ? 'Restaurar' : 'Archivar'}
-                    onClick={() => toggleArchive(routine)}
-                  />
-                  {!hasHistory && (
-                    <IconButton
-                      icon={Trash}
-                      label="Eliminar"
-                      onClick={() => setPendingDelete(routine)}
-                    />
-                  )}
-                </div>
+                <IconButton
+                  icon={MoreHorizontal}
+                  label={`Opciones de ${routine.name}`}
+                  onClick={() => setMenuFor(routine)}
+                />
               </Card>
             )
           })}
@@ -177,6 +178,39 @@ export function RoutinesScreen() {
           </Button>
         </div>
       )}
+
+      <ActionSheet
+        open={menuFor !== null}
+        title={menuFor?.name ?? ''}
+        onClose={() => setMenuFor(null)}
+        actions={
+          menuFor
+            ? [
+                {
+                  icon: ArrowUp,
+                  label: 'Subir en la lista',
+                  onSelect: () => move(menuFor, -1),
+                  disabled: menuIndex <= 0,
+                },
+                {
+                  icon: ArrowDown,
+                  label: 'Bajar en la lista',
+                  onSelect: () => move(menuFor, 1),
+                  disabled: menuIndex === routines.length - 1,
+                },
+                { icon: Copy, label: 'Duplicar', onSelect: () => duplicate(menuFor) },
+                {
+                  icon: menuFor.archived ? ArchiveRestore : Archive,
+                  label: menuFor.archived ? 'Restaurar' : 'Archivar',
+                  onSelect: () => toggleArchive(menuFor),
+                },
+                ...(routineHasHistory(state, menuFor.id)
+                  ? []
+                  : [{ icon: Trash, label: 'Eliminar', onSelect: () => setPendingDelete(menuFor), subtle: true }]),
+              ]
+            : []
+        }
+      />
 
       <ConfirmDialog
         open={pendingDelete !== null}

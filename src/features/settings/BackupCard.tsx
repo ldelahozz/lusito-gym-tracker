@@ -127,7 +127,7 @@ export function BackupCard() {
       />
 
       {error && (
-        <div className="flex items-start gap-2.5 p-3 rounded-control bg-elevated border border-line">
+        <div className="flex items-start gap-2.5 p-3 rounded-control surface-well">
           <FileWarning size={18} className="text-muted shrink-0 mt-0.5" />
           <p className="text-sm leading-relaxed">{error}</p>
         </div>
@@ -172,7 +172,7 @@ export function BackupCard() {
                 ['Series', preview.summary.sets],
                 ['Récords', preview.summary.records],
               ].map(([label, value]) => (
-                <div key={label} className="p-2 rounded-control bg-surface">
+                <div key={label} className="p-2 rounded-control surface-well">
                   <p className="text-[11px] text-muted">{label}</p>
                   <p className="text-base font-semibold tabular-nums">{value}</p>
                 </div>

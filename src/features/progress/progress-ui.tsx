@@ -20,7 +20,7 @@ export function TrendBadge({ trend, className }: { trend: Trend; className?: str
         'inline-flex items-center gap-1 h-7 px-2.5 rounded-full text-xs whitespace-nowrap',
         trend.kind === 'up'
           ? 'bg-accent-soft text-accent'
-          : 'bg-elevated text-muted border border-line',
+          : 'surface-well text-muted',
         className,
       )}
     >
@@ -37,10 +37,10 @@ function DeltaPill({ value, unit, neutral }: { value: number; unit: string; neut
       className={cn(
         'inline-flex items-center h-6 px-2 rounded-full text-[11px] tabular-nums whitespace-nowrap',
         neutral
-          ? 'bg-elevated text-muted border border-line'
+          ? 'surface-well text-muted'
           : up
             ? 'bg-accent-soft text-accent'
-            : 'bg-elevated text-muted border border-line',
+            : 'surface-well text-muted',
       )}
     >
       {neutral ? `${unit} ${formatSigned(value)}` : `${formatSigned(value)} ${unit}`}
@@ -67,7 +67,7 @@ export function SetCompareRow({
     current && !previous && !firstTime ? (
       <span
         key="new"
-        className="inline-flex items-center h-6 px-2 rounded-full text-[11px] bg-elevated text-muted border border-line"
+        className="inline-flex items-center h-6 px-2 rounded-full text-[11px] surface-well text-muted"
       >
         serie nueva
       </span>

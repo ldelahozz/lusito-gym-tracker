@@ -2,7 +2,7 @@
 export function AppMark({ size = 40 }: { size?: number }) {
   return (
     <span
-      className="grid place-items-center bg-elevated shrink-0"
+      className="grid place-items-center surface-hero shrink-0"
       style={{ width: size, height: size, borderRadius: size * 0.28 }}
       aria-hidden="true"
     >

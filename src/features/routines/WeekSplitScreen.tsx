@@ -69,15 +69,15 @@ export function WeekSplitScreen() {
                     onClick={() => setEditingDay(index)}
                     className={cn(
                       'w-full flex items-center gap-3 min-h-16 px-4 py-3 rounded-card text-left',
-                      'bg-surface border transition-colors duration-150',
-                      isToday ? 'border-accent-dim' : 'border-line hover:border-accent-dim',
+                      'transition-[border-color,transform] duration-150 active:scale-[0.99]',
+                      isToday ? 'surface-hero' : 'surface-card hover:border-accent-dim',
                     )}
                   >
                     <span className="w-20 shrink-0">
                       <span
                         className={cn(
                           'block text-sm',
-                          isToday ? 'text-accent font-medium' : 'text-muted',
+                          isToday ? 'text-accent-hi font-semibold' : 'text-muted',
                         )}
                       >
                         {day}
@@ -87,7 +87,7 @@ export function WeekSplitScreen() {
 
                     <span className="flex-1 min-w-0">
                       {name ? (
-                        <span className="block text-[15px] truncate">{name}</span>
+                        <span className="block text-[15px] font-semibold truncate">{name}</span>
                       ) : (
                         <span className="flex items-center gap-1.5 text-[15px] text-muted">
                           <Moon size={15} />
@@ -134,7 +134,7 @@ export function WeekSplitScreen() {
                 className={cn(
                   'w-full flex items-center gap-3 h-14 px-4 rounded-control text-left',
                   'border transition-colors duration-150',
-                  selected ? 'bg-accent-soft border-accent-dim text-accent' : 'bg-surface border-line',
+                  selected ? 'bg-accent-soft border-accent-dim text-accent-hi font-semibold' : 'surface-key',
                 )}
               >
                 <span className="flex-1 min-w-0 truncate text-[15px]">{routine.name}</span>
@@ -150,8 +150,8 @@ export function WeekSplitScreen() {
               'w-full flex items-center gap-3 h-14 px-4 rounded-control text-left',
               'border transition-colors duration-150',
               editingDay !== null && split[editingDay] === null
-                ? 'bg-accent-soft border-accent-dim text-accent'
-                : 'bg-surface border-line text-muted',
+                ? 'bg-accent-soft border-accent-dim text-accent-hi font-semibold'
+                : 'surface-key text-muted',
             )}
           >
             <Moon size={16} className="shrink-0" />

@@ -80,3 +80,13 @@ export function formatSigned(value: number): string {
 export function formatSetLine(set: { weightKg: number; reps: number; rir: number }): string {
   return `${formatWeight(set.weightKg)} kg × ${set.reps} · RIR ${set.rir}`
 }
+
+/** "hoy", "ayer", "hace 3 días". Cuenta días de calendario, no horas. */
+export function formatDaysAgo(timestamp: number, now: number): string {
+  const midnight = (time: number) => new Date(time).setHours(0, 0, 0, 0)
+  // Redondear absorbe los dias de 23 o 25 horas del cambio de horario.
+  const days = Math.round((midnight(now) - midnight(timestamp)) / 86_400_000)
+  if (days <= 0) return 'hoy'
+  if (days === 1) return 'ayer'
+  return `hace ${days} días`
+}

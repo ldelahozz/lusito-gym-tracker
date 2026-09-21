@@ -12,15 +12,32 @@
   --color-text: #e6e8eb;
   --color-muted: #8a919c;
   --color-accent: #4c8dff;
+  --color-accent-hi: #7aabff;
   --color-accent-soft: rgb(76 141 255 / 0.12);
   --color-accent-dim: rgb(76 141 255 / 0.45);
+  /* Segundo acento: solo para lo especial (records, festejos, lo que va ahora). */
+  --color-violet: #8a74ff;
+  --color-violet-soft: rgb(124 92 255 / 0.14);
+  --color-violet-dim: rgb(124 92 255 / 0.45);
+  /* Texto claro sobre fondos azules: nunca blanco puro. */
+  --color-ink: #07101f;
 
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
-  --radius-card: 16px;
-  --radius-control: 12px;
+  --radius-card: 20px;
+  --radius-control: 14px;
 
   --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --animate-pop: pop 320ms var(--ease-spring);
+  --animate-rise: rise 360ms var(--ease-out-soft) both;
+  --animate-glow: glow 1.6s ease-in-out 2;
+}
+
+/* Grano fino tipo papel: le da textura a fondos y tarjetas sin ensuciar. */
+:root {
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .075 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 @layer base {
@@ -43,6 +60,12 @@
   body {
     margin: 0;
     background-color: var(--color-canvas);
+    /* Una luz azul-violeta muy tenue arriba y el grano encima de todo el fondo. */
+    background-image:
+      var(--grain),
+      radial-gradient(90% 32rem at 85% -8rem, rgb(124 92 255 / 0.1), transparent 70%),
+      radial-gradient(110% 30rem at 10% -6rem, rgb(76 141 255 / 0.13), transparent 70%);
+    background-repeat: repeat, no-repeat, no-repeat;
     color: var(--color-text);
     font-family: var(--font-sans);
     -webkit-tap-highlight-color: transparent;
@@ -118,6 +141,88 @@
   }
 }
 
+/* ------------------------------------------------------------------
+   Superficies con profundidad. Cada una simula una capa con luz desde
+   arriba: borde superior apenas mas claro y sombra suave hacia abajo.
+------------------------------------------------------------------- */
+@layer components {
+  /* Tarjeta normal. */
+  .surface-card {
+    background-color: var(--color-surface);
+    background-image: var(--grain), linear-gradient(180deg, #191d24 0%, #13161b 100%);
+    border: 1px solid var(--color-line);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.045),
+      0 14px 32px -22px rgb(0 0 0 / 0.95);
+  }
+
+  /* Tarjeta protagonista: con luz azul-violeta en las esquinas. */
+  .surface-hero {
+    background-color: #151a24;
+    background-image:
+      var(--grain),
+      radial-gradient(80% 70% at 100% 0%, rgb(124 92 255 / 0.24), transparent 60%),
+      radial-gradient(90% 80% at 0% 0%, rgb(76 141 255 / 0.2), transparent 62%),
+      linear-gradient(165deg, #1a2332 0%, #141922 58%, #11151b 100%);
+    border: 1px solid #2a3550;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.07),
+      0 24px 48px -26px rgb(0 0 0 / 1),
+      0 0 0 1px rgb(0 0 0 / 0.35);
+  }
+
+  /* Hoja que sube desde abajo (ventanas): un escalon mas clara que las tarjetas. */
+  .surface-sheet {
+    background-color: var(--color-elevated);
+    background-image: var(--grain), linear-gradient(180deg, #1f242c 0%, #171b21 100%);
+    border: 1px solid #2b313b;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      0 -18px 48px -20px rgb(0 0 0 / 0.9);
+  }
+
+  /* Hueco hundido: donde van los numeros que se ajustan. */
+  .surface-well {
+    background-image: linear-gradient(180deg, #0d1014 0%, #12161b 100%);
+    border: 1px solid #232932;
+    box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.55);
+  }
+
+  /* Tecla en relieve: botones secundarios y los + / -. */
+  .surface-key {
+    background-image: linear-gradient(180deg, #252b35 0%, #1c2129 100%);
+    border: 1px solid #2d343f;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.07),
+      0 2px 5px -1px rgb(0 0 0 / 0.55);
+  }
+
+  /* Boton principal: azul que se va a violeta, con brillo. */
+  .surface-glow {
+    color: var(--color-ink);
+    background-image: linear-gradient(135deg, #74a8ff 0%, #4c8dff 48%, #6f6bff 100%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.35),
+      inset 0 -1px 0 rgb(0 0 0 / 0.15),
+      0 12px 26px -12px rgb(76 141 255 / 0.8);
+  }
+
+  /* Cristal: barras fijas que dejan ver lo de atras, desenfocado. */
+  .surface-glass {
+    background-color: rgb(13 15 18 / 0.72);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(140%);
+  }
+
+  /* Titulos grandes con un degradado apenas perceptible. */
+  .text-shine {
+    background-image: linear-gradient(180deg, #e6e8eb 0%, #aebde9 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
 @keyframes modal-in {
   from {
     opacity: 0;
@@ -126,5 +231,71 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.55);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(124 92 255 / 0);
+  }
+  50% {
+    box-shadow: 0 0 28px 2px rgb(124 92 255 / 0.45);
+  }
+}
+
+/* Si el sistema pide menos movimiento, la app se queda quieta. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

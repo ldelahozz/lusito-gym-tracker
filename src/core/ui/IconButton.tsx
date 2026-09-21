@@ -17,7 +17,7 @@ export function IconButton({ icon: Icon, label, size = 20, active, className, ..
       aria-label={label}
       title={label}
       className={cn(
-        'grid place-items-center size-11 shrink-0 rounded-control transition-colors duration-150',
+        'grid place-items-center size-11 shrink-0 rounded-control transition-[color,background-color,transform] duration-150 active:scale-90',
         'disabled:opacity-30 disabled:pointer-events-none',
         active ? 'text-accent bg-accent-soft' : 'text-muted hover:text-text hover:bg-elevated',
         className,

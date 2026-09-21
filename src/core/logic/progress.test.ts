@@ -5,11 +5,13 @@ import {
   finishedSessions,
   previousOf,
   routineSummary,
+  routineVolumes,
   skippedIn,
   skippedSessions,
   trendBetween,
   type ProgressSession,
   type ProgressSet,
+  summaryText,
 } from './progress'
 
 let nextId = 1
@@ -279,5 +281,48 @@ describe('saltados en progreso', () => {
     const history = exerciseHistory({ sets, sessions: conSaltos, exerciseId: 'press' })
     // b y c tienen press; la comparacion de c es contra b.
     expect(previousOf(history, 'c')?.sessionId).toBe('b')
+  })
+})
+
+describe('summaryText', () => {
+  const base = { sessions: 3, lastAt: 1, up: 0, same: 0, down: 0, fresh: 0, skipped: 0 }
+
+  it('solo menciona lo que no es cero, en singular o plural', () => {
+    expect(summaryText({ ...base, up: 3, same: 1, down: 1 })).toBe('3 subieron · 1 igual · 1 bajó')
+    expect(summaryText({ ...base, up: 1, skipped: 2 })).toBe('1 subió · 2 saltados')
+    expect(summaryText(base)).toBe('')
+  })
+})
+
+describe('routineVolumes', () => {
+  const session = (id: string, startedAt: number, routineId = 'upper') => ({
+    id,
+    routineId,
+    startedAt,
+    endedAt: startedAt + 1,
+  })
+  const set = (id: string, sessionId: string, weightKg: number, reps: number, type: 'work' | 'warmup' = 'work') => ({
+    id,
+    sessionId,
+    exerciseId: 'press',
+    type,
+    setIndex: 0,
+    weightKg,
+    reps,
+    rir: 2,
+  })
+
+  it('suma peso × reps de las series de trabajo, de la sesión más vieja a la más nueva', () => {
+    const volumes = routineVolumes({
+      sessions: [session('b', 200), session('a', 100), session('otra', 150, 'lower')],
+      sets: [set('1', 'a', 60, 8), set('2', 'a', 20, 10, 'warmup'), set('3', 'b', 62.5, 8), set('4', 'otra', 100, 5)],
+      routineId: 'upper',
+    })
+    expect(volumes).toEqual([480, 500])
+  })
+
+  it('se queda con las últimas sesiones', () => {
+    const sessions = [1, 2, 3, 4].map((n) => session(`s${n}`, n * 100))
+    expect(routineVolumes({ sessions, sets: [], routineId: 'upper', limit: 2 })).toEqual([0, 0])
   })
 })

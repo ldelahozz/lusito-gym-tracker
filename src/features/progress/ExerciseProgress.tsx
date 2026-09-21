@@ -65,7 +65,7 @@ function Chip({
         'shrink-0 h-9 px-3 rounded-control text-sm whitespace-nowrap transition-colors duration-150',
         active
           ? 'bg-accent text-canvas font-medium'
-          : 'bg-elevated text-muted border border-line hover:text-text',
+          : 'surface-well text-muted hover:text-text',
       )}
     >
       {children}
@@ -75,7 +75,7 @@ function Chip({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex-1 min-w-0 p-3 rounded-control bg-surface border border-line text-center">
+    <div className="flex-1 min-w-0 p-3 rounded-control surface-card text-center">
       <p className="text-[11px] text-muted truncate">{label}</p>
       <p className="text-lg font-semibold tabular-nums">{value}</p>
     </div>
@@ -150,7 +150,7 @@ export function ExerciseProgress() {
   return (
     <Screen title={name} description="Cada vez que lo hiciste, frente a la anterior." actions={back}>
       <div className="mx-auto w-full max-w-2xl flex flex-col gap-4">
-        <h1 className="md:hidden text-xl font-semibold truncate">{name}</h1>
+        <h1 className="md:hidden text-[26px] leading-tight font-extrabold tracking-tight text-shine truncate">{name}</h1>
 
         {fromRoutine && (
           <div className="flex gap-2 overflow-x-auto no-scrollbar">
@@ -209,7 +209,7 @@ export function ExerciseProgress() {
             </Card>
 
             <section className="flex flex-col gap-2">
-              <h2 className="px-1 text-xs uppercase tracking-wider text-muted">Cada vez</h2>
+              <h2 className="px-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted">Cada vez</h2>
               {entries.slice(0, visible).map((entry) =>
                 entry.kind === 'skipped' ? (
                   <Card key={entry.sessionId} className="p-4 flex items-center justify-between gap-3">
@@ -221,7 +221,7 @@ export function ExerciseProgress() {
                         </p>
                       )}
                     </div>
-                    <span className="inline-flex items-center gap-1 h-7 px-2.5 rounded-full text-xs whitespace-nowrap bg-elevated text-muted border border-line shrink-0">
+                    <span className="inline-flex items-center gap-1 h-7 px-2.5 rounded-full text-xs whitespace-nowrap surface-well text-muted shrink-0">
                       <SkipForward size={13} />
                       Saltado
                     </span>

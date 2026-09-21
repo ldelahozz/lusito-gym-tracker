@@ -46,7 +46,7 @@ export function NotesPanel({ sessionId, exerciseId }: Props) {
   const hasContent = Boolean(note?.text.trim()) || Boolean(text.trim())
 
   return (
-    <div className="rounded-control border border-line bg-surface overflow-hidden">
+    <div className="rounded-card surface-card overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
@@ -75,7 +75,7 @@ export function NotesPanel({ sessionId, exerciseId }: Props) {
             onBlur={commit}
             rows={3}
             placeholder="Cómo se sintió, qué ajustar la próxima vez..."
-            className="w-full p-3 rounded-control bg-elevated border border-line text-text placeholder:text-muted/70 focus:border-accent focus:outline-none resize-none"
+            className="w-full p-3 rounded-control surface-well text-text placeholder:text-muted/70 focus:border-accent-dim focus:outline-none resize-none"
           />
         </div>
       )}

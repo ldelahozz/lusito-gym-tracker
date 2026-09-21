@@ -63,7 +63,7 @@ function PlannedSetRow({
   return (
     <div className="rounded-control border border-line p-2.5 flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs uppercase tracking-wider text-muted">Serie {position}</span>
+        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Serie {position}</span>
         <IconButton
           icon={Trash}
           label={`Quitar serie ${position}`}
@@ -165,7 +165,7 @@ function ExerciseCard({
       {expanded && (
         <div className="px-4 pb-4 flex flex-col gap-5 border-t border-line pt-4">
           <div className="flex flex-col gap-2">
-            <span className="text-xs uppercase tracking-wider text-muted">Series de trabajo</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Series de trabajo</span>
             <div className="flex flex-col gap-2">
               {link.workSets.map((set, position) => (
                 <PlannedSetRow

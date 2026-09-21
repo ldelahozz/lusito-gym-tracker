@@ -70,3 +70,47 @@ export function daysUsing(split: unknown, routineId: string): number[] {
 export function removeRoutineFromSplit(split: unknown, routineId: string): WeekSplit {
   return normalizeSplit(split).map((id) => (id === routineId ? null : id))
 }
+
+/** Lunes a las 00:00 (hora local) de la semana en la que cae `now`. */
+export function startOfWeek(now: number): number {
+  const date = new Date(now)
+  date.setHours(0, 0, 0, 0)
+  date.setDate(date.getDate() - weekdayIndex(date))
+  return date.getTime()
+}
+
+type WeekSession = { startedAt: number; endedAt: number | null; deleted?: boolean }
+
+export type WeekActivity = {
+  /** Dias de esta semana (lunes a domingo) con al menos una sesion terminada. */
+  trained: boolean[]
+  /** Cuantos dias entrenaste esta semana. */
+  done: number
+  /** Cuantos dias tiene rutina en el split. */
+  planned: number
+}
+
+/**
+ * Como va la semana: que dias ya entrenaste y cuantos planeabas.
+ * Cuenta dias, no sesiones: dos sesiones el mismo dia son un dia entrenado.
+ */
+export function weekActivity(params: {
+  sessions: readonly WeekSession[]
+  split: unknown
+  now: number
+}): WeekActivity {
+  const start = startOfWeek(params.now)
+  const trained = Array.from({ length: DAYS_IN_WEEK }, () => false)
+  for (const session of params.sessions) {
+    if (session.deleted || session.endedAt === null) continue
+    if (session.startedAt < start) continue
+    const day = weekdayIndex(new Date(session.startedAt))
+    // Solo cuenta la semana en curso, no la siguiente.
+    if (session.startedAt - start < DAYS_IN_WEEK * 86_400_000 + 3_600_000) trained[day] = true
+  }
+  return {
+    trained,
+    done: trained.filter(Boolean).length,
+    planned: normalizeSplit(params.split).filter((day) => day !== null).length,
+  }
+}

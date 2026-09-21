@@ -21,7 +21,7 @@ export function SetupNeededScreen() {
           Google que guarda tus datos y maneja el acceso con tu cuenta).
         </p>
         <div className="flex flex-col gap-2">
-          <p className="text-xs uppercase tracking-wider text-muted">Datos que faltan</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Datos que faltan</p>
           <ul className="flex flex-col gap-1">
             {missingFirebaseKeys.map((key) => (
               <li key={key} className="text-sm font-mono text-text bg-elevated rounded-[10px] px-3 py-2">

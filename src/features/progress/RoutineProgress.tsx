@@ -134,7 +134,7 @@ export function RoutineProgress() {
   return (
     <Screen title={routineName} description="Cada ejercicio frente a la vez anterior." actions={back}>
       <div className="mx-auto w-full max-w-2xl flex flex-col gap-4">
-        <h1 className="md:hidden text-xl font-semibold truncate">{routineName}</h1>
+        <h1 className="md:hidden text-[26px] leading-tight font-extrabold tracking-tight text-shine truncate">{routineName}</h1>
 
         {/* Que sesion se mira */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
@@ -147,7 +147,7 @@ export function RoutineProgress() {
                 'shrink-0 h-10 px-3 rounded-control text-sm whitespace-nowrap transition-colors duration-150',
                 session.id === selected.id
                   ? 'bg-accent text-canvas font-medium'
-                  : 'bg-elevated text-muted border border-line hover:text-text',
+                  : 'surface-well text-muted hover:text-text',
               )}
             >
               {index === 0 ? `Última · ${formatDate(session.startedAt)}` : formatDate(session.startedAt)}
@@ -156,7 +156,7 @@ export function RoutineProgress() {
         </div>
 
         <Card className="p-4 flex flex-col gap-1">
-          <p className="text-xs uppercase tracking-wider text-muted">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
             Sesión del {formatDateTime(selected.startedAt)}
           </p>
           {items.length === 0 ? (
@@ -190,7 +190,7 @@ export function RoutineProgress() {
                   <ChevronRight size={14} />
                 </button>
               </div>
-              <span className="inline-flex items-center gap-1 h-7 px-2.5 rounded-full text-xs whitespace-nowrap bg-elevated text-muted border border-line shrink-0">
+              <span className="inline-flex items-center gap-1 h-7 px-2.5 rounded-full text-xs whitespace-nowrap surface-well text-muted shrink-0">
                 <SkipForward size={13} />
                 Saltado
               </span>

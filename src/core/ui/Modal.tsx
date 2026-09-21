@@ -33,7 +33,7 @@ export function Modal({ open, onClose, title, description, children, footer, cla
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-canvas/80 backdrop-blur-[2px] md:items-center md:p-6"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-canvas/70 backdrop-blur-sm md:items-center md:p-6 animate-[fade-in_160ms_ease-out]"
       onClick={onClose}
     >
       <div
@@ -42,16 +42,18 @@ export function Modal({ open, onClose, title, description, children, footer, cla
         aria-label={title}
         onClick={(event) => event.stopPropagation()}
         className={cn(
-          'w-full md:max-w-md bg-elevated border border-line',
-          'rounded-t-card md:rounded-card',
-          'p-5 pb-6 md:pb-5 flex flex-col gap-4',
+          'relative w-full md:max-w-md surface-sheet',
+          'rounded-t-[26px] md:rounded-card',
+          'p-5 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:pb-5 flex flex-col gap-4',
           'animate-[modal-in_180ms_ease-out]',
           className,
         )}
       >
+        {/* Asa de arrastre: en el celular se ve como hoja que sube desde abajo. */}
+        <span aria-hidden="true" className="md:hidden absolute top-2 left-1/2 -translate-x-1/2 h-1 w-10 rounded-full bg-line" />
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <h2 className="text-lg font-semibold leading-tight">{title}</h2>
+            <h2 className="text-xl font-bold tracking-tight leading-tight">{title}</h2>
             {description && <p className="text-sm text-muted mt-1 leading-relaxed">{description}</p>}
           </div>
           <button

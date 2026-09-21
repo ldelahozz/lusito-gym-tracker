@@ -33,7 +33,7 @@ function TooltipBox({
   if (!Number.isFinite(value)) return null
 
   return (
-    <div className="rounded-control bg-elevated border border-line px-3 py-2 shadow-lg shadow-black/40">
+    <div className="rounded-control surface-sheet px-3 py-2">
       <p className="text-[11px] uppercase tracking-wider text-muted">{String(label ?? '')}</p>
       <p className="text-sm">
         <span className="text-muted">{title}: </span>

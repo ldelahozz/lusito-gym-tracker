@@ -3,6 +3,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Flag,
+  LayoutGrid,
   Minus,
   Pause,
   Play,
@@ -13,17 +14,13 @@ import {
 import { Button } from '@/core/ui/Button'
 import { ConfirmDialog } from '@/core/ui/ConfirmDialog'
 import { IconButton } from '@/core/ui/IconButton'
+import { cn } from '@/core/ui/cn'
 import { useToast } from '@/core/ui/toast-context'
 import { useChrome } from '@/app/chrome-context'
 import { SyncIndicator } from '@/app/SyncIndicator'
 import { unlockAudio, notifyRestFinished, restFinishedFeedback, tapFeedback, vibrate } from '@/core/feedback'
 import { formatDate, formatDuration, formatRepRange } from '@/core/logic/format'
-import {
-  equivalentPreviousSet,
-  prefillFor,
-  previousLabel,
-  previousSessionSets,
-} from '@/core/logic/prefill'
+import { equivalentPreviousSet, prefillFor, previousSessionSets } from '@/core/logic/prefill'
 import {
   adjustRest,
   isFinished,
@@ -54,8 +51,9 @@ type Row = {
   /** Posicion interna dentro de su tipo (0, 1, 2...). */
   index: number
   log: SetLog | undefined
-  previousText: string | null
-  /** Objetivo de esa serie segun la rutina ("6-8 reps @RIR 2"). */
+  /** La misma serie de la vez pasada, para comparar. */
+  previous: SetDraft | null
+  /** Meta de esa serie segun la rutina ("6-8 · RIR 2"). */
   targetText: string | null
   defaults: SetDraft
 }
@@ -78,14 +76,19 @@ export function ActiveSession({
 }) {
   const { state, settings, save, saveMany, remove } = useData()
   const { showToast } = useToast()
-  const { setHideHeader } = useChrome()
+  const { setHideHeader, hideNav, setHideNav } = useChrome()
   const now = useNow(true)
   useWakeLock(true)
 
+  // Modo enfoque: sin cabecera general ni barra de abajo mientras entrenas.
   useEffect(() => {
     setHideHeader(true)
-    return () => setHideHeader(false)
-  }, [setHideHeader])
+    setHideNav(true)
+    return () => {
+      setHideHeader(false)
+      setHideNav(false)
+    }
+  }, [setHideHeader, setHideNav])
 
   const routine = state.routines[session.routineId]
   const links = useMemo(
@@ -152,10 +155,10 @@ export function ActiveSession({
           position: index + 1,
           index,
           log,
-          previousText: previousLabel(previous),
-          targetText: target
-            ? `Objetivo ${formatRepRange(target.repsMin, target.repsMax)} reps @RIR ${target.rir}`
+          previous: previous
+            ? { weightKg: previous.weightKg, reps: previous.reps, rir: previous.rir }
             : null,
+          targetText: target ? `${formatRepRange(target.repsMin, target.repsMax)} · RIR ${target.rir}` : null,
           defaults: log
             ? { weightKg: log.weightKg, reps: log.reps, rir: log.rir }
             : prefillFor({
@@ -454,12 +457,47 @@ export function ActiveSession({
   const elapsed = sessionElapsedMs(session, now)
   const paused = isPaused(session)
 
+  /** Una rayita por ejercicio: hecho, a medias, saltado o pendiente. */
+  const segments = links.map((item, index) => {
+    const logged = sessionSets.filter(
+      (log) => log.exerciseId === item.exerciseId && log.type === 'work',
+    ).length
+    const target = item.workSets.length
+    const status =
+      skipped.includes(item.exerciseId) && logged === 0
+        ? 'skipped'
+        : target > 0 && logged >= target
+          ? 'done'
+          : logged > 0
+            ? 'partial'
+            : 'pending'
+    return { id: item.id, exerciseId: item.exerciseId, status, current: index === exerciseIndex }
+  })
+
+  const firstTarget = link?.workSets[0]
+  const sameTarget =
+    firstTarget &&
+    link.workSets.every(
+      (set) =>
+        set.repsMin === firstTarget.repsMin &&
+        set.repsMax === firstTarget.repsMax &&
+        set.rir === firstTarget.rir,
+    )
+  const headTarget = !link
+    ? ''
+    : sameTarget && firstTarget
+      ? `${link.workSets.length} × ${formatRepRange(firstTarget.repsMin, firstTarget.repsMax)} · RIR ${firstTarget.rir}`
+      : `${link.workSets.length} series`
+
+  const smallButton =
+    'inline-flex items-center gap-1 h-8 px-2.5 rounded-full surface-key text-xs text-muted hover:text-text transition-transform duration-100 active:scale-95 disabled:opacity-30 disabled:pointer-events-none'
+
   return (
-    <div className="min-h-full flex flex-col bg-canvas">
-      <header className="sticky top-0 z-20 bg-canvas/95 backdrop-blur border-b border-line pt-safe">
-        <div className="mx-auto max-w-3xl flex items-center gap-3 h-14 px-3">
+    <div className="min-h-full flex flex-col">
+      <header className="sticky top-0 z-20 surface-glass border-b border-line/60 pt-safe">
+        <div className="mx-auto max-w-3xl flex items-center gap-2 h-14 px-3">
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium truncate">{routine?.name ?? 'Entrenamiento'}</p>
+            <p className="text-[15px] font-bold truncate">{routine?.name ?? 'Entrenamiento'}</p>
             <p className="text-xs text-muted">
               {links.length > 0 ? `Ejercicio ${exerciseIndex + 1} de ${links.length}` : 'Sin ejercicios'}
             </p>
@@ -468,19 +506,63 @@ export function ActiveSession({
           <button
             type="button"
             onClick={togglePause}
-            className="flex items-center gap-2 h-10 px-3 rounded-control bg-elevated border border-line"
+            className={cn(
+              'flex items-center gap-2 h-10 px-3 rounded-full surface-key transition-transform duration-100 active:scale-95',
+              paused && 'border-accent-dim',
+            )}
             aria-label={paused ? 'Reanudar cronómetro' : 'Pausar cronómetro'}
           >
-            {paused ? <Play size={16} className="text-accent" /> : <Pause size={16} className="text-muted" />}
-            <span className="text-sm tabular-nums">{formatDuration(elapsed)}</span>
+            {paused ? <Play size={15} className="text-accent-hi" /> : <Pause size={15} className="text-muted" />}
+            <span className={cn('text-sm font-semibold tabular-nums', paused && 'text-accent-hi')}>
+              {formatDuration(elapsed)}
+            </span>
           </button>
 
+          <IconButton
+            icon={LayoutGrid}
+            label={hideNav ? 'Mostrar menú' : 'Ocultar menú'}
+            active={!hideNav}
+            onClick={() => setHideNav(!hideNav)}
+            className="md:hidden size-10"
+            size={18}
+          />
           <SyncIndicator />
         </div>
+
+        {links.length > 1 && (
+          <div className="mx-auto max-w-3xl flex gap-1 px-3 pb-2" aria-label="Avance de la sesión">
+            {segments.map((segment, index) => (
+              <button
+                key={segment.id}
+                type="button"
+                onClick={() => goToExercise(index)}
+                aria-label={`Ir a ${exerciseName(state, segment.exerciseId)}`}
+                aria-current={segment.current ? 'step' : undefined}
+                className="flex-1 h-4 flex items-center"
+              >
+                <span
+                  className={cn(
+                    'h-1.5 w-full rounded-full transition-[background-color,box-shadow] duration-300',
+                    segment.status === 'done' &&
+                      'bg-gradient-to-r from-accent to-violet shadow-[0_0_8px_-1px_rgb(76_141_255/0.8)]',
+                    segment.status === 'partial' && 'bg-accent/45',
+                    segment.status === 'skipped' &&
+                      'bg-[repeating-linear-gradient(-45deg,#3a4150_0_3px,#1d222b_3px_6px)]',
+                    segment.status === 'pending' && 'bg-[#232a35]',
+                    segment.current && 'ring-2 ring-accent/70 ring-offset-2 ring-offset-canvas',
+                  )}
+                />
+              </button>
+            ))}
+          </div>
+        )}
       </header>
 
       <div
-        className="flex-1 mx-auto w-full max-w-3xl px-3 pb-40 pt-3 flex flex-col gap-4"
+        className={cn(
+          'flex-1 mx-auto w-full max-w-3xl px-3 pt-4 flex flex-col gap-5',
+          restTimer ? 'pb-48' : 'pb-16',
+        )}
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
@@ -493,7 +575,7 @@ export function ActiveSession({
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-2">
+            <div key={currentExerciseId} className="flex items-center gap-1 animate-rise">
               <IconButton
                 icon={ChevronLeft}
                 label="Ejercicio anterior"
@@ -501,10 +583,17 @@ export function ActiveSession({
                 onClick={() => goToExercise(exerciseIndex - 1)}
               />
               <div className="flex-1 min-w-0 text-center">
-                <h1 className="text-lg font-semibold truncate">{currentName}</h1>
-                <p className="text-xs text-muted">
-                  {workDone} de {planned.work} series
-                </p>
+                <h1 className="text-[22px] leading-tight font-extrabold tracking-tight text-shine truncate">
+                  {currentName}
+                </h1>
+                <div className="mt-1.5 flex items-center justify-center gap-2 text-xs">
+                  <span className="px-2.5 py-0.5 rounded-full bg-accent-soft text-accent-hi font-medium whitespace-nowrap">
+                    Meta {headTarget}
+                  </span>
+                  <span className="text-muted tabular-nums whitespace-nowrap">
+                    {workDone} de {planned.work} hechas
+                  </span>
+                </div>
               </div>
               <SessionVideoButton exerciseId={currentExerciseId} exerciseName={currentName} />
               <IconButton
@@ -516,7 +605,7 @@ export function ActiveSession({
             </div>
 
             {isSkipped ? (
-              <div className="flex items-center gap-3 pl-3 pr-1.5 py-1.5 rounded-control bg-surface border border-line">
+              <div className="flex items-center gap-3 pl-3.5 pr-1.5 py-1.5 rounded-control surface-card">
                 <SkipForward size={16} className="text-muted shrink-0" />
                 <p className="flex-1 min-w-0 text-sm">Saltaste este ejercicio</p>
                 <Button size="sm" variant="ghost" onClick={unskipExercise}>
@@ -526,7 +615,7 @@ export function ActiveSession({
               </div>
             ) : (
               (lastSkip || workDone === 0) && (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 -mt-2">
                   {lastSkip && (
                     <p className="flex items-center justify-center gap-1.5 px-1 text-xs text-muted">
                       <SkipForward size={13} className="shrink-0" />
@@ -534,12 +623,8 @@ export function ActiveSession({
                     </p>
                   )}
                   {workDone === 0 && (
-                    <button
-                      type="button"
-                      onClick={skipExercise}
-                      className="self-end inline-flex items-center gap-1.5 h-11 px-3 rounded-control border border-line text-sm text-muted hover:text-text transition-colors duration-150"
-                    >
-                      <SkipForward size={15} />
+                    <button type="button" onClick={skipExercise} className={cn(smallButton, 'self-end h-9 px-3')}>
+                      <SkipForward size={14} />
                       Saltar ejercicio
                     </button>
                   )}
@@ -553,25 +638,29 @@ export function ActiveSession({
               return (
                 <section key={type} className="flex flex-col gap-2">
                   <div className="flex items-center justify-between gap-2 px-1">
-                    <h2 className="text-xs uppercase tracking-wider text-muted">
+                    <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
                       {type === 'warmup' ? 'Calentamiento' : 'Series de trabajo'}
                     </h2>
-                    <div className="flex items-center gap-1">
-                      <IconButton
-                        icon={Minus}
-                        label={type === 'warmup' ? 'Quitar calentamiento' : 'Quitar serie'}
-                        size={16}
-                        className="size-9"
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        className={smallButton}
                         disabled={typeRows.length <= logged || typeRows.length === 0}
                         onClick={() => changeRowCount(type, -1)}
-                      />
-                      <IconButton
-                        icon={Plus}
-                        label={type === 'warmup' ? 'Agregar calentamiento' : 'Agregar serie'}
-                        size={16}
-                        className="size-9"
+                        aria-label={type === 'warmup' ? 'Quitar un calentamiento' : 'Quitar una serie'}
+                      >
+                        <Minus size={13} />
+                        Quitar
+                      </button>
+                      <button
+                        type="button"
+                        className={smallButton}
                         onClick={() => changeRowCount(type, 1)}
-                      />
+                        aria-label={type === 'warmup' ? 'Agregar un calentamiento' : 'Agregar una serie'}
+                      >
+                        <Plus size={13} />
+                        Agregar
+                      </button>
                     </div>
                   </div>
 
@@ -589,7 +678,7 @@ export function ActiveSession({
                           logged={Boolean(row.log)}
                           open={activeKey === row.key}
                           draft={draftOf(row)}
-                          previousText={row.previousText}
+                          previous={row.previous}
                           targetText={row.targetText}
                           weightStep={settings.weightStep}
                           isRecord={Boolean(row.log && recordSetIds.has(row.log.id))}
@@ -611,7 +700,7 @@ export function ActiveSession({
 
             <NotesPanel sessionId={session.id} exerciseId={currentExerciseId} />
 
-            <Button variant="ghost" onClick={() => setConfirmFinish(true)} className="mt-2">
+            <Button variant="ghost" onClick={() => setConfirmFinish(true)} className="mt-1">
               <Flag size={18} />
               Finalizar sesión
             </Button>
@@ -624,6 +713,7 @@ export function ActiveSession({
           timer={restTimer}
           now={now}
           exerciseName={exerciseName(state, restTimer.exerciseId)}
+          aboveNav={!hideNav}
           onAdjust={(delta) => setRestTimer((current) => adjustRest(current, delta, Date.now()))}
           onSkip={() => setRestTimer(null)}
         />
@@ -641,7 +731,6 @@ export function ActiveSession({
         onCancel={() => setConfirmFinish(false)}
         onConfirm={finishSession}
       />
-
     </div>
   )
 }
