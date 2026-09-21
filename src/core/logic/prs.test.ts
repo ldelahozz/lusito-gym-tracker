@@ -21,19 +21,19 @@ const work = (
 
 const kinds = (sets: PrSet[], set: PrSet) => detectRecords(set, sets).map((hit) => hit.kind)
 
-describe('detectRecords: casos limite', () => {
-  it('la primera vez no hay record, porque no hay nada que superar', () => {
+describe('detectRecords: casos límite', () => {
+  it('la primera vez no hay récord, porque no hay nada que superar', () => {
     const first = work('a', 60, 8)
     expect(detectRecords(first, [first])).toEqual([])
   })
 
-  it('empatar la marca no es record', () => {
+  it('empatar la marca no es récord', () => {
     const before = work('a', 60, 8, 2)
     const tie = work('b', 60, 8, 2)
     expect(kinds([before, tie], tie)).toEqual([])
   })
 
-  it('los calentamientos no marcan record', () => {
+  it('los calentamientos no marcan récord', () => {
     const before = work('a', 60, 8)
     const warmup = work('b', 200, 20, 5, { type: 'warmup' })
     expect(detectRecords(warmup, [before, warmup])).toEqual([])
@@ -66,37 +66,37 @@ describe('detectRecords: casos limite', () => {
 })
 
 describe('detectRecords: los tres tipos', () => {
-  it('mas peso que nunca: record de peso (y de 1RM estimado)', () => {
+  it('más peso que nunca: récord de peso (y de 1RM estimado)', () => {
     const before = work('a', 60, 8, 2)
     const heavier = work('b', 65, 8, 2)
     expect(kinds([before, heavier], heavier)).toEqual(['weight', 'e1rm'])
   })
 
-  it('mas peso pero muchas menos reps: solo record de peso', () => {
+  it('más peso pero muchas menos reps: solo récord de peso', () => {
     const before = work('a', 60, 10, 2)
     const heavier = work('b', 62.5, 3, 2)
     expect(kinds([before, heavier], heavier)).toEqual(['weight'])
   })
 
-  it('mismo peso y mas repeticiones: record de reps y de 1RM estimado', () => {
+  it('mismo peso y más repeticiones: récord de reps y de 1RM estimado', () => {
     const before = work('a', 60, 8, 2)
     const more = work('b', 60, 9, 2)
     expect(kinds([before, more], more)).toEqual(['e1rm', 'reps'])
   })
 
-  it('mismas reps con mas reserva: solo mejora el 1RM estimado', () => {
+  it('mismas reps con más reserva: solo mejora el 1RM estimado', () => {
     const before = work('a', 60, 8, 0)
     const easier = work('b', 60, 8, 2)
     expect(kinds([before, easier], easier)).toEqual(['e1rm'])
   })
 
-  it('menos peso y menos reps no es record', () => {
+  it('menos peso y menos reps no es récord', () => {
     const before = work('a', 100, 10, 1)
     const lighter = work('b', 80, 6, 1)
     expect(kinds([before, lighter], lighter)).toEqual([])
   })
 
-  it('el peso nuevo no cuenta ademas como record de repeticiones', () => {
+  it('el peso nuevo no cuenta además como récord de repeticiones', () => {
     const before = work('a', 60, 5, 2)
     const heavier = work('b', 80, 8, 2)
     expect(kinds([before, heavier], heavier)).not.toContain('reps')
@@ -104,7 +104,7 @@ describe('detectRecords: los tres tipos', () => {
 })
 
 describe('historyBefore', () => {
-  it('solo mira hacia atras, nunca la propia serie ni las siguientes', () => {
+  it('solo mira hacia atrás, nunca la propia serie ni las siguientes', () => {
     const first = work('a', 60, 8)
     const second = work('b', 62.5, 8)
     const third = work('c', 65, 8)
@@ -134,28 +134,28 @@ describe('historyBefore', () => {
 })
 
 describe('topRecord y recordMessage', () => {
-  it('el peso maximo manda sobre los demas', () => {
+  it('el peso máximo manda sobre los demás', () => {
     const before = work('a', 60, 8, 2)
     const heavier = work('b', 65, 12, 2)
     expect(topRecord(detectRecords(heavier, [before, heavier]))?.kind).toBe('weight')
   })
 
-  it('sin records no hay nada que mostrar', () => {
+  it('sin récords no hay nada que mostrar', () => {
     expect(topRecord([])).toBeNull()
   })
 
-  it('describe el record en una linea', () => {
+  it('describe el récord en una linea', () => {
     const before = work('a', 60, 8, 2)
     const heavier = work('b', 62.5, 8, 2)
     const hit = topRecord(detectRecords(heavier, [before, heavier]))!
-    expect(recordMessage(hit, 'Press banca')).toBe('Record de peso: 62.5 kg en Press banca')
+    expect(recordMessage(hit, 'Press banca')).toBe('Récord de peso: 62.5 kg en Press banca')
   })
 
-  it('el record de repeticiones se describe en repeticiones', () => {
+  it('el récord de repeticiones se describe en repeticiones', () => {
     const before = work('a', 60, 8, 2)
     const more = work('b', 60, 10, 2)
     const hits = detectRecords(more, [before, more])
     const reps = hits.find((hit) => hit.kind === 'reps')!
-    expect(recordMessage(reps, 'Press banca')).toBe('Record de repeticiones: 10 reps en Press banca')
+    expect(recordMessage(reps, 'Press banca')).toBe('Récord de repeticiones: 10 reps en Press banca')
   })
 })

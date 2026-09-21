@@ -148,7 +148,7 @@ export function SessionDetail({
     removeSessionCascade(state, remove, session.id)
     setConfirmDelete(false)
     close()
-    showToast('Sesion borrada')
+    showToast('Sesión borrada')
   }
 
   return (
@@ -162,13 +162,13 @@ export function SessionDetail({
         footer={
           <Button variant="ghost" onClick={() => setConfirmDelete(true)}>
             <Trash size={18} />
-            Borrar sesion
+            Borrar sesión
           </Button>
         }
       >
         <div className="flex gap-2 text-center">
           <div className="flex-1 p-2 rounded-control bg-surface">
-            <p className="text-[11px] text-muted">Duracion</p>
+            <p className="text-[11px] text-muted">Duración</p>
             <p className="text-sm font-medium tabular-nums">
               {duration === null ? '-' : formatDuration(duration)}
             </p>
@@ -203,7 +203,7 @@ export function SessionDetail({
         </div>
 
         {groups.length === 0 ? (
-          <p className="text-sm text-muted py-2">Esta sesion no tiene series registradas.</p>
+          <p className="text-sm text-muted py-2">Esta sesión no tiene series registradas.</p>
         ) : (
           <div className="flex flex-col gap-4">
             {groups.map((group) => (
@@ -233,8 +233,8 @@ export function SessionDetail({
         open={confirmDelete}
         onCancel={() => setConfirmDelete(false)}
         onConfirm={deleteSession}
-        title="Borrar esta sesion"
-        description="Se borran todas sus series y los records que hayan salido de ella. Esto no se puede deshacer."
+        title="Borrar esta sesión"
+        description="Se borran todas sus series y los récords que hayan salido de ella. Esto no se puede deshacer."
         confirmLabel="Borrar"
       />
     </>

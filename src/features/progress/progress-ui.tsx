@@ -4,8 +4,8 @@ import { formatSetLine, formatSigned } from '@/core/logic/format'
 import type { SetComparison, Trend } from '@/core/logic/progress'
 
 const TREND_TEXT: Record<Trend['kind'], Record<'weight' | 'reps' | 'none', string>> = {
-  up: { weight: 'Subio el peso', reps: 'Mas repeticiones', none: 'Subio' },
-  down: { weight: 'Bajo el peso', reps: 'Menos repeticiones', none: 'Bajo' },
+  up: { weight: 'Subió el peso', reps: 'Más repeticiones', none: 'Subió' },
+  down: { weight: 'Bajó el peso', reps: 'Menos repeticiones', none: 'Bajó' },
   same: { weight: 'Igual', reps: 'Igual', none: 'Igual que la vez pasada' },
   new: { weight: 'Primera vez', reps: 'Primera vez', none: 'Primera vez' },
 }

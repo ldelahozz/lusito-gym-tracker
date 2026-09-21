@@ -324,7 +324,7 @@ export function ActiveSession({
             goToExercise(exerciseIndex + 1)
             showToast(`Siguiente: ${exerciseName(state, next.exerciseId)}`)
           } else {
-            showToast('Terminaste el ultimo ejercicio')
+            showToast('Terminaste el último ejercicio')
           }
         }, 1100)
       }
@@ -469,7 +469,7 @@ export function ActiveSession({
             type="button"
             onClick={togglePause}
             className="flex items-center gap-2 h-10 px-3 rounded-control bg-elevated border border-line"
-            aria-label={paused ? 'Reanudar cronometro' : 'Pausar cronometro'}
+            aria-label={paused ? 'Reanudar cronómetro' : 'Pausar cronómetro'}
           >
             {paused ? <Play size={16} className="text-accent" /> : <Pause size={16} className="text-muted" />}
             <span className="text-sm tabular-nums">{formatDuration(elapsed)}</span>
@@ -488,7 +488,7 @@ export function ActiveSession({
           <div className="flex flex-col items-center gap-4 py-16 text-center">
             <p className="text-muted">Esta rutina no tiene ejercicios.</p>
             <Button variant="primary" onClick={() => setConfirmFinish(true)}>
-              Terminar sesion
+              Terminar sesión
             </Button>
           </div>
         ) : (
@@ -613,7 +613,7 @@ export function ActiveSession({
 
             <Button variant="ghost" onClick={() => setConfirmFinish(true)} className="mt-2">
               <Flag size={18} />
-              Finalizar sesion
+              Finalizar sesión
             </Button>
           </>
         )}
@@ -631,11 +631,11 @@ export function ActiveSession({
 
       <ConfirmDialog
         open={confirmFinish}
-        title="Finalizar sesion"
+        title="Finalizar sesión"
         description={
           pendingWorkSets > 0
-            ? `Quedan ${pendingWorkSets} series sin registrar. Puedes terminar igual: se guarda lo que si hiciste, y los ejercicios sin ninguna serie quedan como saltados.`
-            : 'Se guarda la duracion y todo lo registrado.'
+            ? `Quedan ${pendingWorkSets} series sin registrar. Puedes terminar igual: se guarda lo que sí hiciste, y los ejercicios sin ninguna serie quedan como saltados.`
+            : 'Se guarda la duración y todo lo registrado.'
         }
         confirmLabel="Finalizar"
         onCancel={() => setConfirmFinish(false)}

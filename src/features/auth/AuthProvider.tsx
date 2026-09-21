@@ -19,9 +19,9 @@ function describeError(error: unknown): string {
     case 'auth/cancelled-popup-request':
       return 'Cerraste la ventana de Google antes de terminar. Intenta de nuevo.'
     case 'auth/network-request-failed':
-      return 'No hay conexion a internet. Conectate una vez para entrar; despues la app funciona sin internet.'
+      return 'No hay conexión a internet. Conéctate una vez para entrar; después la app funciona sin internet.'
     case 'auth/unauthorized-domain':
-      return 'Este dominio no esta autorizado en Firebase. Agregalo en Authentication > Settings > Authorized domains.'
+      return 'Este dominio no está autorizado en Firebase. Agrégalo en Authentication > Settings > Authorized domains.'
     case 'auth/operation-not-allowed':
       return 'Falta activar el acceso con Google en Firebase (Authentication > Sign-in method).'
     default:

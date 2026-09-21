@@ -59,7 +59,7 @@ export function App() {
                 <Route
                   path="/progreso/*"
                   element={
-                    <Suspense fallback={<LoadingScreen label="Abriendo tus graficas" />}>
+                    <Suspense fallback={<LoadingScreen label="Abriendo tus gráficas" />}>
                       <ProgressRoutes />
                     </Suspense>
                   }

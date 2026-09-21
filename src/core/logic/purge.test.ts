@@ -74,7 +74,7 @@ describe('purgeRoutine', () => {
 })
 
 describe('purgeExercise', () => {
-  it('se lleva el ejercicio con sus series, notas, records y su lugar en las rutinas', () => {
+  it('se lleva el ejercicio con sus series, notas, récords y su lugar en las rutinas', () => {
     const plan = purgeExercise(tables(), 'press')
     expect(keys(plan.targets)).toEqual(
       [
@@ -92,7 +92,7 @@ describe('purgeExercise', () => {
     )
   })
 
-  it('las sesiones se quedan, con los demas ejercicios', () => {
+  it('las sesiones se quedan, con los demás ejercicios', () => {
     const plan = keys(purgeExercise(tables(), 'press').targets)
     expect(plan).not.toContain('sessions/s1')
     expect(plan).not.toContain('setLogs/l2')
@@ -109,7 +109,7 @@ describe('purgeTraining', () => {
     expect(plan.sets).toBe(4)
   })
 
-  it('tambien limpia series sueltas de sesiones que ya no existen', () => {
+  it('también limpia series sueltas de sesiones que ya no existen', () => {
     const data = tables()
     data.setLogs.huerfana = { id: 'huerfana', sessionId: 'no-existe', exerciseId: 'press' }
     expect(keys(purgeTraining(data).targets)).toContain('setLogs/huerfana')

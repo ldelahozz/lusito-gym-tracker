@@ -11,11 +11,11 @@ import {
 } from './format'
 
 describe('formatRepRange', () => {
-  it('muestra el rango cuando hay dos numeros distintos', () => {
+  it('muestra el rango cuando hay dos números distintos', () => {
     expect(formatRepRange(6, 8)).toBe('6-8')
   })
 
-  it('muestra un solo numero cuando el rango es fijo', () => {
+  it('muestra un solo número cuando el rango es fijo', () => {
     expect(formatRepRange(8, 8)).toBe('8')
   })
 
@@ -55,7 +55,7 @@ describe('formatDate y formatDateTime', () => {
     expect(formatDate(new Date(2024, 8, 15, 19, 30).getTime())).toBe('15 sep')
   })
 
-  it('agrega el dia de la semana y la hora', () => {
+  it('agrega el día de la semana y la hora', () => {
     expect(formatDateTime(new Date(2024, 8, 15, 19, 30).getTime())).toBe('dom 15 sep, 19:30')
   })
 
@@ -65,7 +65,7 @@ describe('formatDate y formatDateTime', () => {
 })
 
 describe('formatSigned', () => {
-  it('pone el signo mas cuando sube', () => {
+  it('pone el signo más cuando sube', () => {
     expect(formatSigned(2.5)).toBe('+2.5')
     expect(formatSigned(1)).toBe('+1')
   })

@@ -80,7 +80,7 @@ export function TrainScreen() {
       {routines.length === 0 ? (
         <EmptyState
           icon={Dumbbell}
-          title="Todavia no hay rutinas"
+          title="Todavía no hay rutinas"
           description="Crea tu primera rutina para poder empezar a entrenar."
           action={
             <Button variant="primary" onClick={() => navigate('/rutinas')}>
@@ -179,8 +179,8 @@ export function TrainScreen() {
               <HardDriveDownload size={16} className="shrink-0" />
               <span className="flex-1 min-w-0">
                 {settings.lastExportAt === null
-                  ? 'Todavia no guardas un respaldo de tus datos'
-                  : `Hace ${backupDays} dias que no guardas un respaldo`}
+                  ? 'Todavía no guardas un respaldo de tus datos'
+                  : `Hace ${backupDays} días que no guardas un respaldo`}
               </span>
               <ChevronRight size={16} className="shrink-0" />
             </button>
@@ -191,7 +191,7 @@ export function TrainScreen() {
       <Modal
         open={summary !== null}
         onClose={() => setSummary(null)}
-        title="Sesion terminada"
+        title="Sesión terminada"
         description={summary?.routineName}
         footer={
           <Button variant="primary" onClick={() => setSummary(null)}>
@@ -202,7 +202,7 @@ export function TrainScreen() {
         <div className="flex flex-col gap-3">
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="p-3 rounded-control bg-surface">
-            <p className="text-xs text-muted">Duracion</p>
+            <p className="text-xs text-muted">Duración</p>
             <p className="text-lg font-semibold tabular-nums">
               {formatDuration(summary?.durationMs ?? 0)}
             </p>
@@ -222,7 +222,7 @@ export function TrainScreen() {
         {(summary?.records ?? 0) > 0 && (
           <p className="flex items-center justify-center gap-2 h-11 rounded-control bg-accent-soft text-accent text-sm">
             <Trophy size={16} />
-            {summary?.records === 1 ? '1 record nuevo' : `${summary?.records} records nuevos`}
+            {summary?.records === 1 ? '1 récord nuevo' : `${summary?.records} récords nuevos`}
           </p>
         )}
 

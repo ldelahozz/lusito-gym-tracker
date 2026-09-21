@@ -5,17 +5,17 @@ import { getPlatform, isStandalone } from '@/core/platform'
 const STEPS: Record<ReturnType<typeof getPlatform>, string[]> = {
   android: [
     'Abre la app en Chrome.',
-    'Toca el menu de los tres puntos, arriba a la derecha.',
-    'Elige "Agregar a la pantalla principal" o "Instalar aplicacion".',
+    'Toca el menú de los tres puntos, arriba a la derecha.',
+    'Elige "Agregar a la pantalla principal" o "Instalar aplicación".',
   ],
   ios: [
     'Abre la app en Safari (no funciona desde Chrome en iPhone).',
-    'Toca el boton Compartir, el cuadrito con la flecha hacia arriba.',
+    'Toca el botón Compartir, el cuadrito con la flecha hacia arriba.',
     'Baja y elige "Agregar a inicio".',
   ],
   desktop: [
     'Abre la app en Chrome o Edge.',
-    'Busca el icono de instalar en la barra de direcciones, a la derecha.',
+    'Busca el ícono de instalar en la barra de direcciones, a la derecha.',
     'Confirma "Instalar".',
   ],
 }
@@ -30,7 +30,7 @@ export function InstallCard() {
         <span className="grid place-items-center size-9 rounded-full bg-accent-soft text-accent shrink-0">
           <Check size={18} />
         </span>
-        <p className="text-sm text-muted">La app ya esta instalada en este dispositivo.</p>
+        <p className="text-sm text-muted">La app ya está instalada en este dispositivo.</p>
       </Card>
     )
   }

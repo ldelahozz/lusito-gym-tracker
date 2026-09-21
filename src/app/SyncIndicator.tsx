@@ -4,7 +4,7 @@ import { cn } from '@/core/ui/cn'
 const LABELS = {
   synced: 'Sincronizado',
   syncing: 'Sincronizando',
-  offline: 'Sin conexion',
+  offline: 'Sin conexión',
 } as const
 
 const DOT = {

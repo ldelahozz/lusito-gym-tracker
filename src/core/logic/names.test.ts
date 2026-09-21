@@ -16,7 +16,7 @@ const ex = (id: string, name: string, extra: Partial<NamedExercise> = {}): Named
 })
 
 describe('normalizeExerciseName', () => {
-  it('ignora mayusculas, acentos y espacios de mas', () => {
+  it('ignora mayusculas, acentos y espacios de más', () => {
     expect(normalizeExerciseName('  Press   Bánca ')).toBe('press banca')
     expect(normalizeExerciseName('PRESS BANCA')).toBe('press banca')
     expect(normalizeExerciseName('press banca')).toBe('press banca')
@@ -28,7 +28,7 @@ describe('normalizeExerciseName', () => {
     expect(normalizeExerciseName('Extensión de tríceps')).toBe('extension de triceps')
   })
 
-  it('con texto vacio devuelve vacio', () => {
+  it('con texto vacío devuelve vacío', () => {
     expect(normalizeExerciseName('   ')).toBe('')
   })
 })
@@ -51,7 +51,7 @@ describe('findExerciseByName', () => {
     expect(findExerciseByName(catalog, 'Remo')).toBeUndefined()
   })
 
-  it('no encuentra nada con texto vacio', () => {
+  it('no encuentra nada con texto vacío', () => {
     expect(findExerciseByName(catalog, '  ')).toBeUndefined()
   })
 })
@@ -69,7 +69,7 @@ describe('suggestExercises', () => {
     expect(result.map((item) => item.id)).toEqual(['1', '2'])
   })
 
-  it('tambien encuentra por una parte del nombre', () => {
+  it('también encuentra por una parte del nombre', () => {
     expect(suggestExercises(catalog, 'banca').map((item) => item.id)).toEqual(['1'])
   })
 
@@ -77,7 +77,7 @@ describe('suggestExercises', () => {
     expect(suggestExercises(catalog, 'inclinado')).toEqual([])
   })
 
-  it('sin texto devuelve el catalogo disponible', () => {
+  it('sin texto devuelve el catálogo disponible', () => {
     expect(suggestExercises(catalog, '').map((item) => item.id)).toEqual(['1', '2', '3'])
   })
 })

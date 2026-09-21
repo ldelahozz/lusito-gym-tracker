@@ -270,7 +270,7 @@ export function RoutineEditor() {
 
   const addExercise = (exerciseId: string) => {
     if (links.some((link) => link.exerciseId === exerciseId)) {
-      showToast('Ese ejercicio ya esta en la rutina')
+      showToast('Ese ejercicio ya está en la rutina')
       return
     }
     const id = newId()
@@ -326,8 +326,8 @@ export function RoutineEditor() {
         {links.length === 0 ? (
           <EmptyState
             icon={Dumbbell}
-            title="Sin ejercicios todavia"
-            description="Agrega el primero con el boton de abajo. Puedes escribir cualquier nombre."
+            title="Sin ejercicios todavía"
+            description="Agrega el primero con el botón de abajo. Puedes escribir cualquier nombre."
           />
         ) : (
           <div className="flex flex-col gap-3">
@@ -376,7 +376,7 @@ export function RoutineEditor() {
             Guardar rutina
           </Button>
           <p className="text-xs text-muted text-center">
-            Cada cambio se guarda solo mientras editas, aqui o en el celular.
+            Cada cambio se guarda solo mientras editas, aquí o en el celular.
           </p>
         </div>
       </div>

@@ -7,7 +7,7 @@ describe('estimateOneRepMax', () => {
     expect(estimateOneRepMax(100, 5, 0)).toBe(116.67)
   })
 
-  it('a mismo peso, mas repeticiones dan mas marca', () => {
+  it('a mismo peso, más repeticiones dan más marca', () => {
     expect(estimateOneRepMax(80, 6, 2)).toBeGreaterThan(estimateOneRepMax(80, 5, 2))
   })
 
@@ -15,11 +15,11 @@ describe('estimateOneRepMax', () => {
     expect(estimateOneRepMax(60, 8, 2)).toBeGreaterThan(estimateOneRepMax(60, 8, 0))
   })
 
-  it('a mismas repeticiones, mas peso da mas marca', () => {
+  it('a mismas repeticiones, más peso da más marca', () => {
     expect(estimateOneRepMax(100, 5, 1)).toBeGreaterThan(estimateOneRepMax(97.5, 5, 1))
   })
 
-  it('una serie vacia no vale nada', () => {
+  it('una serie vacía no vale nada', () => {
     expect(estimateOneRepMax(0, 10, 0)).toBe(0)
     expect(estimateOneRepMax(80, 0, 0)).toBe(0)
   })

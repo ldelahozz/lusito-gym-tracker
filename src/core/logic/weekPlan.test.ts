@@ -16,13 +16,13 @@ describe('weekdayIndex', () => {
     expect(weekdayIndex(new Date(2024, 0, 6))).toBe(5)
   })
 
-  it('el domingo es el ultimo dia, no el primero', () => {
+  it('el domingo es el último día, no el primero', () => {
     expect(weekdayIndex(new Date(2024, 0, 7))).toBe(6)
   })
 })
 
 describe('normalizeSplit', () => {
-  it('siempre devuelve siete dias', () => {
+  it('siempre devuelve siete días', () => {
     expect(normalizeSplit(null)).toHaveLength(7)
     expect(normalizeSplit(['a'])).toHaveLength(7)
     expect(normalizeSplit(new Array(20).fill('a'))).toHaveLength(7)
@@ -48,7 +48,7 @@ describe('normalizeSplit', () => {
 describe('setDayRoutine', () => {
   const base = normalizeSplit([])
 
-  it('asigna la rutina al dia indicado', () => {
+  it('asigna la rutina al día indicado', () => {
     expect(setDayRoutine(base, 2, 'empuje')[2]).toBe('empuje')
   })
 
@@ -58,35 +58,35 @@ describe('setDayRoutine', () => {
     expect(original[0]).toBe('a')
   })
 
-  it('la misma rutina puede repetirse en varios dias', () => {
+  it('la misma rutina puede repetirse en varios días', () => {
     const split = setDayRoutine(setDayRoutine(base, 0, 'upper'), 3, 'upper')
     expect(daysUsing(split, 'upper')).toEqual([0, 3])
   })
 
-  it('pasar null deja el dia en descanso', () => {
+  it('pasar null deja el día en descanso', () => {
     const split = setDayRoutine(base, 1, 'pierna')
     expect(setDayRoutine(split, 1, null)[1]).toBeNull()
   })
 
-  it('ignora dias que no existen', () => {
+  it('ignora días que no existen', () => {
     expect(setDayRoutine(base, 9, 'x')).toEqual(base)
     expect(setDayRoutine(base, -1, 'x')).toEqual(base)
   })
 })
 
 describe('isSplitEmpty', () => {
-  it('una semana sin nada asignado esta vacia', () => {
+  it('una semana sin nada asignado está vacía', () => {
     expect(isSplitEmpty(normalizeSplit([]))).toBe(true)
     expect(isSplitEmpty(undefined)).toBe(true)
   })
 
-  it('con un solo dia asignado ya no lo esta', () => {
+  it('con un solo día asignado ya no lo está', () => {
     expect(isSplitEmpty(setDayRoutine(normalizeSplit([]), 4, 'pierna'))).toBe(false)
   })
 })
 
 describe('removeRoutineFromSplit', () => {
-  it('borrar una rutina la quita de todos sus dias', () => {
+  it('borrar una rutina la quita de todos sus días', () => {
     const split = normalizeSplit(['upper', 'lower', 'upper'])
     expect(removeRoutineFromSplit(split, 'upper')).toEqual([
       null,
@@ -99,7 +99,7 @@ describe('removeRoutineFromSplit', () => {
     ])
   })
 
-  it('no toca las demas rutinas', () => {
+  it('no toca las demás rutinas', () => {
     const split = normalizeSplit(['upper', 'lower'])
     expect(daysUsing(removeRoutineFromSplit(split, 'upper'), 'lower')).toEqual([1])
   })

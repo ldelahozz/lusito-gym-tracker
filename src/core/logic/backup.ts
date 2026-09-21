@@ -125,12 +125,12 @@ export function parseBackup(text: string): ParseResult {
     return { ok: false, error: 'Ese archivo no es un respaldo de Lusito Gym Tracker.' }
   }
   if (typeof raw.schemaVersion !== 'number' || !isObject(raw.data)) {
-    return { ok: false, error: 'El respaldo esta danado: le faltan partes.' }
+    return { ok: false, error: 'El respaldo está dañado: le faltan partes.' }
   }
   if (raw.schemaVersion > BACKUP_SCHEMA_VERSION) {
     return {
       ok: false,
-      error: 'Este respaldo viene de una version mas nueva de la app. Actualizala y vuelve a intentarlo.',
+      error: 'Este respaldo viene de una versión más nueva de la app. Actualízala y vuelve a intentarlo.',
     }
   }
 
@@ -140,7 +140,7 @@ export function parseBackup(text: string): ParseResult {
   for (const name of COLLECTION_NAMES) {
     const list = source[name] ?? []
     if (!Array.isArray(list)) {
-      return { ok: false, error: 'El respaldo esta danado: le faltan partes.' }
+      return { ok: false, error: 'El respaldo está dañado: le faltan partes.' }
     }
     data[name] = []
     for (const item of list) {
@@ -152,7 +152,7 @@ export function parseBackup(text: string): ParseResult {
   if (broken > 0) {
     return {
       ok: false,
-      error: `El respaldo esta danado: ${broken} ${broken === 1 ? 'registro tiene' : 'registros tienen'} datos incompletos. No se importo nada.`,
+      error: `El respaldo está dañado: ${broken} ${broken === 1 ? 'registro tiene' : 'registros tienen'} datos incompletos. No se importó nada.`,
     }
   }
 

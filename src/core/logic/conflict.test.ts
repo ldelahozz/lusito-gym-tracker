@@ -19,16 +19,16 @@ describe('resolveConflict: gana el celular', () => {
     expect(resolveConflict(pc(9_999), phone(1_000))).toBe('b')
   })
 
-  it('el celular gana aunque haya escrito despues que la PC', () => {
+  it('el celular gana aunque haya escrito después que la PC', () => {
     expect(resolveConflict(phone(9_999), pc(1_000))).toBe('a')
   })
 
-  it('entre dos celulares gana el mas reciente', () => {
+  it('entre dos celulares gana el más reciente', () => {
     expect(resolveConflict(phone(2_000, 'phone-a'), phone(1_000, 'phone-b'))).toBe('a')
     expect(resolveConflict(phone(1_000, 'phone-a'), phone(2_000, 'phone-b'))).toBe('b')
   })
 
-  it('entre dos PCs gana la mas reciente', () => {
+  it('entre dos PCs gana la más reciente', () => {
     expect(resolveConflict(pc(2_000, 'pc-a'), pc(1_000, 'pc-b'))).toBe('a')
     expect(resolveConflict(pc(1_000, 'pc-a'), pc(2_000, 'pc-b'))).toBe('b')
   })
@@ -68,7 +68,7 @@ describe('shouldOverwriteRemote', () => {
     expect(shouldOverwriteRemote(pc(8_000), phone(1_000))).toBe(false)
   })
 
-  it('la PC si reescribe una version mas vieja de otra PC', () => {
+  it('la PC sí reescribe una versión más vieja de otra PC', () => {
     expect(shouldOverwriteRemote(pc(9_000, 'pc-a'), pc(1_000, 'pc-b'))).toBe(true)
   })
 })

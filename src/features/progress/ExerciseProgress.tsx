@@ -35,7 +35,7 @@ type Entry =
   | { kind: 'skipped'; sessionId: string; startedAt: number; routineId: string }
 
 const METRICS: Array<{ key: Metric; label: string; format: (value: number) => string }> = [
-  { key: 'topWeight', label: 'Peso maximo', format: (value) => formatWeight(Math.round(value * 10) / 10) },
+  { key: 'topWeight', label: 'Peso máximo', format: (value) => formatWeight(Math.round(value * 10) / 10) },
   { key: 'bestE1rm', label: '1RM estimado', format: (value) => String(Math.round(value)) },
   { key: 'totalReps', label: 'Reps totales', format: (value) => String(Math.round(value)) },
   {
@@ -167,13 +167,13 @@ export function ExerciseProgress() {
           <EmptyState
             icon={Dumbbell}
             title="Sin registros"
-            description="Todavia no hay sesiones terminadas con este ejercicio."
+            description="Todavía no hay sesiones terminadas con este ejercicio."
           />
         ) : (
           <>
             <div className="flex gap-2">
               <Stat
-                label="Peso maximo"
+                label="Peso máximo"
                 value={
                   history.length > 0
                     ? `${formatWeight(Math.max(...history.map((item) => item.topWeight)))} kg`
@@ -250,7 +250,7 @@ export function ExerciseProgress() {
 
               {entries.length > visible && (
                 <Button className="self-center" onClick={() => setVisible((value) => value + PAGE)}>
-                  Ver mas
+                  Ver más
                 </Button>
               )}
             </section>

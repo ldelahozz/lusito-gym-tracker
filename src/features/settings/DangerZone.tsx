@@ -32,9 +32,9 @@ type Pending = {
 function historyText(plan: PurgePlan): string {
   if (plan.sessions === 0 && plan.sets === 0) return 'No tiene entrenamientos registrados.'
   const parts: string[] = []
-  if (plan.sessions > 0) parts.push(`${plan.sessions} ${plan.sessions === 1 ? 'sesion' : 'sesiones'}`)
+  if (plan.sessions > 0) parts.push(`${plan.sessions} ${plan.sessions === 1 ? 'sesión' : 'sesiones'}`)
   if (plan.sets > 0) parts.push(`${plan.sets} ${plan.sets === 1 ? 'serie' : 'series'}`)
-  return `Se borran tambien ${parts.join(' y ')}.`
+  return `Se borran también ${parts.join(' y ')}.`
 }
 
 export function DangerZone() {
@@ -55,7 +55,7 @@ export function DangerZone() {
   const run = (plan: PurgePlan, message: string, after?: () => void) => {
     // Se borra en segundo plano: la pantalla cambia al instante, con o sin internet.
     void destroy(plan.targets).catch(() =>
-      showToast('Parte del borrado no llego a la nube. Se reintenta cuando vuelva la conexion.'),
+      showToast('Parte del borrado no llegó a la nube. Se reintenta cuando vuelva la conexión.'),
     )
     after?.()
     showToast(message)
@@ -80,7 +80,7 @@ export function DangerZone() {
     const plan = purgeExercise(tables, exerciseId)
     setPending({
       title: `Borrar «${name}» para siempre`,
-      description: `${historyText(plan)} Sale tambien de las rutinas donde este. No se puede deshacer, salvo con un respaldo.`,
+      description: `${historyText(plan)} Sale también de las rutinas donde esté. No se puede deshacer, salvo con un respaldo.`,
       plan,
       done: 'Ejercicio borrado para siempre',
     })
@@ -97,7 +97,7 @@ export function DangerZone() {
       <div className="flex items-start gap-3">
         <AlertTriangle size={20} className="text-muted shrink-0 mt-0.5" />
         <p className="text-sm text-muted leading-relaxed">
-          Lo que borres aqui desaparece de la nube y de todos tus dispositivos. No se puede deshacer,
+          Lo que borres aquí desaparece de la nube y de todos tus dispositivos. No se puede deshacer,
           salvo que tengas un respaldo. Exporta uno antes si tienes duda.
         </p>
       </div>
@@ -105,8 +105,8 @@ export function DangerZone() {
       <div className="flex flex-col gap-2">
         <p className="text-[15px] font-medium">Todos los entrenamientos</p>
         <p className="text-sm text-muted leading-relaxed">
-          Borra todas tus sesiones, series, notas y records. Tus rutinas, ejercicios y ajustes se
-          quedan: sirve para empezar de cero despues de hacer pruebas.
+          Borra todas tus sesiones, series, notas y récords. Tus rutinas, ejercicios y ajustes se
+          quedan: sirve para empezar de cero después de hacer pruebas.
         </p>
         <Button
           className="self-start"
@@ -122,7 +122,7 @@ export function DangerZone() {
         <p className="text-[15px] font-medium">Rutinas archivadas</p>
         {archivedRoutines.length === 0 ? (
           <p className="text-sm text-muted">
-            No hay. Para borrar una rutina para siempre, primero archivala en Rutinas.
+            No hay. Para borrar una rutina para siempre, primero archívala en Rutinas.
           </p>
         ) : (
           archivedRoutines.map((routine) => (
@@ -144,7 +144,7 @@ export function DangerZone() {
         <p className="text-[15px] font-medium">Ejercicios archivados</p>
         {archivedExercises.length === 0 ? (
           <p className="text-sm text-muted">
-            No hay. Para borrar un ejercicio para siempre, primero archivalo en Rutinas &rsaquo; Ejercicios.
+            No hay. Para borrar un ejercicio para siempre, primero archívalo en Rutinas &rsaquo; Ejercicios.
           </p>
         ) : (
           archivedExercises.map((exercise) => (
@@ -181,7 +181,7 @@ export function DangerZone() {
           setTyped('')
         }}
         title="Borrar todos los entrenamientos"
-        description={`Se borran ${trainingPlan.sessions} ${trainingPlan.sessions === 1 ? 'sesion' : 'sesiones'} y ${trainingPlan.sets} ${trainingPlan.sets === 1 ? 'serie' : 'series'}, con sus notas y records. Tus rutinas y ejercicios se quedan.`}
+        description={`Se borran ${trainingPlan.sessions} ${trainingPlan.sessions === 1 ? 'sesión' : 'sesiones'} y ${trainingPlan.sets} ${trainingPlan.sets === 1 ? 'serie' : 'series'}, con sus notas y récords. Tus rutinas y ejercicios se quedan.`}
         footer={
           <>
             <Button

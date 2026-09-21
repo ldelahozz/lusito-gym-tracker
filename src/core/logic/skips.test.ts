@@ -9,7 +9,7 @@ const work = (sessionId: string, exerciseId: string, extra = {}) => ({
 })
 
 describe('skippedOf', () => {
-  it('lee la lista de la sesion', () => {
+  it('lee la lista de la sesión', () => {
     expect(skippedOf({ skippedExerciseIds: ['curl'] })).toEqual(['curl'])
   })
 
@@ -35,7 +35,7 @@ describe('setSkipped', () => {
 })
 
 describe('hasWorkSets', () => {
-  it('solo cuentan las series de trabajo de esa sesion', () => {
+  it('solo cuentan las series de trabajo de esa sesión', () => {
     const sets = [
       { ...work('s1', 'press'), type: 'warmup' as const },
       work('s2', 'press'),
@@ -85,14 +85,14 @@ describe('skippedLastTime', () => {
     ...extra,
   })
 
-  it('avisa si en la sesion anterior de la rutina te lo saltaste', () => {
+  it('avisa si en la sesión anterior de la rutina te lo saltaste', () => {
     const sessions = [session('a', 1, []), session('b', 2, ['curl']), session('hoy', 3)]
     expect(
       skippedLastTime({ sessions, routineId: 'upper', exerciseId: 'curl', currentSessionId: 'hoy' })?.id,
     ).toBe('b')
   })
 
-  it('solo mira la sesion inmediatamente anterior', () => {
+  it('solo mira la sesión inmediatamente anterior', () => {
     const sessions = [session('a', 1, ['curl']), session('b', 2, []), session('hoy', 3)]
     expect(
       skippedLastTime({ sessions, routineId: 'upper', exerciseId: 'curl', currentSessionId: 'hoy' }),
@@ -112,7 +112,7 @@ describe('skippedLastTime', () => {
     ).toBeNull()
   })
 
-  it('la primera sesion de una rutina no tiene nada que avisar', () => {
+  it('la primera sesión de una rutina no tiene nada que avisar', () => {
     expect(
       skippedLastTime({
         sessions: [session('hoy', 3)],

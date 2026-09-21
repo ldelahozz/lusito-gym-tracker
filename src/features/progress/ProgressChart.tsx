@@ -57,7 +57,7 @@ export function ProgressChart({
     return (
       <div className="h-[180px] grid place-items-center text-center px-6">
         <p className="text-sm text-muted">
-          La grafica aparece a partir de la segunda vez que hagas este ejercicio.
+          La gráfica aparece a partir de la segunda vez que hagas este ejercicio.
         </p>
       </div>
     )

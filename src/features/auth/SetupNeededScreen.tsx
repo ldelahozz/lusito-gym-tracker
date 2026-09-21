@@ -17,7 +17,7 @@ export function SetupNeededScreen() {
           <h1 className="text-lg font-semibold text-text">Falta conectar Firebase</h1>
         </div>
         <p className="text-sm text-muted leading-relaxed">
-          La app esta lista, pero todavia no tiene las claves del proyecto de Firebase (el servicio de
+          La app está lista, pero todavía no tiene las claves del proyecto de Firebase (el servicio de
           Google que guarda tus datos y maneja el acceso con tu cuenta).
         </p>
         <div className="flex flex-col gap-2">
@@ -32,7 +32,7 @@ export function SetupNeededScreen() {
         </div>
         <p className="text-sm text-muted leading-relaxed">
           Copia el archivo <span className="text-text">.env.example</span> como{' '}
-          <span className="text-text">.env.local</span>, pega ahi los valores de tu proyecto y vuelve a
+          <span className="text-text">.env.local</span>, pega ahí los valores de tu proyecto y vuelve a
           iniciar la app.
         </p>
       </Card>

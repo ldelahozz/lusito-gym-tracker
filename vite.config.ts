@@ -24,7 +24,7 @@ export default defineConfig(({ command }) => ({
       manifest: {
         name: 'Lusito Gym Tracker',
         short_name: 'Lusito Gym',
-        description: 'Registro de entrenamientos de gimnasio, offline y con sincronizacion.',
+        description: 'Registro de entrenamientos de gimnasio, offline y con sincronización.',
         lang: 'es',
         start_url: './',
         scope: './',

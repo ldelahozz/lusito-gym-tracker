@@ -69,13 +69,13 @@ describe('finishedSessions', () => {
 })
 
 describe('exerciseHistory', () => {
-  it('agrupa las series por sesion, de la mas vieja a la mas nueva', () => {
+  it('agrupa las series por sesión, de la más vieja a la más nueva', () => {
     const history = exerciseHistory({ sets, sessions, exerciseId: 'press' })
     expect(history.map((item) => item.sessionId)).toEqual(['a', 'b', 'c'])
     expect(history[2].sets).toHaveLength(3)
   })
 
-  it('resume cada sesion: peso tope, reps totales y volumen', () => {
+  it('resume cada sesión: peso tope, reps totales y volumen', () => {
     const [primera, , tercera] = exerciseHistory({ sets, sessions, exerciseId: 'press' })
     expect(primera.topWeight).toBe(60)
     expect(primera.totalReps).toBe(15)
@@ -95,7 +95,7 @@ describe('exerciseHistory', () => {
     expect(primera.sets).toHaveLength(2)
   })
 
-  it('no cuenta una sesion que sigue en curso', () => {
+  it('no cuenta una sesión que sigue en curso', () => {
     const conCurso = [...sessions, session('hoy', 9_000, { endedAt: null })]
     const history = exerciseHistory({
       sets: [...sets, set('hoy', 0, 70, 8)],
@@ -105,7 +105,7 @@ describe('exerciseHistory', () => {
     expect(history.map((item) => item.sessionId)).not.toContain('hoy')
   })
 
-  it('ordena las series por su posicion aunque lleguen desordenadas', () => {
+  it('ordena las series por su posición aunque lleguen desordenadas', () => {
     const [primera] = exerciseHistory({
       sets: [set('a', 1, 60, 7), set('a', 0, 60, 8)],
       sessions,
@@ -123,14 +123,14 @@ describe('compareSets', () => {
     ])
   })
 
-  it('una serie de mas hoy aparece sin comparacion', () => {
+  it('una serie de más hoy aparece sin comparación', () => {
     const rows = compareSets([set('b', 0, 60, 8), set('b', 1, 60, 8)], [set('a', 0, 60, 8)])
     expect(rows).toHaveLength(2)
     expect(rows[1].previous).toBeNull()
     expect(rows[1].weightDelta).toBeNull()
   })
 
-  it('una serie que hoy no hiciste tambien aparece', () => {
+  it('una serie que hoy no hiciste también aparece', () => {
     const rows = compareSets([set('b', 0, 60, 8)], [set('a', 0, 60, 8), set('a', 1, 60, 8)])
     expect(rows[1].current).toBeNull()
     expect(rows[1].previous?.reps).toBe(8)
@@ -149,14 +149,14 @@ describe('compareSets', () => {
   })
 })
 
-describe('trendBetween: progresion doble', () => {
+describe('trendBetween: progresión doble', () => {
   const history = exerciseHistory({ sets, sessions, exerciseId: 'press' })
 
-  it('mas peso es subir, aunque salgan menos repeticiones', () => {
+  it('más peso es subir, aunque salgan menos repeticiones', () => {
     expect(trendBetween(history[2], history[1])).toEqual({ kind: 'up', reason: 'weight' })
   })
 
-  it('mismo peso y mas repeticiones es subir', () => {
+  it('mismo peso y más repeticiones es subir', () => {
     expect(trendBetween(history[1], history[0])).toEqual({ kind: 'up', reason: 'reps' })
   })
 
@@ -202,13 +202,13 @@ describe('previousOf', () => {
     expect(previousOf(history, 'a')).toBeUndefined()
   })
 
-  it('una sesion que no esta en el historial tampoco', () => {
+  it('una sesión que no está en el historial tampoco', () => {
     expect(previousOf(history, 'no-existe')).toBeUndefined()
   })
 })
 
 describe('routineSummary', () => {
-  it('cuenta cuantos ejercicios subieron en la ultima sesion', () => {
+  it('cuenta cuantos ejercicios subieron en la última sesión', () => {
     const mixed = [
       ...sets,
       // Sentadilla: igual en b y c.
@@ -255,7 +255,7 @@ describe('saltados en progreso', () => {
     session('c', 3_000, { skippedExerciseIds: ['curl', 'press'] }),
   ]
 
-  it('el resumen de la rutina cuenta los saltados de la ultima sesion', () => {
+  it('el resumen de la rutina cuenta los saltados de la última sesión', () => {
     // En "c" hay series de press, asi que solo curl cuenta como saltado.
     expect(routineSummary({ sets, sessions: conSaltos, routineId: 'upper' }).skipped).toBe(1)
   })
@@ -275,7 +275,7 @@ describe('saltados en progreso', () => {
     expect(skippedSessions({ sets, sessions, exerciseId: 'curl' })).toEqual([])
   })
 
-  it('saltarse un ejercicio no rompe la comparacion con la ultima vez que si se hizo', () => {
+  it('saltarse un ejercicio no rompe la comparación con la última vez que sí se hizo', () => {
     const history = exerciseHistory({ sets, sessions: conSaltos, exerciseId: 'press' })
     // b y c tienen press; la comparacion de c es contra b.
     expect(previousOf(history, 'c')?.sessionId).toBe('b')

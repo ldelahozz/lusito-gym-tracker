@@ -34,7 +34,7 @@ export function PreferencesCard() {
   return (
     <Card className="p-4 flex flex-col gap-5">
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Paso del peso" hint="Cuanto suma cada toque de + o -.">
+        <Field label="Paso del peso" hint="Cuánto suma cada toque de + o -.">
           <NumberField
             value={settings.weightStep}
             onChange={(weightStep) => update({ weightStep })}
@@ -70,11 +70,11 @@ export function PreferencesCard() {
           onChange={(sound) => update({ sound })}
         />
         <Switch
-          label="Vibracion"
+          label="Vibración"
           description={
             vibrationAvailable
               ? 'Al guardar una serie y al terminar el descanso.'
-              : 'Este dispositivo no tiene vibracion en el navegador (los iPhone no la permiten).'
+              : 'Este dispositivo no tiene vibración en el navegador (los iPhone no la permiten).'
           }
           checked={settings.vibration && vibrationAvailable}
           disabled={!vibrationAvailable}
@@ -91,7 +91,7 @@ export function PreferencesCard() {
           )}
           <p className="flex-1 text-xs text-muted leading-relaxed">
             {permission === 'granted'
-              ? 'Recibiras un aviso del sistema aunque la app este en segundo plano.'
+              ? 'Recibirás un aviso del sistema aunque la app esté en segundo plano.'
               : 'Permite los avisos para enterarte del fin del descanso con la app cerrada.'}
           </p>
           {permission === 'default' && (

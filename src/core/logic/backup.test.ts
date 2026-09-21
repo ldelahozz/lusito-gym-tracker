@@ -81,14 +81,14 @@ function sampleTables(): Tables {
 }
 
 describe('buildBackup', () => {
-  it('lleva la marca de la app, la version de formato y la fecha', () => {
+  it('lleva la marca de la app, la versión de formato y la fecha', () => {
     const backup = buildBackup(sampleTables(), 9_999)
     expect(backup.app).toBe(BACKUP_APP)
     expect(backup.schemaVersion).toBe(BACKUP_SCHEMA_VERSION)
     expect(backup.exportedAt).toBe(9_999)
   })
 
-  it('no guarda lo borrado ni los campos de sincronizacion', () => {
+  it('no guarda lo borrado ni los campos de sincronización', () => {
     const tables = sampleTables()
     tables.routines.vieja = { ...sync, id: 'vieja', name: 'Vieja', deleted: true }
     const backup = buildBackup(tables, 0)
@@ -100,7 +100,7 @@ describe('buildBackup', () => {
 })
 
 describe('ida y vuelta: exportar e importar', () => {
-  it('importar en una cuenta vacia reconstruye exactamente lo exportado', () => {
+  it('importar en una cuenta vacía reconstruye exactamente lo exportado', () => {
     const original = sampleTables()
     const text = serializeBackup(buildBackup(original, 9_999))
     const parsed = parseBackup(text)
@@ -132,7 +132,7 @@ describe('ida y vuelta: exportar e importar', () => {
     expect(plan.kept).toBe(8)
   })
 
-  it('recupera lo que borraste despues de exportar', () => {
+  it('recupera lo que borraste después de exportar', () => {
     const tables = sampleTables()
     const parsed = parseBackup(serializeBackup(buildBackup(tables, 0)))
     if (!parsed.ok) throw new Error(parsed.error)
@@ -170,15 +170,15 @@ describe('parseBackup: archivos que no sirven', () => {
     expect(result).toEqual({ ok: false, error: 'Ese archivo no es un respaldo de Lusito Gym Tracker.' })
   })
 
-  it('rechaza un respaldo de una version mas nueva', () => {
+  it('rechaza un respaldo de una versión más nueva', () => {
     const file = valid()
     file.schemaVersion = BACKUP_SCHEMA_VERSION + 1
     const result = parseBackup(JSON.stringify(file))
     expect(result.ok).toBe(false)
-    if (!result.ok) expect(result.error).toContain('version mas nueva')
+    if (!result.ok) expect(result.error).toContain('versión más nueva')
   })
 
-  it('rechaza todo si algun registro viene incompleto, y dice cuantos', () => {
+  it('rechaza todo si algún registro viene incompleto, y dice cuantos', () => {
     const file = valid()
     file.data.setLogs.push({ id: 'roto', sessionId: 's1' })
     file.data.routines.push({ name: 'sin id' })
@@ -187,13 +187,13 @@ describe('parseBackup: archivos que no sirven', () => {
     if (!result.ok) expect(result.error).toContain('2 registros')
   })
 
-  it('rechaza pesos que no son numeros', () => {
+  it('rechaza pesos que no son números', () => {
     const file = valid()
     file.data.setLogs[0].weightKg = 'mucho'
     expect(parseBackup(JSON.stringify(file)).ok).toBe(false)
   })
 
-  it('acepta un respaldo al que le falta una coleccion vacia', () => {
+  it('acepta un respaldo al que le falta una colección vacía', () => {
     const file = valid()
     delete file.data.sessionNotes
     const result = parseBackup(JSON.stringify(file))
@@ -216,7 +216,7 @@ describe('summarizeBackup', () => {
 })
 
 describe('backupFileName', () => {
-  it('lleva la fecha del dia', () => {
+  it('lleva la fecha del día', () => {
     expect(backupFileName(new Date(2026, 8, 5, 22, 30).getTime())).toBe(
       'lusito-gym-2026-09-05.gymbackup.json',
     )
@@ -226,7 +226,7 @@ describe('backupFileName', () => {
 describe('recordatorio de respaldo', () => {
   const now = 100 * DAY
 
-  it('avisa si pasaron mas de 30 dias desde el ultimo respaldo', () => {
+  it('avisa si pasaron más de 30 días desde el último respaldo', () => {
     expect(backupReminderDue({ lastExportAt: now - 31 * DAY, firstActivityAt: 0, now })).toBe(true)
     expect(backupReminderDue({ lastExportAt: now - 29 * DAY, firstActivityAt: 0, now })).toBe(false)
   })
@@ -240,7 +240,7 @@ describe('recordatorio de respaldo', () => {
     expect(backupReminderDue({ lastExportAt: null, firstActivityAt: null, now })).toBe(false)
   })
 
-  it('cuenta dias completos', () => {
+  it('cuenta días completos', () => {
     expect(daysSince(now - 2.5 * DAY, now)).toBe(2)
     expect(daysSince(now + DAY, now)).toBe(0)
   })

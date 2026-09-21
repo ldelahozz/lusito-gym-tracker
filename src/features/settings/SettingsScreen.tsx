@@ -36,12 +36,12 @@ export function SettingsScreen() {
               </div>
             </div>
             <p className="text-xs text-muted leading-relaxed">
-              Todo lo que registras queda guardado solo en tu cuenta. Nadie mas puede verlo, ni siquiera
+              Todo lo que registras queda guardado solo en tu cuenta. Nadie más puede verlo, ni siquiera
               quien use esta misma app con otra cuenta.
             </p>
             <Button onClick={() => setConfirmingSignOut(true)}>
               <LogOut size={18} />
-              Cerrar sesion
+              Cerrar sesión
             </Button>
           </Card>
         </section>
@@ -57,7 +57,7 @@ export function SettingsScreen() {
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-xs uppercase tracking-wider text-muted px-1">Aplicacion</h2>
+          <h2 className="text-xs uppercase tracking-wider text-muted px-1">Aplicación</h2>
           <InstallCard />
         </section>
 
@@ -69,9 +69,9 @@ export function SettingsScreen() {
 
       <ConfirmDialog
         open={confirmingSignOut}
-        title="Cerrar sesion"
-        description="Se borrara la copia de tus datos guardada en este dispositivo. Todo sigue a salvo en la nube y vuelve al entrar de nuevo. Necesitaras internet para volver a entrar."
-        confirmLabel="Cerrar sesion"
+        title="Cerrar sesión"
+        description="Se borrará la copia de tus datos guardada en este dispositivo. Todo sigue a salvo en la nube y vuelve al entrar de nuevo. Necesitarás internet para volver a entrar."
+        confirmLabel="Cerrar sesión"
         onCancel={() => setConfirmingSignOut(false)}
         onConfirm={() => void signOut()}
       />

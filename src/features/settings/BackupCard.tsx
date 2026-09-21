@@ -26,10 +26,10 @@ import { useData } from '@/core/sync/data-context'
 type Preview = { summary: BackupSummary; plan: ImportPlan }
 
 function lastExportText(lastExportAt: number | null, now: number): string {
-  if (lastExportAt === null) return 'Todavia no has guardado ningun respaldo.'
+  if (lastExportAt === null) return 'Todavía no has guardado ningún respaldo.'
   const days = daysSince(lastExportAt, now)
-  const when = days === 0 ? 'hoy' : days === 1 ? 'ayer' : `hace ${days} dias`
-  return `Ultimo respaldo: ${when} (${formatDate(lastExportAt)}).`
+  const when = days === 0 ? 'hoy' : days === 1 ? 'ayer' : `hace ${days} días`
+  return `Último respaldo: ${when} (${formatDate(lastExportAt)}).`
 }
 
 export function BackupCard() {
@@ -101,7 +101,7 @@ export function BackupCard() {
       <div>
         <p className="text-[15px] font-medium">Respaldo en archivo</p>
         <p className="text-sm text-muted mt-1 leading-relaxed">
-          Guarda en un archivo tus rutinas, ejercicios, entrenamientos, notas, records y ajustes. Tus
+          Guarda en un archivo tus rutinas, ejercicios, entrenamientos, notas, récords y ajustes. Tus
           datos ya viven en la nube; esto es una copia extra que queda en tus manos.
         </p>
         <p className="text-sm mt-2">{lastExportText(settings.lastExportAt, Date.now())}</p>
@@ -134,7 +134,7 @@ export function BackupCard() {
       )}
 
       <p className="text-xs text-muted leading-relaxed">
-        Los videos de los ejercicios no van en el respaldo: se quedan solo en el telefono donde los
+        Los videos de los ejercicios no van en el respaldo: se quedan solo en el teléfono donde los
         guardaste.
       </p>
 
@@ -170,7 +170,7 @@ export function BackupCard() {
                 ['Ejercicios', preview.summary.exercises],
                 ['Sesiones', preview.summary.sessions],
                 ['Series', preview.summary.sets],
-                ['Records', preview.summary.records],
+                ['Récords', preview.summary.records],
               ].map(([label, value]) => (
                 <div key={label} className="p-2 rounded-control bg-surface">
                   <p className="text-[11px] text-muted">{label}</p>
@@ -194,7 +194,7 @@ export function BackupCard() {
                 {preview.plan.restored > 0 && (
                   <li>
                     <span className="font-semibold tabular-nums">{preview.plan.restored}</span> registros
-                    que habias borrado vuelven.
+                    que habías borrado vuelven.
                   </li>
                 )}
                 {preview.plan.kept > 0 && (

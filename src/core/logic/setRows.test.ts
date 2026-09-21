@@ -23,7 +23,7 @@ describe('renumberSets', () => {
     expect(renumberSets(sets)).toEqual([s('w1', 'warmup', 0), s('t1', 'work', 0)])
   })
 
-  it('con una lista vacia no hay nada que renumerar', () => {
+  it('con una lista vacía no hay nada que renumerar', () => {
     expect(renumberSets([])).toEqual([])
   })
 })
@@ -58,7 +58,7 @@ describe('rowCount', () => {
     expect(rowCount(4, 0)).toBe(4)
   })
 
-  it('si registraste mas de las planeadas, se muestran todas', () => {
+  it('si registraste más de las planeadas, se muestran todas', () => {
     expect(rowCount(3, 5)).toBe(5)
   })
 

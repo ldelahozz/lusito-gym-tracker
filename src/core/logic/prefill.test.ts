@@ -35,7 +35,7 @@ const history: PrefillSet[] = [
 ]
 
 describe('previousSessionSets', () => {
-  it('toma las series de la ultima sesion anterior', () => {
+  it('toma las series de la última sesión anterior', () => {
     const previous = previousSessionSets(history, sessions, 'press', 'hoy')
     expect(previous.map((item) => `${item.type}${item.setIndex}`)).toEqual([
       'warmup0',
@@ -52,7 +52,7 @@ describe('previousSessionSets', () => {
     expect(previous[0].weightKg).toBe(30)
   })
 
-  it('ignora la sesion actual', () => {
+  it('ignora la sesión actual', () => {
     const conHoy = [...history, set('hoy', 'work', 0, 999, 1)]
     const previous = previousSessionSets(conHoy, sessions, 'press', 'hoy')
     expect(previous.some((item) => item.weightKg === 999)).toBe(false)
@@ -77,7 +77,7 @@ describe('previousSessionSets', () => {
 describe('equivalentPreviousSet: calentamiento con calentamiento', () => {
   const previous = previousSessionSets(history, sessions, 'press', 'hoy')
 
-  it('empareja por tipo y posicion', () => {
+  it('empareja por tipo y posición', () => {
     expect(equivalentPreviousSet(previous, 'warmup', 1)?.weightKg).toBe(40)
     expect(equivalentPreviousSet(previous, 'work', 0)?.weightKg).toBe(60)
     expect(equivalentPreviousSet(previous, 'work', 1)?.reps).toBe(7)
@@ -88,7 +88,7 @@ describe('equivalentPreviousSet: calentamiento con calentamiento', () => {
     expect(equivalentPreviousSet(previous, 'warmup', 0)?.type).toBe('warmup')
   })
 
-  it('si hoy haces mas series, usa la ultima del mismo tipo', () => {
+  it('si hoy haces más series, usa la última del mismo tipo', () => {
     expect(equivalentPreviousSet(previous, 'work', 5)?.reps).toBe(7)
     expect(equivalentPreviousSet(previous, 'warmup', 9)?.weightKg).toBe(40)
   })
@@ -97,7 +97,7 @@ describe('equivalentPreviousSet: calentamiento con calentamiento', () => {
 describe('prefillFor', () => {
   const previous = previousSessionSets(history, sessions, 'press', 'hoy')
 
-  it('usa la serie equivalente de la sesion anterior', () => {
+  it('usa la serie equivalente de la sesión anterior', () => {
     expect(prefillFor({ previousSets: previous, currentSets: [], type: 'work', setIndex: 1 })).toEqual({
       weightKg: 60,
       reps: 7,

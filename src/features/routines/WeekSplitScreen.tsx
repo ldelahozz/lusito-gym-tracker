@@ -36,7 +36,7 @@ export function WeekSplitScreen() {
   return (
     <Screen
       title="Split semanal"
-      description="Asigna una rutina a cada dia. Los dias sin rutina son descanso."
+      description="Asigna una rutina a cada día. Los días sin rutina son descanso."
       actions={
         <Button variant="ghost" onClick={() => navigate('/rutinas')}>
           <ArrowLeft size={18} />
@@ -49,7 +49,7 @@ export function WeekSplitScreen() {
           <EmptyState
             icon={Dumbbell}
             title="Primero crea una rutina"
-            description="Cuando tengas rutinas podras repartirlas en la semana."
+            description="Cuando tengas rutinas podrás repartirlas en la semana."
             action={
               <Button variant="primary" onClick={() => navigate('/rutinas')}>
                 Ir a Rutinas
@@ -103,8 +103,8 @@ export function WeekSplitScreen() {
             </div>
 
             <p className="text-xs text-muted px-1">
-              Una misma rutina puede ir en varios dias. Esto no te obliga a nada: siempre puedes
-              entrenar otra rutina cualquier dia.
+              Una misma rutina puede ir en varios días. Esto no te obliga a nada: siempre puedes
+              entrenar otra rutina cualquier día.
             </p>
 
             {!isSplitEmpty(split) && (
@@ -121,7 +121,7 @@ export function WeekSplitScreen() {
         open={editingDay !== null}
         onClose={() => setEditingDay(null)}
         title={editingDay === null ? '' : WEEKDAYS[editingDay]}
-        description="Que toca este dia"
+        description="¿Qué toca este día?"
       >
         <div className="flex flex-col gap-2">
           {routines.map((routine) => {

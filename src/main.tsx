@@ -13,7 +13,7 @@ registerSW({ immediate: true })
 void requestPersistentStorage()
 
 const container = document.getElementById('root')
-if (!container) throw new Error('No se encontro el contenedor #root')
+if (!container) throw new Error('No se encontró el contenedor #root')
 
 createRoot(container).render(
   <StrictMode>

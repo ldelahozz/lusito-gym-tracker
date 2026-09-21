@@ -79,7 +79,7 @@ describe('adjustRest', () => {
     expect(remainingSeconds(shorter, now)).toBe(105)
   })
 
-  it('restar de mas termina el descanso, no lo deja en negativo', () => {
+  it('restar de más termina el descanso, no lo deja en negativo', () => {
     const timer = startRest('press', 10, now)
     const shorter = adjustRest(timer, -60, now)
     expect(remainingMs(shorter, now)).toBe(0)

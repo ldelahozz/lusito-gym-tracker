@@ -13,9 +13,9 @@ import { exerciseName } from '@/core/sync/selectors'
 /** "3 subieron · 1 igual · 1 bajo" (solo lo que no sea cero). */
 function summaryLine(summary: RoutineSummary): string {
   const parts: string[] = []
-  if (summary.up > 0) parts.push(`${summary.up} ${summary.up === 1 ? 'subio' : 'subieron'}`)
+  if (summary.up > 0) parts.push(`${summary.up} ${summary.up === 1 ? 'subió' : 'subieron'}`)
   if (summary.same > 0) parts.push(`${summary.same} igual`)
-  if (summary.down > 0) parts.push(`${summary.down} ${summary.down === 1 ? 'bajo' : 'bajaron'}`)
+  if (summary.down > 0) parts.push(`${summary.down} ${summary.down === 1 ? 'bajó' : 'bajaron'}`)
   if (summary.fresh > 0) parts.push(`${summary.fresh} ${summary.fresh === 1 ? 'nuevo' : 'nuevos'}`)
   if (summary.skipped > 0) {
     parts.push(`${summary.skipped} ${summary.skipped === 1 ? 'saltado' : 'saltados'}`)
@@ -53,18 +53,18 @@ export function ProgressHome() {
 
   if (routines.length === 0) {
     return (
-      <Screen title="Progreso" description="Como vas en cada rutina, sesion contra sesion.">
+      <Screen title="Progreso" description="Cómo vas en cada rutina, sesión contra sesión.">
         <EmptyState
           icon={TrendingUp}
-          title="Sin sesiones todavia"
-          description="Termina tu primer entrenamiento y aqui veras como vas en cada rutina."
+          title="Sin sesiones todavía"
+          description="Termina tu primer entrenamiento y aquí verás cómo vas en cada rutina."
         />
       </Screen>
     )
   }
 
   return (
-    <Screen title="Progreso" description="Como vas en cada rutina, sesion contra sesion.">
+    <Screen title="Progreso" description="Cómo vas en cada rutina, sesión contra sesión.">
       <div className="mx-auto w-full max-w-2xl flex flex-col gap-6">
         <section className="flex flex-col gap-2">
           <h2 className="px-1 text-xs uppercase tracking-wider text-muted">Tus rutinas</h2>
@@ -83,12 +83,12 @@ export function ProgressHome() {
                     {archived && <span className="text-muted font-normal"> &middot; archivada</span>}
                   </p>
                   <p className="text-xs text-muted mt-0.5">
-                    {summary.sessions} {summary.sessions === 1 ? 'sesion' : 'sesiones'}
-                    {summary.lastAt !== null && ` · ultima ${formatDate(summary.lastAt)}`}
+                    {summary.sessions} {summary.sessions === 1 ? 'sesión' : 'sesiones'}
+                    {summary.lastAt !== null && ` · última ${formatDate(summary.lastAt)}`}
                   </p>
                   {line && (
                     <p className="text-sm mt-2">
-                      <span className="text-muted">Ultima vez: </span>
+                      <span className="text-muted">Última vez: </span>
                       <span className={summary.up > 0 ? 'text-accent' : 'text-text'}>{line}</span>
                     </p>
                   )}
@@ -101,7 +101,7 @@ export function ProgressHome() {
 
         {records.length > 0 && (
           <section className="flex flex-col gap-2">
-            <h2 className="px-1 text-xs uppercase tracking-wider text-muted">Records recientes</h2>
+            <h2 className="px-1 text-xs uppercase tracking-wider text-muted">Récords recientes</h2>
             {records.map((record) => (
               <Card key={record.id} className="p-0 overflow-hidden">
                 <button

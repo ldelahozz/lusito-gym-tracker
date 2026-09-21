@@ -99,7 +99,7 @@ export function RoutineProgress() {
   }
   const rest = [
     counts.same > 0 ? `${counts.same} igual` : null,
-    counts.down > 0 ? `${counts.down} ${counts.down === 1 ? 'bajo' : 'bajaron'}` : null,
+    counts.down > 0 ? `${counts.down} ${counts.down === 1 ? 'bajó' : 'bajaron'}` : null,
     counts.new > 0 ? `${counts.new} por primera vez` : null,
     counts.skipped > 0 ? `${counts.skipped} ${counts.skipped === 1 ? 'saltado' : 'saltados'}` : null,
   ].filter(Boolean)
@@ -109,7 +109,7 @@ export function RoutineProgress() {
     removeSessionCascade(state, remove, selected.id)
     setConfirmDelete(false)
     setSelectedId(null)
-    showToast('Sesion borrada')
+    showToast('Sesión borrada')
   }
 
   const back = (
@@ -125,7 +125,7 @@ export function RoutineProgress() {
         <EmptyState
           icon={Dumbbell}
           title="Sin sesiones terminadas"
-          description="Cuando termines una sesion de esta rutina, aqui veras como vas."
+          description="Cuando termines una sesión de esta rutina, aquí verás cómo vas."
         />
       </Screen>
     )
@@ -150,22 +150,22 @@ export function RoutineProgress() {
                   : 'bg-elevated text-muted border border-line hover:text-text',
               )}
             >
-              {index === 0 ? `Ultima · ${formatDate(session.startedAt)}` : formatDate(session.startedAt)}
+              {index === 0 ? `Última · ${formatDate(session.startedAt)}` : formatDate(session.startedAt)}
             </button>
           ))}
         </div>
 
         <Card className="p-4 flex flex-col gap-1">
           <p className="text-xs uppercase tracking-wider text-muted">
-            Sesion del {formatDateTime(selected.startedAt)}
+            Sesión del {formatDateTime(selected.startedAt)}
           </p>
           {items.length === 0 ? (
-            <p className="text-sm text-muted">Esta sesion no tiene series registradas.</p>
+            <p className="text-sm text-muted">Esta sesión no tiene series registradas.</p>
           ) : (
             <p className="text-sm">
               {counts.up > 0 && (
                 <span className="text-accent">
-                  {counts.up} {counts.up === 1 ? 'subio' : 'subieron'}
+                  {counts.up} {counts.up === 1 ? 'subió' : 'subieron'}
                 </span>
               )}
               {counts.up > 0 && rest.length > 0 && <span className="text-muted"> &middot; </span>}
@@ -236,7 +236,7 @@ export function RoutineProgress() {
           </Button>
           <Button variant="ghost" onClick={() => setConfirmDelete(true)}>
             <Trash size={16} />
-            Borrar sesion
+            Borrar sesión
           </Button>
         </div>
       </div>
@@ -245,8 +245,8 @@ export function RoutineProgress() {
 
       <ConfirmDialog
         open={confirmDelete}
-        title="Borrar esta sesion"
-        description={`Se borra la sesion del ${formatDate(selected.startedAt)} con todas sus series y los records que hayan salido de ella. Esto no se puede deshacer.`}
+        title="Borrar esta sesión"
+        description={`Se borra la sesión del ${formatDate(selected.startedAt)} con todas sus series y los récords que hayan salido de ella. Esto no se puede deshacer.`}
         confirmLabel="Borrar"
         onCancel={() => setConfirmDelete(false)}
         onConfirm={deleteSelected}

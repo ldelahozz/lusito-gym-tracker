@@ -14,7 +14,7 @@ const start = 1_000_000
 const running: SessionTimes = { startedAt: start, endedAt: null, pausedMs: 0, pausedAt: null }
 
 describe('sessionElapsedMs', () => {
-  it('cuenta el tiempo desde que empezo', () => {
+  it('cuenta el tiempo desde que empezó', () => {
     expect(sessionElapsedMs(running, start + 10 * MINUTE)).toBe(10 * MINUTE)
   })
 
@@ -29,7 +29,7 @@ describe('sessionElapsedMs', () => {
     expect(sessionElapsedMs(session, start + 30 * MINUTE)).toBe(5 * MINUTE)
   })
 
-  it('una sesion terminada muestra siempre lo mismo', () => {
+  it('una sesión terminada muestra siempre lo mismo', () => {
     const session = { ...running, endedAt: start + 45 * MINUTE }
     expect(sessionElapsedMs(session, start + 999 * MINUTE)).toBe(45 * MINUTE)
   })
@@ -40,7 +40,7 @@ describe('sessionElapsedMs', () => {
 })
 
 describe('pausar y reanudar', () => {
-  it('bloquear el celular no afecta: el calculo usa marcas de tiempo', () => {
+  it('bloquear el celular no afecta: el cálculo usa marcas de tiempo', () => {
     // Empieza, pasan 20 minutos con la pantalla apagada, y al volver el tiempo es correcto.
     expect(sessionElapsedMs(running, start + 20 * MINUTE)).toBe(20 * MINUTE)
   })

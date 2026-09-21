@@ -115,7 +115,7 @@ export function ExerciseCatalogScreen() {
   return (
     <Screen
       title="Ejercicios"
-      description="Tu catalogo. Renombrar cambia el nombre en todo el historial; fusionar junta dos historiales en uno."
+      description="Tu catálogo. Renombrar cambia el nombre en todo el historial; fusionar junta dos historiales en uno."
       actions={
         <Button variant="ghost" onClick={() => navigate('/rutinas')}>
           <ArrowLeft size={18} />
@@ -126,7 +126,7 @@ export function ExerciseCatalogScreen() {
       {exercises.length === 0 ? (
         <EmptyState
           icon={Dumbbell}
-          title={showArchived ? 'No hay ejercicios archivados' : 'El catalogo esta vacio'}
+          title={showArchived ? 'No hay ejercicios archivados' : 'El catálogo está vacío'}
           description="Los ejercicios se crean solos cuando los agregas a una rutina."
         />
       ) : (
@@ -217,7 +217,7 @@ export function ExerciseCatalogScreen() {
         open={merging !== null}
         onClose={() => setMerging(null)}
         title="Fusionar ejercicios"
-        description={`Elige con cual se junta "${merging?.name ?? ''}". Todo su historial pasara al que elijas.`}
+        description={`Elige con cuál se junta "${merging?.name ?? ''}". Todo su historial pasará al que elijas.`}
         footer={
           <>
             <Button variant="ghost" onClick={() => setMerging(null)}>
@@ -247,7 +247,7 @@ export function ExerciseCatalogScreen() {
         </div>
         {mergeTargetId && (
           <p className="text-sm text-muted leading-relaxed">
-            &laquo;{merging?.name}&raquo; desaparecera del catalogo y sus series quedaran registradas
+            &laquo;{merging?.name}&raquo; desaparecerá del catálogo y sus series quedarán registradas
             en &laquo;{targetName}&raquo;.
           </p>
         )}
@@ -256,7 +256,7 @@ export function ExerciseCatalogScreen() {
       <ConfirmDialog
         open={pendingDelete !== null}
         title="Eliminar ejercicio"
-        description={`Se elimina "${pendingDelete?.name ?? ''}" del catalogo. No tiene series registradas, asi que no pierdes historial.`}
+        description={`Se elimina "${pendingDelete?.name ?? ''}" del catálogo. No tiene series registradas, así que no pierdes historial.`}
         confirmLabel="Eliminar"
         onCancel={() => setPendingDelete(null)}
         onConfirm={confirmDelete}

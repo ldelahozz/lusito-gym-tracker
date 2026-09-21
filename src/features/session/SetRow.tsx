@@ -78,7 +78,7 @@ export function SetRow({
 
         {isRecord && (
           <span className="shrink-0 text-[11px] uppercase tracking-wider text-accent bg-accent-soft px-2 py-1 rounded-full">
-            Record
+            Récord
           </span>
         )}
       </button>
@@ -140,7 +140,7 @@ export function SetRow({
       <div className="flex items-center gap-2">
         <Button variant="primary" size="lg" className="flex-1" onClick={onComplete}>
           <Check size={20} />
-          {logged ? 'Guardar cambios' : 'Termine serie'}
+          {logged ? 'Guardar cambios' : 'Terminé serie'}
         </Button>
         <IconButton
           icon={ArrowLeftRight}

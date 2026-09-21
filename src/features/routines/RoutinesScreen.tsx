@@ -86,7 +86,7 @@ export function RoutinesScreen() {
   return (
     <Screen
       title="Rutinas"
-      description="Arma tus rutinas aqui. Se sincronizan solas con el celular."
+      description="Arma tus rutinas aquí. Se sincronizan solas con el celular."
       actions={
         <>
           <Button onClick={() => navigate('/rutinas/split')}>
@@ -104,8 +104,8 @@ export function RoutinesScreen() {
       {routines.length === 0 ? (
         <EmptyState
           icon={ListChecks}
-          title={showArchived ? 'No hay rutinas archivadas' : 'Todavia no hay rutinas'}
-          description="Crea una rutina, ponle nombre y agregale los ejercicios que haces."
+          title={showArchived ? 'No hay rutinas archivadas' : 'Todavía no hay rutinas'}
+          description="Crea una rutina, ponle nombre y agrégale los ejercicios que haces."
           action={
             <Button variant="primary" onClick={createRoutine}>
               <Plus size={18} />
@@ -181,7 +181,7 @@ export function RoutinesScreen() {
       <ConfirmDialog
         open={pendingDelete !== null}
         title="Eliminar rutina"
-        description={`Se elimina "${pendingDelete?.name ?? ''}". No tiene entrenamientos registrados, asi que no pierdes historial.`}
+        description={`Se elimina "${pendingDelete?.name ?? ''}". No tiene entrenamientos registrados, así que no pierdes historial.`}
         confirmLabel="Eliminar"
         onCancel={() => setPendingDelete(null)}
         onConfirm={confirmDelete}

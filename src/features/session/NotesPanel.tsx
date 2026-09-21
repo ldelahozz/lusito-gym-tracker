@@ -66,7 +66,7 @@ export function NotesPanel({ sessionId, exerciseId }: Props) {
         <div className="px-3 pb-3 flex flex-col gap-2 border-t border-line pt-3">
           {previousNote && (
             <p className="text-xs text-muted leading-relaxed">
-              <span className="uppercase tracking-wider">Ultima vez:</span> {previousNote}
+              <span className="uppercase tracking-wider">Última vez:</span> {previousNote}
             </p>
           )}
           <textarea
@@ -74,7 +74,7 @@ export function NotesPanel({ sessionId, exerciseId }: Props) {
             onChange={(event) => setText(event.target.value)}
             onBlur={commit}
             rows={3}
-            placeholder="Como se sintio, que ajustar la proxima vez..."
+            placeholder="Cómo se sintió, qué ajustar la próxima vez..."
             className="w-full p-3 rounded-control bg-elevated border border-line text-text placeholder:text-muted/70 focus:border-accent focus:outline-none resize-none"
           />
         </div>

@@ -52,7 +52,7 @@ export const MONTHS_SHORT = [
   'dic',
 ] as const
 
-const DAYS_SHORT = ['dom', 'lun', 'mar', 'mie', 'jue', 'vie', 'sab'] as const
+const DAYS_SHORT = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'] as const
 
 /** "15 sep" */
 export function formatDate(timestamp: number): string {

@@ -40,9 +40,9 @@ export type PrHit = {
 const KIND_ORDER: PrKind[] = ['weight', 'e1rm', 'reps']
 
 export const PR_LABELS: Record<PrKind, string> = {
-  weight: 'Peso maximo',
+  weight: 'Peso máximo',
   e1rm: 'Mejor 1RM estimado',
-  reps: 'Mas repeticiones',
+  reps: 'Más repeticiones',
 }
 
 /** Series de trabajo del mismo ejercicio registradas antes que esta. */
@@ -109,5 +109,5 @@ export function recordMessage(hit: PrHit, exerciseName: string): string {
       ? `${hit.value} reps`
       : `${Number.isInteger(hit.value) ? hit.value : Math.round(hit.value * 100) / 100} kg`
   const what = hit.kind === 'e1rm' ? '1RM estimado' : hit.kind === 'reps' ? 'repeticiones' : 'peso'
-  return `Record de ${what}: ${value} en ${exerciseName}`
+  return `Récord de ${what}: ${value} en ${exerciseName}`
 }
