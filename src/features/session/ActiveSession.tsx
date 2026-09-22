@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
+  ArrowLeftRight,
   ChevronLeft,
   ChevronRight,
   Flag,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/core/ui/Button'
 import { ConfirmDialog } from '@/core/ui/ConfirmDialog'
+import { Modal } from '@/core/ui/Modal'
 import { IconButton } from '@/core/ui/IconButton'
 import { InfoTip } from '@/core/ui/InfoTip'
 import { cn } from '@/core/ui/cn'
@@ -31,6 +33,7 @@ import {
 import { detectRecords, recordMessage, topRecord, type PrSet } from '@/core/logic/prs'
 import { renumberSets, rowCount, switchSetType } from '@/core/logic/setRows'
 import { finalSkipped, setSkipped, skippedLastTime, skippedOf } from '@/core/logic/skips'
+import { canSwap, effectiveLinks, setSwap, swapsOf } from '@/core/logic/swaps'
 import { endSession, isPaused, pauseSession, resumeSession, sessionElapsedMs } from '@/core/logic/sessionDuration'
 import { newId } from '@/core/model/ids'
 import type { Session, SetLog, SetType } from '@/core/model/types'
@@ -38,6 +41,7 @@ import { useData } from '@/core/sync/data-context'
 import { exerciseName, listRoutineExercises } from '@/core/sync/selectors'
 import { useNow } from '@/core/useNow'
 import { useWakeLock } from '@/core/useWakeLock'
+import { ExercisePicker } from '@/features/routines/ExercisePicker'
 import { NotesPanel } from './NotesPanel'
 import { RestBar } from './RestBar'
 import { SessionVideoButton } from './SessionVideoButton'
@@ -92,9 +96,10 @@ export function ActiveSession({
   }, [setHideHeader, setHideNav])
 
   const routine = state.routines[session.routineId]
+  // Con los cambios de hoy ya aplicados: si cambiaste un ejercicio, aqui ya es el nuevo.
   const links = useMemo(
-    () => listRoutineExercises(state, session.routineId),
-    [state, session.routineId],
+    () => effectiveLinks(listRoutineExercises(state, session.routineId), session),
+    [state, session],
   )
 
   const [plan, setPlan] = useState(() => loadSessionPlan(session.id))
@@ -102,6 +107,7 @@ export function ActiveSession({
   const [openKey, setOpenKey] = useState<string | null>(null)
   const [drafts, setDrafts] = useState<Record<string, SetDraft>>({})
   const [confirmFinish, setConfirmFinish] = useState(false)
+  const [swapping, setSwapping] = useState(false)
   const alertedFor = useRef<number | null>(null)
   /** Salto automatico al siguiente ejercicio, pendiente de dispararse. */
   const advanceTimer = useRef<number | undefined>(undefined)
@@ -493,6 +499,38 @@ export function ActiveSession({
     }
   }
 
+  /** Cambia el ejercicio actual solo por hoy (o vuelve al original, con null). */
+  const swapExercise = (exerciseId: string | null, pickedName?: string) => {
+    if (!link) return
+    const target = exerciseId ?? link.swappedFrom ?? link.exerciseId
+    const check = canSwap({
+      links,
+      currentLinkId: link.id,
+      newExerciseId: target,
+      loggedSets: currentSets.length,
+    })
+    if (!check.ok) {
+      showToast(
+        check.reason === 'has-sets'
+          ? 'Ya registraste series de este ejercicio: bórralas antes de cambiarlo'
+          : 'Ese ejercicio ya está en la sesión de hoy',
+      )
+      return
+    }
+    const original = link.swappedFrom ?? link.exerciseId
+    save('sessions', {
+      ...session,
+      exerciseSwaps: setSwap(swapsOf(session), { id: link.id, exerciseId: original }, exerciseId),
+    })
+    setSwapping(false)
+    setOpenKey(null)
+    showToast(
+      exerciseId === null || exerciseId === original
+        ? `De vuelta a ${exerciseName(state, original)}`
+        : `Hoy haces ${pickedName ?? exerciseName(state, exerciseId)} en lugar de ${exerciseName(state, original)}`,
+    )
+  }
+
   const unskipExercise = () => {
     save('sessions', { ...session, skippedExerciseIds: setSkipped(skipped, currentExerciseId, false) })
   }
@@ -725,8 +763,14 @@ export function ActiveSession({
                 </Button>
               </div>
             ) : (
-              (lastSkip || workDone === 0) && (
+              (lastSkip || workDone === 0 || link.swappedFrom) && (
                 <div className="flex flex-col gap-2 -mt-2">
+                  {link.swappedFrom && (
+                    <p className="flex items-center justify-center gap-1.5 px-1 text-xs text-muted">
+                      <ArrowLeftRight size={13} className="shrink-0" />
+                      Solo hoy, en lugar de {exerciseName(state, link.swappedFrom)}
+                    </p>
+                  )}
                   {lastSkip && (
                     <p className="flex items-center justify-center gap-1.5 px-1 text-xs text-muted">
                       <SkipForward size={13} className="shrink-0" />
@@ -734,10 +778,25 @@ export function ActiveSession({
                     </p>
                   )}
                   {workDone === 0 && (
-                    <button type="button" onClick={skipExercise} className={cn(smallButton, 'self-end')}>
-                      <SkipForward size={14} />
-                      Saltar ejercicio
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      {/* Cambiar solo antes de registrar cualquier serie; saltar, antes de las de trabajo. */}
+                      {currentSets.length > 0 ? null : link.swappedFrom ? (
+                        <button type="button" onClick={() => swapExercise(null)} className={smallButton}>
+                          <Undo2 size={14} />
+                          Volver al original
+                        </button>
+                      ) : (
+                        <button type="button" onClick={() => setSwapping(true)} className={smallButton}>
+                          <ArrowLeftRight size={14} />
+                          Cambiar
+                        </button>
+                      )}
+                      <button type="button" onClick={skipExercise} className={smallButton}>
+                        <SkipForward size={14} />
+                        Saltar
+                      </button>
+                      <InfoTip topic="skip" />
+                    </div>
                   )}
                 </div>
               )
@@ -831,6 +890,19 @@ export function ActiveSession({
           onSkip={() => setRestTimer(null)}
         />
       )}
+
+      <Modal
+        open={swapping}
+        onClose={() => setSwapping(false)}
+        title="Cambiar solo por hoy"
+        description={
+          link
+            ? `¿Qué harás en lugar de ${currentName}? Se queda con sus series, rangos y descansos. Tu rutina no cambia.`
+            : undefined
+        }
+      >
+        <ExercisePicker onPick={(exerciseId, name) => swapExercise(exerciseId, name)} placeholder="Busca o escribe el ejercicio" />
+      </Modal>
 
       <ConfirmDialog
         open={confirmFinish}

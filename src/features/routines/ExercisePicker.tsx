@@ -13,7 +13,8 @@ import { useData } from '@/core/sync/data-context'
 import { listExercises } from '@/core/sync/selectors'
 
 type Props = {
-  onPick: (exerciseId: string) => void
+  /** Recibe tambien el nombre: un ejercicio recien creado aun no aparece en los datos. */
+  onPick: (exerciseId: string, name: string) => void
   placeholder?: string
 }
 
@@ -32,8 +33,8 @@ export function ExercisePicker({ onPick, placeholder = 'Escribe un ejercicio...'
   const trimmed = cleanExerciseName(query)
   const exactMatch = trimmed ? findExerciseByName(all, trimmed) : undefined
 
-  const pick = (exerciseId: string) => {
-    onPick(exerciseId)
+  const pick = (exerciseId: string, name: string) => {
+    onPick(exerciseId, name)
     setQuery('')
   }
 
@@ -42,7 +43,7 @@ export function ExercisePicker({ onPick, placeholder = 'Escribe un ejercicio...'
     if (exactMatch) {
       // Si existia archivado, se reactiva en lugar de crear un duplicado.
       if (exactMatch.archived) save('exercises', { ...exactMatch, archived: false })
-      pick(exactMatch.id)
+      pick(exactMatch.id, exactMatch.name)
       return
     }
     const id = newId()
@@ -52,7 +53,7 @@ export function ExercisePicker({ onPick, placeholder = 'Escribe un ejercicio...'
       normalizedName: normalizeExerciseName(trimmed),
       archived: false,
     })
-    pick(id)
+    pick(id, trimmed)
   }
 
   return (
@@ -91,7 +92,7 @@ export function ExercisePicker({ onPick, placeholder = 'Escribe un ejercicio...'
             <button
               key={exercise.id}
               type="button"
-              onClick={() => pick(exercise.id)}
+              onClick={() => pick(exercise.id, exercise.name)}
               className={cn(
                 'flex items-center h-12 px-3 rounded-control text-left text-[15px]',
                 'text-text hover:bg-elevated transition-colors duration-150',

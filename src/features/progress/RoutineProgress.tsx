@@ -23,6 +23,7 @@ import {
 import type { SetLog } from '@/core/model/types'
 import { useData } from '@/core/sync/data-context'
 import { exerciseName, listRoutineExercises } from '@/core/sync/selectors'
+import { effectiveLinks } from '@/core/logic/swaps'
 import { SessionDetail } from './SessionDetail'
 import { removeSessionCascade } from './session-actions'
 import { SetCompareRow, TrendBadge } from './progress-ui'
@@ -59,10 +60,24 @@ export function RoutineProgress() {
    * Ejercicios de la sesion elegida en el orden de la rutina: los que hiciste,
    * comparados con su vez anterior, y los que te saltaste.
    */
+  /** En la sesion elegida, que ejercicio reemplazo a cual (solo ese dia). */
+  const swappedFrom = useMemo(() => {
+    const map = new Map<string, string>()
+    if (!selected) return map
+    for (const link of effectiveLinks(listRoutineExercises(state, routineId), selected)) {
+      if (link.swappedFrom) map.set(link.exerciseId, link.swappedFrom)
+    }
+    return map
+  }, [selected, state, routineId])
+
   const items = useMemo<Item[]>(() => {
     if (!selected) return []
+    // Un ejercicio cambiado solo ese dia ocupa el lugar del original.
     const planOrder = new Map(
-      listRoutineExercises(state, routineId).map((link, index) => [link.exerciseId, index]),
+      effectiveLinks(listRoutineExercises(state, routineId), selected).map((link, index) => [
+        link.exerciseId,
+        index,
+      ]),
     )
     const done = [
       ...new Set(
@@ -206,6 +221,8 @@ export function RoutineProgress() {
                     {item.previous
                       ? `Frente al ${formatDate(item.previous.startedAt)}`
                       : 'Primera vez en esta rutina'}
+                    {swappedFrom.get(item.exerciseId) &&
+                      ` · en lugar de ${exerciseName(state, swappedFrom.get(item.exerciseId) ?? '')}`}
                   </p>
                 </div>
                 <TrendBadge trend={item.trend} className="shrink-0" />

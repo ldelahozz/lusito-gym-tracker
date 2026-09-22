@@ -81,6 +81,11 @@ export type Session = SyncFields & {
   pausedAt: number | null
   /** Ejercicios que te saltaste. Las sesiones viejas no lo traen. */
   skippedExerciseIds?: string[]
+  /**
+   * Ejercicios cambiados solo por hoy: por cada renglon de la rutina (su id),
+   * el ejercicio que se hizo en su lugar. Las sesiones viejas no lo traen.
+   */
+  exerciseSwaps?: Record<string, string>
 }
 
 export type SetType = 'warmup' | 'work'
