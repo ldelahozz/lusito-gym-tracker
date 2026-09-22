@@ -1,5 +1,6 @@
 import { ArrowLeftRight, Award, Check, Trash } from 'lucide-react'
 import { Button } from '@/core/ui/Button'
+import { InfoTip } from '@/core/ui/InfoTip'
 import { NumberField } from '@/core/ui/NumberField'
 import { cn } from '@/core/ui/cn'
 import { formatSetLine, formatSigned, formatWeight } from '@/core/logic/format'
@@ -160,7 +161,10 @@ export function SetRow({
       {isWork && (
         <div className="flex flex-col gap-2" role="radiogroup" aria-label="RIR: repeticiones en reserva">
           <p className="flex items-baseline justify-between gap-2">
-            <span className="text-sm font-semibold">RIR</span>
+            <span className="text-sm font-semibold flex items-center gap-2">
+              RIR
+              <InfoTip topic="rir" />
+            </span>
             <span className="text-xs text-muted">Repeticiones que te quedaban</span>
           </p>
           <div className="flex gap-1.5">

@@ -14,6 +14,7 @@ import {
 import { Button } from '@/core/ui/Button'
 import { ConfirmDialog } from '@/core/ui/ConfirmDialog'
 import { IconButton } from '@/core/ui/IconButton'
+import { InfoTip } from '@/core/ui/InfoTip'
 import { cn } from '@/core/ui/cn'
 import { useToast } from '@/core/ui/toast-context'
 import { useChrome } from '@/app/chrome-context'
@@ -699,6 +700,7 @@ export function ActiveSession({
                   <span className="px-2.5 py-0.5 rounded-full bg-accent-soft text-accent-hi font-medium whitespace-nowrap">
                     Meta {headTarget}
                   </span>
+                  <InfoTip topic="repRange" />
                   <span className="text-muted tabular-nums whitespace-nowrap">
                     {workDone} de {planned.work} hechas
                   </span>

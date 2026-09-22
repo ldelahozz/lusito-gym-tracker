@@ -7,6 +7,7 @@ import { DurationWheel } from '@/core/ui/DurationWheel'
 import { EmptyState } from '@/core/ui/EmptyState'
 import { Field } from '@/core/ui/Field'
 import { IconButton } from '@/core/ui/IconButton'
+import { InfoTip } from '@/core/ui/InfoTip'
 import { Input } from '@/core/ui/Input'
 import { NumberField } from '@/core/ui/NumberField'
 import { Screen } from '@/core/ui/Screen'
@@ -76,7 +77,10 @@ function PlannedSetRow({
 
       {/* Etiquetas arriba: asi cada campo usa todo el ancho y el numero siempre cabe. */}
       <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-2 gap-y-1">
-        <span className="text-xs text-muted">Reps mínimas</span>
+        <span className="text-xs text-muted flex items-center gap-1.5">
+          Reps mínimas
+          <InfoTip topic="repRange" />
+        </span>
         <span />
         <span className="text-xs text-muted">Reps máximas</span>
         <NumberField
@@ -97,7 +101,10 @@ function PlannedSetRow({
           ariaLabel={`Repeticiones máximas, serie ${position}`}
         />
 
-        <span className="text-xs text-muted mt-1.5 col-start-1">RIR objetivo</span>
+        <span className="text-xs text-muted mt-1.5 col-start-1 flex items-center gap-1.5">
+          RIR objetivo
+          <InfoTip topic="rir" />
+        </span>
         <NumberField
           compact
           className="col-start-1"
@@ -184,7 +191,7 @@ function ExerciseCard({
             </Button>
           </div>
 
-          <Field label="Descanso entre series de trabajo">
+          <Field label="Descanso entre series de trabajo" help="rest">
             <DurationWheel
               value={link.restSeconds}
               onChange={(restSeconds) => onChange({ ...link, restSeconds })}
@@ -192,7 +199,7 @@ function ExerciseCard({
             />
           </Field>
 
-          <Field label="Series de calentamiento">
+          <Field label="Series de calentamiento" help="warmup">
             <NumberField
               value={link.warmupSets}
               onChange={(warmupSets) => onChange({ ...link, warmupSets })}

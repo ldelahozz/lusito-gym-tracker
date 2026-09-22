@@ -9,6 +9,7 @@ import { GuestsCard } from '@/features/access/GuestsCard'
 import { useAuth } from '@/features/auth/auth-context'
 import { BackupCard } from './BackupCard'
 import { DangerZone } from './DangerZone'
+import { HelpGuideCard } from './HelpGuideCard'
 import { InstallCard } from './InstallCard'
 import { PreferencesCard } from './PreferencesCard'
 import { SyncCard } from './SyncCard'
@@ -61,6 +62,11 @@ export function SettingsScreen() {
         <section className="flex flex-col gap-3">
           <h2 className="section-label px-1">Entrenamiento</h2>
           <PreferencesCard />
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h2 className="section-label px-1">Guía rápida</h2>
+          <HelpGuideCard />
         </section>
 
         <section className="flex flex-col gap-3">

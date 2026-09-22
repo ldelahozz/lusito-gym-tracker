@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Dumbbell, SkipForward } from 'lucide-react'
 import { Button } from '@/core/ui/Button'
+import type { HelpKey } from '@/core/help'
+import { InfoTip } from '@/core/ui/InfoTip'
 import { Card } from '@/core/ui/Card'
 import { EmptyState } from '@/core/ui/EmptyState'
 import { Screen } from '@/core/ui/Screen'
@@ -73,10 +75,13 @@ function Chip({
   )
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, help }: { label: string; value: string; help?: HelpKey }) {
   return (
     <div className="flex-1 min-w-0 p-3 rounded-control surface-card text-center">
-      <p className="text-xs text-muted truncate">{label}</p>
+      <p className="text-xs text-muted truncate flex items-center justify-center gap-1.5">
+        {label}
+        {help && <InfoTip topic={help} />}
+      </p>
       <p className="text-lg font-semibold tabular-nums">{value}</p>
     </div>
   )
@@ -182,6 +187,7 @@ export function ExerciseProgress() {
               />
               <Stat
                 label="1RM estimado"
+                help="e1rm"
                 value={
                   history.length > 0
                     ? `${Math.round(Math.max(...history.map((item) => item.bestE1rm)))} kg`

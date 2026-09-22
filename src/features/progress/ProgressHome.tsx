@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowDown, ArrowUp, Award, ChevronRight, Equal, SkipForward, Sparkles, TrendingUp } from 'lucide-react'
 import { Card } from '@/core/ui/Card'
 import { EmptyState } from '@/core/ui/EmptyState'
+import { InfoTip } from '@/core/ui/InfoTip'
 import { ProgressRing } from '@/core/ui/ProgressRing'
 import { Screen } from '@/core/ui/Screen'
 import { Sparkline } from '@/core/ui/Sparkline'
@@ -90,7 +91,10 @@ export function ProgressHome() {
         </Card>
 
         <section className="flex flex-col gap-2.5">
-          <h2 className="px-1 section-label">Tus rutinas</h2>
+          <h2 className="px-1 section-label flex items-center gap-2">
+            Tus rutinas
+            <InfoTip topic="trend" />
+          </h2>
           {routines.map(({ routineId, name, archived, summary }, index) => {
             const volumes = routineVolumes({ sets, sessions, routineId })
             return (
@@ -158,7 +162,10 @@ export function ProgressHome() {
 
         {records.length > 0 && (
           <section className="flex flex-col gap-2">
-            <h2 className="px-1 section-label">Récords recientes</h2>
+            <h2 className="px-1 section-label flex items-center gap-2">
+              Récords recientes
+              <InfoTip topic="records" />
+            </h2>
             <Card className="flex flex-col divide-y divide-white/[0.06] overflow-hidden">
             {records.map((record) => (
                 <button
