@@ -4,6 +4,7 @@ import { ArrowDown, ArrowUp, Award, ChevronRight, Equal, SkipForward, Sparkles, 
 import { Card } from '@/core/ui/Card'
 import { EmptyState } from '@/core/ui/EmptyState'
 import { InfoTip } from '@/core/ui/InfoTip'
+import { BodyCard } from '@/features/body/BodyCard'
 import { ProgressRing } from '@/core/ui/ProgressRing'
 import { Screen } from '@/core/ui/Screen'
 import { Sparkline } from '@/core/ui/Sparkline'
@@ -51,6 +52,10 @@ export function ProgressHome() {
           title="Sin sesiones todavía"
           description="Termina tu primer entrenamiento y aquí verás cómo vas en cada rutina."
         />
+        <section className="mx-auto w-full max-w-2xl flex flex-col gap-2.5">
+          <h2 className="px-1 section-label">Tu cuerpo</h2>
+          <BodyCard />
+        </section>
       </Screen>
     )
   }
@@ -158,6 +163,11 @@ export function ProgressHome() {
               </button>
             )
           })}
+        </section>
+
+        <section className="flex flex-col gap-2.5">
+          <h2 className="px-1 section-label">Tu cuerpo</h2>
+          <BodyCard />
         </section>
 
         {records.length > 0 && (

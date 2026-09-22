@@ -14,6 +14,7 @@ export type DataState = {
   setLogs: Table<CollectionTypes['setLogs']>
   sessionNotes: Table<CollectionTypes['sessionNotes']>
   personalRecords: Table<CollectionTypes['personalRecords']>
+  bodyWeights: Table<CollectionTypes['bodyWeights']>
   settings: Table<CollectionTypes['settings']>
 }
 

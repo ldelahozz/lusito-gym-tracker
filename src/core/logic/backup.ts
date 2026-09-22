@@ -92,6 +92,10 @@ const REQUIRED: Record<CollectionName, Array<[string, FieldType]>> = {
     ['exerciseId', 'string'],
     ['setLogId', 'string'],
   ],
+  bodyWeights: [
+    ['measuredAt', 'number'],
+    ['weightKg', 'number'],
+  ],
   settings: [],
 }
 

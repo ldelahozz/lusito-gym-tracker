@@ -6,6 +6,7 @@ import { ConfirmDialog } from '@/core/ui/ConfirmDialog'
 import { Screen } from '@/core/ui/Screen'
 import { useAccess } from '@/features/access/access-context'
 import { GuestsCard } from '@/features/access/GuestsCard'
+import { ProfileCard } from '@/features/body/ProfileCard'
 import { useAuth } from '@/features/auth/auth-context'
 import { BackupCard } from './BackupCard'
 import { DangerZone } from './DangerZone'
@@ -58,6 +59,11 @@ export function SettingsScreen() {
             <GuestsCard />
           </section>
         )}
+
+        <section className="flex flex-col gap-3">
+          <h2 className="section-label px-1">Tus datos</h2>
+          <ProfileCard />
+        </section>
 
         <section className="flex flex-col gap-3">
           <h2 className="section-label px-1">Entrenamiento</h2>

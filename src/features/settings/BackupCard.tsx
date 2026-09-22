@@ -101,7 +101,7 @@ export function BackupCard() {
       <div>
         <p className="text-[15px] font-medium">Respaldo en archivo</p>
         <p className="text-sm text-muted mt-1 leading-relaxed">
-          Guarda en un archivo tus rutinas, ejercicios, entrenamientos, notas, récords y ajustes. Tus
+          Guarda en un archivo tus rutinas, ejercicios, entrenamientos, notas, récords, tu peso y tus ajustes. Tus
           datos ya viven en la nube; esto es una copia extra que queda en tus manos.
         </p>
         <p className="text-sm mt-2">{lastExportText(settings.lastExportAt, Date.now())}</p>

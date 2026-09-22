@@ -38,6 +38,7 @@ const EMPTY_STATE: DataState = {
   setLogs: {},
   sessionNotes: {},
   personalRecords: {},
+  bodyWeights: {},
   settings: {},
 }
 

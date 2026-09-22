@@ -25,6 +25,7 @@ function emptyTables(): Tables {
     setLogs: {},
     sessionNotes: {},
     personalRecords: {},
+    bodyWeights: {},
     settings: {},
   }
 }

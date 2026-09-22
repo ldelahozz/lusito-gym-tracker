@@ -36,6 +36,7 @@ function tables(): PurgeTables {
       r1: { id: 'r1', exerciseId: 'press', setLogId: 'l1' },
       r2: { id: 'r2', exerciseId: 'press', setLogId: 'l3' },
     },
+    bodyWeights: { w1: { id: 'w1', measuredAt: 1, weightKg: 80 } },
     settings: { app: { id: 'app' } },
   }
 }
@@ -101,7 +102,7 @@ describe('purgeExercise', () => {
 })
 
 describe('purgeTraining', () => {
-  it('borra todos los entrenamientos y deja rutinas, ejercicios y ajustes', () => {
+  it('borra todos los entrenamientos y deja rutinas, ejercicios, ajustes y tu peso', () => {
     const plan = purgeTraining(tables())
     const collections = new Set(plan.targets.map((target) => target.collection))
     expect([...collections].sort()).toEqual(['personalRecords', 'sessionNotes', 'sessions', 'setLogs'])

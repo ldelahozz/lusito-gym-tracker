@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Dumbbell, SkipForward } from 'lucide-react'
 import { Button } from '@/core/ui/Button'
 import type { HelpKey } from '@/core/help'
+import { latestWeight, relativeStrength } from '@/core/logic/body'
 import { InfoTip } from '@/core/ui/InfoTip'
 import { Card } from '@/core/ui/Card'
 import { EmptyState } from '@/core/ui/EmptyState'
@@ -152,6 +153,11 @@ export function ExerciseProgress() {
     </Button>
   )
 
+  const strength = relativeStrength(
+    history.length > 0 ? Math.max(...history.map((item) => item.bestE1rm)) : 0,
+    latestWeight(Object.values(state.bodyWeights)),
+  )
+
   return (
     <Screen title={name} description="Cada vez que lo hiciste, frente a la anterior." actions={back}>
       <div className="mx-auto w-full max-w-2xl flex flex-col gap-4">
@@ -194,7 +200,12 @@ export function ExerciseProgress() {
                     : '-'
                 }
               />
-              <Stat label="Veces" value={String(history.length)} />
+              {/* Con tu peso registrado, la fuerza relativa dice mas que el numero de veces. */}
+              {strength !== null ? (
+                <Stat label="Fuerza relativa" help="relativeStrength" value={`${strength.toFixed(2)}×`} />
+              ) : (
+                <Stat label="Veces" value={String(history.length)} />
+              )}
             </div>
             {skipped.length > 0 && (
               <p className="-mt-2 px-1 flex items-center gap-1.5 text-xs text-muted">

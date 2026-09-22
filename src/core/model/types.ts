@@ -119,6 +119,22 @@ export type PersonalRecord = SyncFields & {
   achievedAt: number
 }
 
+/** Un registro de peso corporal. */
+export type BodyWeight = SyncFields & {
+  /** Cuando te pesaste. */
+  measuredAt: number
+  weightKg: number
+}
+
+export type Sex = 'male' | 'female'
+
+/** Datos del cuerpo para estimaciones (calorias). Todo es opcional. */
+export type BodyProfile = {
+  sex: Sex | null
+  birthYear: number | null
+  heightCm: number | null
+}
+
 export type Settings = SyncFields & {
   /** Cuanto suma o resta cada toque del boton de peso, en kg. */
   weightStep: number
@@ -133,6 +149,7 @@ export type Settings = SyncFields & {
   lastExportAt: number | null
   /** Si se sugiere cuando subir de peso (doble progresion). */
   progressionHints: boolean
+  profile: BodyProfile
 }
 
 export const SETTINGS_ID = 'app'
@@ -146,11 +163,15 @@ export const DEFAULT_SETTINGS = {
   weeklySplit: [null, null, null, null, null, null, null] as (string | null)[],
   lastExportAt: null as number | null,
   progressionHints: true,
+  profile: { sex: null, birthYear: null, heightCm: null } as BodyProfile,
 } as const
 
 export const DEFAULT_REST_SECONDS = 120
 export const DEFAULT_WARMUP_REST_SECONDS = 60
-export const DEFAULT_TARGET_SETS = 3
+/** Series de trabajo que trae un ejercicio recien agregado a una rutina. */
+export const DEFAULT_TARGET_SETS = 2
+/** Las rutinas guardadas con el formato viejo, sin numero de series, se leen con 3 (como se crearon). */
+const LEGACY_TARGET_SETS = 3
 export const DEFAULT_TARGET_REPS = 8
 export const DEFAULT_TARGET_RIR = 2
 export const RIR_VALUES = [0, 1, 2, 3, 4, 5] as const
@@ -179,7 +200,7 @@ export function normalizeRoutineExercise(raw: LegacyRoutineExercise): RoutineExe
   const workSets =
     Array.isArray(raw.workSets) && raw.workSets.length > 0
       ? raw.workSets.map(normalizePlannedSet)
-      : Array.from({ length: Math.max(1, raw.targetSets ?? DEFAULT_TARGET_SETS) }, () =>
+      : Array.from({ length: Math.max(1, raw.targetSets ?? LEGACY_TARGET_SETS) }, () =>
           normalizePlannedSet({
             repsMin: raw.repRange?.min ?? DEFAULT_TARGET_REPS,
             repsMax: raw.repRange?.max ?? raw.repRange?.min ?? DEFAULT_TARGET_REPS,

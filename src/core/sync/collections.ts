@@ -1,4 +1,5 @@
 import type {
+  BodyWeight,
   Exercise,
   PersonalRecord,
   Routine,
@@ -18,6 +19,7 @@ export const COLLECTION_NAMES = [
   'setLogs',
   'sessionNotes',
   'personalRecords',
+  'bodyWeights',
   'settings',
 ] as const
 
@@ -32,6 +34,7 @@ export type CollectionTypes = {
   setLogs: SetLog
   sessionNotes: SessionNote
   personalRecords: PersonalRecord
+  bodyWeights: BodyWeight
   settings: Settings
 }
 
