@@ -2,9 +2,15 @@ import { createContext, useContext } from 'react'
 
 export type ToastKind = 'info' | 'record'
 
+/** Boton dentro del aviso, por ejemplo "Deshacer". */
+export type ToastAction = {
+  label: string
+  onAction: () => void
+}
+
 export type ToastValue = {
-  /** Muestra un aviso breve en la parte baja de la pantalla. */
-  showToast: (message: string, kind?: ToastKind) => void
+  /** Muestra un aviso breve. Con accion, dura un poco mas para alcanzar a tocarla. */
+  showToast: (message: string, kind?: ToastKind, action?: ToastAction) => void
 }
 
 export const ToastContext = createContext<ToastValue | null>(null)

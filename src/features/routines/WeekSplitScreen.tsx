@@ -82,7 +82,7 @@ export function WeekSplitScreen() {
                       >
                         {day}
                       </span>
-                      {isToday && <span className="block text-[11px] text-muted">Hoy</span>}
+                      {isToday && <span className="block text-xs text-muted">Hoy</span>}
                     </span>
 
                     <span className="flex-1 min-w-0">

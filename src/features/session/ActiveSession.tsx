@@ -19,7 +19,7 @@ import { useToast } from '@/core/ui/toast-context'
 import { useChrome } from '@/app/chrome-context'
 import { SyncIndicator } from '@/app/SyncIndicator'
 import { unlockAudio, notifyRestFinished, restFinishedFeedback, tapFeedback, vibrate } from '@/core/feedback'
-import { formatDate, formatDuration, formatRepRange } from '@/core/logic/format'
+import { formatDate, formatDuration, formatRepRange, formatWeight } from '@/core/logic/format'
 import { equivalentPreviousSet, prefillFor, previousSessionSets } from '@/core/logic/prefill'
 import {
   adjustRest,
@@ -104,6 +104,12 @@ export function ActiveSession({
   const alertedFor = useRef<number | null>(null)
   /** Salto automatico al siguiente ejercicio, pendiente de dispararse. */
   const advanceTimer = useRef<number | undefined>(undefined)
+  /** Serie que arranco el descanso en curso: si se deshace, el descanso tambien. */
+  const restStartedBy = useRef<string | null>(null)
+  /** Hacia que lado entra el ejercicio nuevo: 1 desde la derecha, -1 desde la izquierda. */
+  const [slideDir, setSlideDir] = useState(1)
+  /** Contenido que se mueve con el dedo al deslizar entre ejercicios. */
+  const swipeRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => () => window.clearTimeout(advanceTimer.current), [])
 
@@ -186,6 +192,28 @@ export function ActiveSession({
 
   const firstIncomplete = rows.find((row) => !row.log)?.key ?? null
   const activeKey = openKey ?? firstIncomplete
+
+  /**
+   * La serie abierta siempre a la vista: al terminar una serie la pantalla baja
+   * sola a la siguiente, sin quedar tapada por el descanso. Al cambiar de
+   * ejercicio, vuelve arriba.
+   */
+  const lastScroll = useRef<{ exercise: string; key: string | null } | null>(null)
+  useEffect(() => {
+    const previous = lastScroll.current
+    lastScroll.current = { exercise: currentExerciseId, key: activeKey }
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    if (previous && previous.exercise !== currentExerciseId) {
+      window.scrollTo({ top: 0, behavior })
+      return
+    }
+    if (!activeKey || previous?.key === activeKey) return
+    // Un instante despues: la serie recien abierta todavia se esta acomodando.
+    const timer = window.setTimeout(() => {
+      document.querySelector(`[data-set-key="${activeKey}"]`)?.scrollIntoView({ behavior, block: 'nearest' })
+    }, 60)
+    return () => window.clearTimeout(timer)
+  }, [activeKey, currentExerciseId])
   const workDone = currentSets.filter((log) => log.type === 'work').length
 
   /** Ejercicios que marcaste como saltados en esta sesion. */
@@ -225,25 +253,50 @@ export function ActiveSession({
       // Si te mueves tu, manda lo que tu hiciste.
       window.clearTimeout(advanceTimer.current)
       if (index < 0 || index >= links.length) return
+      setSlideDir(index >= exerciseIndex ? 1 : -1)
       setPlan((current) => ({ ...current, exerciseIndex: index }))
       setOpenKey(null)
     },
-    [links.length],
+    [links.length, exerciseIndex],
   )
 
-  const touchStart = useRef<{ x: number; y: number } | null>(null)
+  /**
+   * Deslizar entre ejercicios: el contenido sigue al dedo y, si lo sueltas lejos,
+   * pasa al siguiente. Se mueve directo en la pantalla, sin recalcular todo.
+   */
+  const touchStart = useRef<{ x: number; y: number; axis: 'x' | 'y' | null } | null>(null)
+  const setSwipeOffset = (offset: number, animate: boolean) => {
+    const element = swipeRef.current
+    if (!element) return
+    element.style.transition = animate ? 'transform 220ms cubic-bezier(0.22, 0.61, 0.36, 1)' : 'none'
+    element.style.transform = offset === 0 ? '' : `translate3d(${offset}px, 0, 0)`
+  }
   const onTouchStart = (event: React.TouchEvent) => {
     const touch = event.touches[0]
-    touchStart.current = { x: touch.clientX, y: touch.clientY }
+    touchStart.current = { x: touch.clientX, y: touch.clientY, axis: null }
+  }
+  const onTouchMove = (event: React.TouchEvent) => {
+    const start = touchStart.current
+    if (!start) return
+    const touch = event.touches[0]
+    const dx = touch.clientX - start.x
+    const dy = touch.clientY - start.y
+    if (start.axis === null && Math.max(Math.abs(dx), Math.abs(dy)) > 10) {
+      start.axis = Math.abs(dx) > Math.abs(dy) * 1.5 ? 'x' : 'y'
+    }
+    if (start.axis !== 'x') return
+    // En el primer o ultimo ejercicio se resiste: no hay a donde ir.
+    const blocked = (dx > 0 && exerciseIndex === 0) || (dx < 0 && exerciseIndex === links.length - 1)
+    setSwipeOffset(dx * (blocked ? 0.15 : 0.45), false)
   }
   const onTouchEnd = (event: React.TouchEvent) => {
     const start = touchStart.current
     touchStart.current = null
-    if (!start) return
-    const touch = event.changedTouches[0]
-    const dx = touch.clientX - start.x
-    const dy = touch.clientY - start.y
-    if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 2) return
+    setSwipeOffset(0, true)
+    if (!start || start.axis !== 'x') return
+    const dx = event.changedTouches[0].clientX - start.x
+    if (Math.abs(dx) < 70) return
+    setSwipeOffset(0, false)
     goToExercise(exerciseIndex + (dx < 0 ? 1 : -1))
   }
 
@@ -310,8 +363,14 @@ export function ActiveSession({
       const restSeconds = row.type === 'warmup' ? link?.warmupRestSeconds : link?.restSeconds
       if (shouldStartRest && link && restSeconds && restSeconds > 0) {
         alertedFor.current = null
+        restStartedBy.current = created.id
         setRestTimer(startRest(currentExerciseId, restSeconds, Date.now()))
       }
+      showToast(
+        `${row.type === 'warmup' ? 'Calentamiento' : 'Serie'} ${row.position} guardada`,
+        'info',
+        { label: 'Deshacer', onAction: () => undoRef.current(created.id) },
+      )
 
       // Con la ultima serie de trabajo hecha, el ejercicio se da por terminado.
       // Los calentamientos que queden sin marcar no lo impiden.
@@ -340,6 +399,40 @@ export function ActiveSession({
     })
     setOpenKey(null)
   }
+
+  /**
+   * Deshace una serie recien registrada: la quita, borra sus records, detiene el
+   * descanso que arranco y deja la serie abierta con lo que habias puesto.
+   * Se llama desde el aviso, asi que siempre usa lo mas reciente (ver undoRef).
+   */
+  const undoLog = (logId: string) => {
+    const log = state.setLogs[logId]
+    if (!log || log.deleted) return
+    cancelAdvance()
+    const remaining = sessionSets.filter(
+      (item) => item.exerciseId === log.exerciseId && item.type === log.type && item.id !== log.id,
+    )
+    remove('setLogs', log)
+    clearRecordsOf(log.id)
+    const changes = renumberSets(remaining)
+    if (changes.length > 0) saveMany(changes.map((doc) => ({ collection: 'setLogs' as const, doc })))
+    if (restStartedBy.current === log.id) {
+      restStartedBy.current = null
+      setRestTimer(null)
+    }
+    const index = links.findIndex((item) => item.exerciseId === log.exerciseId)
+    if (index >= 0 && index !== exerciseIndex) goToExercise(index)
+    const key = `${log.type}:${log.setIndex}`
+    setDrafts((current) => ({
+      ...current,
+      [`${log.exerciseId}:${key}`]: { weightKg: log.weightKg, reps: log.reps, rir: log.rir },
+    }))
+    setOpenKey(key)
+  }
+  const undoRef = useRef(undoLog)
+  useEffect(() => {
+    undoRef.current = undoLog
+  })
 
   const deleteRow = (row: Row) => {
     if (!row.log) return
@@ -489,8 +582,17 @@ export function ActiveSession({
       ? `${link.workSets.length} × ${formatRepRange(firstTarget.repsMin, firstTarget.repsMax)} · RIR ${firstTarget.rir}`
       : `${link.workSets.length} series`
 
+  /** Lo que sigue, para ir preparando la barra mientras descansas. */
+  const nextRow = rows.find((row) => !row.log && (row.type === 'work' || workDone === 0))
+  const nextLink = links[exerciseIndex + 1]
+  const nextUp = nextRow
+    ? `${nextRow.type === 'warmup' ? 'Calentamiento' : 'Serie'} ${nextRow.position} · ${formatWeight(draftOf(nextRow).weightKg)} kg × ${draftOf(nextRow).reps}`
+    : nextLink
+      ? exerciseName(state, nextLink.exerciseId)
+      : 'Terminaste los ejercicios'
+
   const smallButton =
-    'inline-flex items-center gap-1 h-8 px-2.5 rounded-full surface-key text-xs text-muted hover:text-text transition-transform duration-100 active:scale-95 disabled:opacity-30 disabled:pointer-events-none'
+    'inline-flex items-center gap-1 h-11 px-3.5 rounded-full surface-key text-sm text-muted hover:text-text transition-transform duration-100 active:scale-95 disabled:opacity-30 disabled:pointer-events-none'
 
   return (
     <div className="min-h-full flex flex-col">
@@ -507,7 +609,7 @@ export function ActiveSession({
             type="button"
             onClick={togglePause}
             className={cn(
-              'flex items-center gap-2 h-10 px-3 rounded-full surface-key transition-transform duration-100 active:scale-95',
+              'flex items-center gap-2 h-11 px-3.5 rounded-full surface-key transition-transform duration-100 active:scale-95',
               paused && 'border-accent-dim',
             )}
             aria-label={paused ? 'Reanudar cronómetro' : 'Pausar cronómetro'}
@@ -523,7 +625,7 @@ export function ActiveSession({
             label={hideNav ? 'Mostrar menú' : 'Ocultar menú'}
             active={!hideNav}
             onClick={() => setHideNav(!hideNav)}
-            className="md:hidden size-10"
+            className="md:hidden"
             size={18}
           />
           <SyncIndicator />
@@ -538,7 +640,7 @@ export function ActiveSession({
                 onClick={() => goToExercise(index)}
                 aria-label={`Ir a ${exerciseName(state, segment.exerciseId)}`}
                 aria-current={segment.current ? 'step' : undefined}
-                className="flex-1 h-4 flex items-center"
+                className="flex-1 h-7 flex items-center"
               >
                 <span
                   className={cn(
@@ -563,8 +665,11 @@ export function ActiveSession({
           'flex-1 mx-auto w-full max-w-3xl px-3 pt-4 flex flex-col gap-5',
           restTimer ? 'pb-48' : 'pb-16',
         )}
+        ref={swipeRef}
         onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchEnd}
       >
         {!link ? (
           <div className="flex flex-col items-center gap-4 py-16 text-center">
@@ -574,8 +679,12 @@ export function ActiveSession({
             </Button>
           </div>
         ) : (
-          <>
-            <div key={currentExerciseId} className="flex items-center gap-1 animate-rise">
+          <div
+            key={currentExerciseId}
+            className="flex flex-col gap-5 animate-slide-in"
+            style={{ '--dir': slideDir } as React.CSSProperties}
+          >
+            <div className="flex items-center gap-1">
               <IconButton
                 icon={ChevronLeft}
                 label="Ejercicio anterior"
@@ -583,7 +692,7 @@ export function ActiveSession({
                 onClick={() => goToExercise(exerciseIndex - 1)}
               />
               <div className="flex-1 min-w-0 text-center">
-                <h1 className="text-[22px] leading-tight font-extrabold tracking-tight text-shine truncate">
+                <h1 className="text-[22px] leading-tight font-bold tracking-tight text-shine truncate">
                   {currentName}
                 </h1>
                 <div className="mt-1.5 flex items-center justify-center gap-2 text-xs">
@@ -623,7 +732,7 @@ export function ActiveSession({
                     </p>
                   )}
                   {workDone === 0 && (
-                    <button type="button" onClick={skipExercise} className={cn(smallButton, 'self-end h-9 px-3')}>
+                    <button type="button" onClick={skipExercise} className={cn(smallButton, 'self-end')}>
                       <SkipForward size={14} />
                       Saltar ejercicio
                     </button>
@@ -638,7 +747,7 @@ export function ActiveSession({
               return (
                 <section key={type} className="flex flex-col gap-2">
                   <div className="flex items-center justify-between gap-2 px-1">
-                    <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
+                    <h2 className="section-label">
                       {type === 'warmup' ? 'Calentamiento' : 'Series de trabajo'}
                     </h2>
                     <div className="flex items-center gap-1.5">
@@ -671,26 +780,28 @@ export function ActiveSession({
                   ) : (
                     <div className="flex flex-col gap-2">
                       {typeRows.map((row) => (
-                        <SetRow
-                          key={row.key}
-                          position={row.position}
-                          type={row.type}
-                          logged={Boolean(row.log)}
-                          open={activeKey === row.key}
-                          draft={draftOf(row)}
-                          previous={row.previous}
-                          targetText={row.targetText}
-                          weightStep={settings.weightStep}
-                          isRecord={Boolean(row.log && recordSetIds.has(row.log.id))}
-                          onOpen={() => {
-                            cancelAdvance()
-                            setOpenKey(row.key)
-                          }}
-                          onChange={(draft) => setDraftOf(row, draft)}
-                          onComplete={() => completeRow(row)}
-                          onDelete={() => deleteRow(row)}
-                          onSwitchType={() => switchType(row)}
-                        />
+                        // El margen le avisa al navegador que no la deje bajo la cabecera ni bajo el descanso.
+                        <div key={row.key} data-set-key={row.key} className="scroll-mt-32 scroll-mb-56">
+                          <SetRow
+                            position={row.position}
+                            type={row.type}
+                            logged={Boolean(row.log)}
+                            open={activeKey === row.key}
+                            draft={draftOf(row)}
+                            previous={row.previous}
+                            targetText={row.targetText}
+                            weightStep={settings.weightStep}
+                            isRecord={Boolean(row.log && recordSetIds.has(row.log.id))}
+                            onOpen={() => {
+                              cancelAdvance()
+                              setOpenKey(row.key)
+                            }}
+                            onChange={(draft) => setDraftOf(row, draft)}
+                            onComplete={() => completeRow(row)}
+                            onDelete={() => deleteRow(row)}
+                            onSwitchType={() => switchType(row)}
+                          />
+                        </div>
                       ))}
                     </div>
                   )}
@@ -704,7 +815,7 @@ export function ActiveSession({
               <Flag size={18} />
               Finalizar sesión
             </Button>
-          </>
+          </div>
         )}
       </div>
 
@@ -712,7 +823,7 @@ export function ActiveSession({
         <RestBar
           timer={restTimer}
           now={now}
-          exerciseName={exerciseName(state, restTimer.exerciseId)}
+          nextUp={nextUp}
           aboveNav={!hideNav}
           onAdjust={(delta) => setRestTimer((current) => adjustRest(current, delta, Date.now()))}
           onSkip={() => setRestTimer(null)}

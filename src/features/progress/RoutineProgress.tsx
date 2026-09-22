@@ -134,7 +134,7 @@ export function RoutineProgress() {
   return (
     <Screen title={routineName} description="Cada ejercicio frente a la vez anterior." actions={back}>
       <div className="mx-auto w-full max-w-2xl flex flex-col gap-4">
-        <h1 className="md:hidden text-[26px] leading-tight font-extrabold tracking-tight text-shine truncate">{routineName}</h1>
+        <h1 className="md:hidden text-[26px] leading-tight font-bold tracking-tight text-shine truncate">{routineName}</h1>
 
         {/* Que sesion se mira */}
         <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
@@ -144,7 +144,7 @@ export function RoutineProgress() {
               type="button"
               onClick={() => setSelectedId(session.id)}
               className={cn(
-                'shrink-0 h-10 px-3 rounded-control text-sm whitespace-nowrap transition-colors duration-150',
+                'shrink-0 h-11 px-3.5 rounded-control text-sm whitespace-nowrap transition-colors duration-150',
                 session.id === selected.id
                   ? 'bg-accent text-canvas font-medium'
                   : 'surface-well text-muted hover:text-text',
@@ -156,7 +156,7 @@ export function RoutineProgress() {
         </div>
 
         <Card className="p-4 flex flex-col gap-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
+          <p className="section-label">
             Sesión del {formatDateTime(selected.startedAt)}
           </p>
           {items.length === 0 ? (
@@ -184,7 +184,7 @@ export function RoutineProgress() {
                 <button
                   type="button"
                   onClick={() => navigate(`/progreso/ejercicio/${item.exerciseId}?rutina=${routineId}`)}
-                  className="flex items-center gap-1 h-8 -ml-1 px-1 text-xs text-muted hover:text-text transition-colors duration-150"
+                  className="flex items-center gap-1 h-11 -ml-1 px-1 text-sm text-muted hover:text-text transition-colors duration-150"
                 >
                   Ver historial del ejercicio
                   <ChevronRight size={14} />
@@ -220,7 +220,7 @@ export function RoutineProgress() {
               <button
                 type="button"
                 onClick={() => navigate(`/progreso/ejercicio/${item.exerciseId}?rutina=${routineId}`)}
-                className="self-start flex items-center gap-1 h-9 -ml-1 px-1 text-xs text-muted hover:text-text transition-colors duration-150"
+                className="self-start flex items-center gap-1 h-11 -ml-1 px-1 text-sm text-muted hover:text-text transition-colors duration-150"
               >
                 Ver historial del ejercicio
                 <ChevronRight size={14} />

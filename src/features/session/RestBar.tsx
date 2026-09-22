@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { Button } from '@/core/ui/Button'
 import { ProgressRing } from '@/core/ui/ProgressRing'
 import { cn } from '@/core/ui/cn'
@@ -12,7 +13,8 @@ import {
 type Props = {
   timer: RestTimer
   now: number
-  exerciseName: string
+  /** Lo que sigue: "Serie 3 · 82.5 kg × 6" o el siguiente ejercicio. */
+  nextUp: string
   /** true si la barra de abajo esta visible: el descanso flota encima de ella. */
   aboveNav?: boolean
   onAdjust: (deltaSeconds: number) => void
@@ -23,12 +25,13 @@ type Props = {
  * Tarjeta flotante abajo con la cuenta regresiva del descanso.
  * Se calcula con la hora de fin, asi que sigue correcta tras bloquear el celular.
  */
-export function RestBar({ timer, now, exerciseName, aboveNav, onAdjust, onSkip }: Props) {
+export function RestBar({ timer, now, nextUp, aboveNav, onAdjust, onSkip }: Props) {
   const remaining = remainingMs(timer, now)
   const progress = restProgress(timer, now)
   const finished = remaining === 0
 
-  return (
+  // Se dibuja directo sobre la pagina: asi ninguna animacion de la pantalla la mueve.
+  return createPortal(
     <div
       className={cn(
         'fixed inset-x-0 z-30 px-3 pb-safe pointer-events-none md:bottom-4',
@@ -47,7 +50,7 @@ export function RestBar({ timer, now, exerciseName, aboveNav, onAdjust, onSkip }
         <ProgressRing value={1 - progress} size={64} stroke={5}>
           <span
             className={cn(
-              'text-[17px] font-extrabold tracking-tight tabular-nums',
+              'text-[17px] font-bold tracking-tight tabular-nums',
               finished && 'text-accent-hi',
             )}
           >
@@ -57,7 +60,9 @@ export function RestBar({ timer, now, exerciseName, aboveNav, onAdjust, onSkip }
 
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold">{finished ? '¡A la siguiente!' : 'Descansa'}</p>
-          <p className="text-xs text-muted truncate">{exerciseName}</p>
+          <p className="text-xs text-muted truncate">
+            Sigue: <span className="text-text">{nextUp}</span>
+          </p>
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -77,6 +82,7 @@ export function RestBar({ timer, now, exerciseName, aboveNav, onAdjust, onSkip }
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

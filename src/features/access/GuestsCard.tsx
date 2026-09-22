@@ -121,7 +121,7 @@ export function GuestsCard() {
             >
               <span className="flex-1 min-w-0 text-sm truncate">{guest.email}</span>
               {guest.admin ? (
-                <span className="inline-flex items-center gap-1 mr-2 text-[11px] font-semibold uppercase tracking-wider text-violet">
+                <span className="inline-flex items-center gap-1 mr-2 text-xs font-semibold text-violet">
                   <Crown size={13} />
                   Dueño
                 </span>

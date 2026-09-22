@@ -44,7 +44,7 @@ export function InstallCard() {
       <ol className="flex flex-col gap-2">
         {STEPS[platform].map((step, index) => (
           <li key={step} className="flex gap-3 text-sm text-muted leading-relaxed">
-            <span className="shrink-0 grid place-items-center size-5 mt-px rounded-full bg-elevated text-[11px] text-text">
+            <span className="shrink-0 grid place-items-center size-5 mt-px rounded-full bg-elevated text-xs text-text">
               {index + 1}
             </span>
             {step}

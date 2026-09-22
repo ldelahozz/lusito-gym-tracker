@@ -173,7 +173,7 @@ export function BackupCard() {
                 ['Récords', preview.summary.records],
               ].map(([label, value]) => (
                 <div key={label} className="p-2 rounded-control surface-well">
-                  <p className="text-[11px] text-muted">{label}</p>
+                  <p className="text-xs text-muted">{label}</p>
                   <p className="text-base font-semibold tabular-nums">{value}</p>
                 </div>
               ))}

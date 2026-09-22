@@ -66,7 +66,7 @@ export function NotesPanel({ sessionId, exerciseId }: Props) {
         <div className="px-3 pb-3 flex flex-col gap-2 border-t border-line pt-3">
           {previousNote && (
             <p className="text-xs text-muted leading-relaxed">
-              <span className="uppercase tracking-wider">Última vez:</span> {previousNote}
+              <span className="font-semibold">Última vez:</span> {previousNote}
             </p>
           )}
           <textarea

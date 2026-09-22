@@ -51,7 +51,7 @@ function WeekStrip({ week, split, todayIndex }: { week: WeekActivity; split: Wee
                         : 'bg-[#1b2029]',
                 )}
               />
-              <span className={cn('text-[10px]', today ? 'text-text font-bold' : 'text-muted')}>
+              <span className={cn('text-xs', today ? 'text-text font-bold' : 'text-muted')}>
                 {today ? 'Hoy' : letter}
               </span>
             </div>
@@ -130,7 +130,7 @@ export function TrainScreen() {
   const todayExercises = todayRoutine ? listRoutineExercises(state, todayRoutine.id) : []
   const todaySummary = todayRoutine ? lastTime(todayRoutine.id) : null
   const todaySummaryText = todaySummary ? summaryText(todaySummary) : ''
-  const chipClass = 'text-xs px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.07]'
+  const chipClass = 'text-xs px-2.5 py-1 rounded-full bg-white/[0.05] text-[#c9cfd8]'
 
   return (
     <Screen title="Entrenar" description="Elige la rutina de hoy y empieza.">
@@ -146,71 +146,56 @@ export function TrainScreen() {
           }
         />
       ) : (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-7">
           {hasSplit ? (
-            <Card variant="hero" className="p-5 flex flex-col gap-4 animate-rise">
-              <div className="flex items-start justify-between gap-4">
+            <>
+              <Card variant="hero" className="p-5 flex flex-col gap-4 animate-rise">
                 <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-hi/85">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent-hi/85">
                     {WEEKDAYS[todayIndex]} &middot; Hoy toca
                   </p>
                   {todayRoutine ? (
                     <>
-                      <h2 className="mt-1.5 text-[34px] leading-[1.05] font-extrabold tracking-tight text-shine truncate">
+                      <h2 className="mt-1.5 text-[32px] leading-[1.05] font-bold tracking-tight text-shine truncate">
                         {todayRoutine.name}
                       </h2>
                       <p className="mt-1.5 text-sm text-muted">
                         {exerciseCountText(todayRoutine.id)}
                         {todaySummary?.lastAt != null &&
-                          ` · última vez ${formatDaysAgo(todaySummary.lastAt, now)}`}
+                          ` · ${formatDaysAgo(todaySummary.lastAt, now)}`}
+                        {todaySummaryText && (
+                          <>
+                            <br />
+                            La última vez: <span className="text-text">{todaySummaryText}</span>
+                          </>
+                        )}
                       </p>
                     </>
                   ) : (
-                    <div className="mt-1.5 flex items-center gap-2.5">
-                      <Moon size={24} className="text-accent-hi shrink-0" />
-                      <h2 className="text-[30px] leading-none font-extrabold tracking-tight text-shine">
+                    <>
+                      <h2 className="mt-1.5 flex items-center gap-2.5 text-[30px] leading-none font-bold tracking-tight text-shine">
+                        <Moon size={24} className="text-accent-hi shrink-0" />
                         Descanso
                       </h2>
-                    </div>
+                      <p className="mt-2 text-sm text-muted">
+                        Hoy no te toca. Si quieres, entrena cualquier rutina de abajo.
+                      </p>
+                    </>
                   )}
                 </div>
-                <ProgressRing
-                  value={week.planned > 0 ? week.done / week.planned : 0}
-                  size={60}
-                  label={`${week.done} de ${week.planned} entrenos esta semana`}
-                >
-                  <span className="text-center leading-none">
-                    <span className="block text-[17px] font-extrabold tabular-nums">
-                      {week.done}
-                      <span className="text-muted text-xs font-semibold">/{week.planned}</span>
-                    </span>
-                    <span className="block text-[9px] uppercase tracking-wider text-muted mt-0.5">
-                      semana
-                    </span>
-                  </span>
-                </ProgressRing>
-              </div>
 
-              {todayExercises.length > 0 && (
-                // Una sola fila que se desliza de lado; se desvanece a la derecha si hay mas.
-                <div className="-mx-5 px-5 flex gap-1.5 overflow-x-auto no-scrollbar [mask-image:linear-gradient(90deg,#000_85%,transparent)]">
-                  {todayExercises.map((link) => (
-                    <span key={link.id} className={cn(chipClass, 'shrink-0 whitespace-nowrap text-[#c9cfd8]')}>
-                      {exerciseName(state, link.exerciseId)}
-                    </span>
-                  ))}
-                </div>
-              )}
+                {todayExercises.length > 0 && (
+                  // Una sola fila que se desliza de lado; se desvanece a la derecha si hay mas.
+                  <div className="-mx-5 px-5 flex gap-1.5 overflow-x-auto no-scrollbar [mask-image:linear-gradient(90deg,#000_85%,transparent)]">
+                    {todayExercises.map((link) => (
+                      <span key={link.id} className={cn(chipClass, 'shrink-0 whitespace-nowrap')}>
+                        {exerciseName(state, link.exerciseId)}
+                      </span>
+                    ))}
+                  </div>
+                )}
 
-              <WeekStrip week={week} split={split} todayIndex={todayIndex} />
-
-              {todayRoutine ? (
-                <>
-                  {todaySummaryText && (
-                    <p className="text-sm text-muted -mt-1">
-                      La última vez: <span className="text-text">{todaySummaryText}</span>
-                    </p>
-                  )}
+                {todayRoutine && (
                   <Button
                     variant="primary"
                     size="xl"
@@ -220,27 +205,39 @@ export function TrainScreen() {
                     <Play size={19} fill="currentColor" />
                     Empezar
                   </Button>
-                </>
-              ) : (
-                <p className="text-sm text-muted -mt-1">
-                  Hoy no te toca. Si quieres, entrena cualquier rutina de abajo.
-                </p>
-              )}
+                )}
+              </Card>
 
+              {/* La semana, fuera de la tarjeta: se lee de un vistazo y lleva al split. */}
               <button
                 type="button"
                 onClick={() => navigate('/rutinas/split')}
-                className="self-center flex items-center gap-1.5 h-8 text-xs text-muted hover:text-text transition-colors duration-150"
+                className="-mt-2 flex items-center gap-4 px-1 text-left transition-opacity duration-150 active:opacity-70"
+                aria-label="Tu semana. Tocar para cambiar el split semanal"
               >
-                <CalendarDays size={14} />
-                Cambiar el split semanal
+                <ProgressRing value={week.planned > 0 ? week.done / week.planned : 0} size={48} stroke={5}>
+                  <span className="text-sm font-bold tabular-nums">
+                    {week.done}
+                    <span className="text-muted text-xs font-semibold">/{week.planned}</span>
+                  </span>
+                </ProgressRing>
+                <span className="flex-1 min-w-0 flex flex-col gap-2">
+                  <span className="flex items-baseline justify-between gap-2">
+                    <span className="text-sm font-semibold">Tu semana</span>
+                    <span className="flex items-center gap-1 text-xs text-muted">
+                      Cambiar split
+                      <ChevronRight size={14} />
+                    </span>
+                  </span>
+                  <WeekStrip week={week} split={split} todayIndex={todayIndex} />
+                </span>
               </button>
-            </Card>
+            </>
           ) : (
             <button
               type="button"
               onClick={() => navigate('/rutinas/split')}
-              className="surface-card flex items-center gap-3 p-4 rounded-card text-left hover:border-accent-dim transition-colors duration-150"
+              className="surface-card flex items-center gap-3 p-4 rounded-card text-left transition-transform duration-150 active:scale-[0.99]"
             >
               <span className="grid place-items-center size-11 rounded-control bg-accent-soft text-accent-hi shrink-0">
                 <CalendarDays size={20} />
@@ -256,23 +253,15 @@ export function TrainScreen() {
           )}
 
           {otherRoutines.length > 0 && (
-            <section className="flex flex-col gap-3">
-              <h2 className="px-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted">
-                {todayRoutine ? 'Otras rutinas' : 'Tus rutinas'}
-              </h2>
-              <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-4">
-                {otherRoutines.map((routine, index) => {
+            <section className="flex flex-col gap-2.5">
+              <h2 className="section-label px-1">{todayRoutine ? 'Otras rutinas' : 'Tus rutinas'}</h2>
+              {/* Una sola tarjeta con renglones: menos cajas, mas facil de leer. */}
+              <Card className="flex flex-col divide-y divide-white/[0.06] overflow-hidden animate-rise [animation-delay:60ms]">
+                {otherRoutines.map((routine) => {
                   const count = listRoutineExercises(state, routine.id).length
                   const last = lastTime(routine.id).lastAt
                   return (
-                    <Card
-                      key={routine.id}
-                      className="p-3.5 pr-3 flex items-center gap-3 animate-rise"
-                      style={{ animationDelay: `${60 + index * 40}ms` }}
-                    >
-                      <span className="grid place-items-center size-11 rounded-control surface-well text-accent-hi shrink-0">
-                        <Dumbbell size={19} />
-                      </span>
+                    <div key={routine.id} className="flex items-center gap-3 pl-4 pr-2 py-2.5">
                       <div className="min-w-0 flex-1">
                         <p className="text-[15px] font-semibold truncate">{routine.name}</p>
                         <p className="text-sm text-muted truncate">
@@ -280,14 +269,19 @@ export function TrainScreen() {
                           {last !== null && ` · ${formatDaysAgo(last, now)}`}
                         </p>
                       </div>
-                      <Button size="sm" onClick={() => startSession(routine)} disabled={count === 0}>
-                        <Play size={15} />
-                        Empezar
-                      </Button>
-                    </Card>
+                      <button
+                        type="button"
+                        onClick={() => startSession(routine)}
+                        disabled={count === 0}
+                        aria-label={`Empezar ${routine.name}`}
+                        className="grid place-items-center size-11 shrink-0 rounded-full surface-key text-accent-hi transition-transform duration-150 active:scale-90 disabled:opacity-30 disabled:pointer-events-none"
+                      >
+                        <Play size={17} fill="currentColor" />
+                      </button>
+                    </div>
                   )
                 })}
-              </div>
+              </Card>
             </section>
           )}
 
@@ -343,8 +337,8 @@ export function TrainScreen() {
                 className="surface-well px-2 py-3 rounded-control animate-rise"
                 style={{ animationDelay: `${120 + index * 70}ms` }}
               >
-                <p className="text-[11px] uppercase tracking-wider text-muted">{label}</p>
-                <p className="mt-1 text-lg font-extrabold tracking-tight tabular-nums">{value}</p>
+                <p className="text-xs text-muted">{label}</p>
+                <p className="mt-1 text-lg font-bold tracking-tight tabular-nums">{value}</p>
               </div>
             ))}
           </div>

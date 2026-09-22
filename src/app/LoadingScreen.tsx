@@ -7,7 +7,7 @@ export function LoadingScreen({ label = 'Cargando' }: { label?: string }) {
       <div className="animate-pulse">
         <AppMark size={56} />
       </div>
-      <p className="text-xs uppercase tracking-[0.08em] text-muted">{label}</p>
+      <p className="text-sm text-muted">{label}</p>
     </div>
   )
 }

@@ -116,8 +116,8 @@ export function DurationWheel({
       aria-label={ariaLabel}
     >
       <div className="flex gap-2">
-        <span className="flex-1 text-center text-[10px] uppercase tracking-wider text-muted">min</span>
-        <span className="flex-1 text-center text-[10px] uppercase tracking-wider text-muted">seg</span>
+        <span className="flex-1 text-center text-xs text-muted">min</span>
+        <span className="flex-1 text-center text-xs text-muted">seg</span>
       </div>
 
       <div className="relative">

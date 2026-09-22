@@ -12,7 +12,7 @@ export function LoginScreen() {
       <div className="flex flex-col items-center gap-4 text-center">
         <AppMark size={64} />
         <div>
-          <h1 className="text-[28px] font-extrabold tracking-tight text-shine">Lusito Gym Tracker</h1>
+          <h1 className="text-[28px] font-bold tracking-tight text-shine">Lusito Gym Tracker</h1>
           <p className="text-sm text-muted mt-1">Tus entrenamientos, con o sin internet.</p>
         </div>
       </div>

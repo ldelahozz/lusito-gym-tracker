@@ -34,7 +34,7 @@ function TooltipBox({
 
   return (
     <div className="rounded-control surface-sheet px-3 py-2">
-      <p className="text-[11px] uppercase tracking-wider text-muted">{String(label ?? '')}</p>
+      <p className="text-xs text-muted">{String(label ?? '')}</p>
       <p className="text-sm">
         <span className="text-muted">{title}: </span>
         <span className="font-semibold tabular-nums">{format(value)}</span>

@@ -12,6 +12,7 @@ import { DangerZone } from './DangerZone'
 import { InstallCard } from './InstallCard'
 import { PreferencesCard } from './PreferencesCard'
 import { SyncCard } from './SyncCard'
+import { TextSizeCard } from './TextSizeCard'
 
 function initialsOf(name: string | null, email: string | null): string {
   const source = name?.trim() || email?.trim() || '?'
@@ -28,7 +29,7 @@ export function SettingsScreen() {
     <Screen title="Ajustes" description="Tu cuenta, tus preferencias y tus respaldos.">
       <div className="flex flex-col gap-6 md:grid md:grid-cols-2 md:items-start">
         <section className="flex flex-col gap-3">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted px-1">Cuenta</h2>
+          <h2 className="section-label px-1">Cuenta</h2>
           <Card className="p-4 flex flex-col gap-4">
             <div className="flex items-center gap-3 min-w-0">
               <span className="grid place-items-center size-11 rounded-full bg-accent-soft text-accent font-semibold shrink-0">
@@ -52,29 +53,30 @@ export function SettingsScreen() {
 
         {isAdmin && (
           <section className="flex flex-col gap-3">
-            <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted px-1">Invitados</h2>
+            <h2 className="section-label px-1">Invitados</h2>
             <GuestsCard />
           </section>
         )}
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted px-1">Entrenamiento</h2>
+          <h2 className="section-label px-1">Entrenamiento</h2>
           <PreferencesCard />
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted px-1">Respaldo</h2>
+          <h2 className="section-label px-1">Respaldo</h2>
           <BackupCard />
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted px-1">Aplicación</h2>
+          <h2 className="section-label px-1">Aplicación</h2>
+          <TextSizeCard />
           <InstallCard />
           <SyncCard />
         </section>
 
         <section className="flex flex-col gap-3">
-          <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted px-1">Borrado definitivo</h2>
+          <h2 className="section-label px-1">Borrado definitivo</h2>
           <DangerZone />
         </section>
       </div>

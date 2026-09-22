@@ -168,13 +168,13 @@ export function SessionDetail({
       >
         <div className="flex gap-2 text-center">
           <div className="flex-1 p-2 rounded-control surface-well">
-            <p className="text-[11px] text-muted">Duración</p>
+            <p className="text-xs text-muted">Duración</p>
             <p className="text-sm font-medium tabular-nums">
               {duration === null ? '-' : formatDuration(duration)}
             </p>
           </div>
           <div className="flex-1 p-2 rounded-control surface-well">
-            <p className="text-[11px] text-muted">Series</p>
+            <p className="text-xs text-muted">Series</p>
             <p className="text-sm font-medium tabular-nums">
               {groups.reduce(
                 (total, group) => total + group.sets.filter((log) => log.type === 'work').length,
@@ -183,7 +183,7 @@ export function SessionDetail({
             </p>
           </div>
           <div className="flex-1 p-2 rounded-control surface-well">
-            <p className="text-[11px] text-muted">Volumen</p>
+            <p className="text-xs text-muted">Volumen</p>
             <p className="text-sm font-medium tabular-nums">
               {formatWeight(
                 Math.round(
@@ -208,7 +208,7 @@ export function SessionDetail({
           <div className="flex flex-col gap-4">
             {groups.map((group) => (
               <section key={group.exerciseId} className="flex flex-col gap-1.5">
-                <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted px-1">
+                <h3 className="section-label px-1">
                   {exerciseName(state, group.exerciseId)}
                 </h3>
                 {group.sets.map((log) => (

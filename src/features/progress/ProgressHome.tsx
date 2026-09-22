@@ -58,7 +58,7 @@ export function ProgressHome() {
   const week = weekActivity({ sessions, split: settings.weeklySplit, now })
   const monthRecords = records30(state.personalRecords, sets, now)
 
-  const chip = 'inline-flex items-center gap-1 h-6 px-2 rounded-full text-[11px] font-medium whitespace-nowrap'
+  const chip = 'inline-flex items-center gap-1 h-6 px-2 rounded-full text-xs font-medium whitespace-nowrap'
 
   return (
     <Screen title="Progreso" description="Cómo vas en cada rutina, sesión contra sesión.">
@@ -69,13 +69,13 @@ export function ProgressHome() {
             size={68}
             label={`${week.done} de ${week.planned} entrenos esta semana`}
           >
-            <span className="text-xl font-extrabold tabular-nums">
+            <span className="text-xl font-bold tabular-nums">
               {week.done}
               <span className="text-xs text-muted font-semibold">/{week.planned}</span>
             </span>
           </ProgressRing>
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-hi/85">Esta semana</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent-hi/85">Esta semana</p>
             <p className="text-lg font-bold leading-snug">
               {week.planned > 0
                 ? `${week.done} de ${week.planned} entrenos`
@@ -90,7 +90,7 @@ export function ProgressHome() {
         </Card>
 
         <section className="flex flex-col gap-2.5">
-          <h2 className="px-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted">Tus rutinas</h2>
+          <h2 className="px-1 section-label">Tus rutinas</h2>
           {routines.map(({ routineId, name, archived, summary }, index) => {
             const volumes = routineVolumes({ sets, sessions, routineId })
             return (
@@ -158,13 +158,14 @@ export function ProgressHome() {
 
         {records.length > 0 && (
           <section className="flex flex-col gap-2">
-            <h2 className="px-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted">Récords recientes</h2>
+            <h2 className="px-1 section-label">Récords recientes</h2>
+            <Card className="flex flex-col divide-y divide-white/[0.06] overflow-hidden">
             {records.map((record) => (
-              <Card key={record.id} className="p-0 overflow-hidden">
                 <button
+                  key={record.id}
                   type="button"
                   onClick={() => navigate(`/progreso/ejercicio/${record.exerciseId}`)}
-                  className="w-full p-3 flex items-center gap-3 text-left"
+                  className="w-full p-3 flex items-center gap-3 text-left transition-colors duration-150 active:bg-white/[0.03]"
                 >
                   <span className="grid place-items-center size-10 shrink-0 rounded-[13px] bg-violet-soft border border-violet-dim text-violet">
                     <Award size={18} />
@@ -175,14 +176,14 @@ export function ProgressHome() {
                       {PR_LABELS[record.kind]} &middot; {formatDate(record.achievedAt)}
                     </p>
                   </div>
-                  <span className="shrink-0 text-base font-extrabold tracking-tight tabular-nums">
+                  <span className="shrink-0 text-base font-bold tracking-tight tabular-nums">
                     {record.kind === 'reps'
                       ? `${record.value} reps`
                       : `${formatWeight(Math.round(record.value * 10) / 10)} kg`}
                   </span>
                 </button>
-              </Card>
             ))}
+            </Card>
           </section>
         )}
       </div>

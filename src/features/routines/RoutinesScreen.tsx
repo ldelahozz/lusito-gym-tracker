@@ -114,7 +114,7 @@ export function RoutinesScreen() {
       </div>
 
       <div className="flex items-center justify-between gap-3 mb-3 px-1">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">
+        <h2 className="section-label">
           {showArchived ? 'Todas tus rutinas' : 'Tus rutinas'}
         </h2>
         <Button variant="primary" size="sm" onClick={createRoutine}>
@@ -130,24 +130,17 @@ export function RoutinesScreen() {
           description="Crea una rutina, ponle nombre y agrégale los ejercicios que haces."
         />
       ) : (
-        <div className="flex flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-4">
-          {routines.map((routine, index) => {
+        <Card className="flex flex-col divide-y divide-white/[0.06] overflow-hidden animate-rise">
+          {routines.map((routine) => {
             const exerciseCount = listRoutineExercises(state, routine.id).length
             const days = daysUsing(settings.weeklySplit, routine.id).map((day) => WEEKDAYS_SHORT[day])
             return (
-              <Card
-                key={routine.id}
-                className="flex items-center gap-1 pr-1.5 animate-rise"
-                style={{ animationDelay: `${index * 40}ms` }}
-              >
+              <div key={routine.id} className="flex items-center gap-1 pr-1.5">
                 <button
                   type="button"
                   onClick={() => navigate(`/rutinas/${routine.id}`)}
-                  className="flex-1 min-w-0 flex items-center gap-3 p-3.5 pr-1 text-left"
+                  className="flex-1 min-w-0 flex items-center gap-3 py-3 pl-4 pr-1 text-left transition-colors duration-150 active:bg-white/[0.03]"
                 >
-                  <span className="grid place-items-center size-11 rounded-control surface-well text-accent-hi shrink-0">
-                    <Dumbbell size={19} />
-                  </span>
                   <span className="min-w-0 flex-1">
                     <span className="block text-[15px] font-semibold truncate">{routine.name}</span>
                     <span className="block text-sm text-muted truncate">
@@ -165,10 +158,10 @@ export function RoutinesScreen() {
                   label={`Opciones de ${routine.name}`}
                   onClick={() => setMenuFor(routine)}
                 />
-              </Card>
+              </div>
             )
           })}
-        </div>
+        </Card>
       )}
 
       {archivedCount > 0 && (

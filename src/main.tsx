@@ -5,6 +5,10 @@ import '@fontsource-variable/inter'
 import './styles/index.css'
 import { App } from './app/App'
 import { requestPersistentStorage } from './core/platform'
+import { applyTextSize, readTextSize } from './core/textSize'
+
+// El tamaño de texto elegido se aplica antes de dibujar nada, para que no brinque.
+applyTextSize(readTextSize())
 
 // Mantiene la app actualizada sola: al abrirla, si hay version nueva, se instala.
 registerSW({ immediate: true })

@@ -35,7 +35,7 @@ function DeltaPill({ value, unit, neutral }: { value: number; unit: string; neut
   return (
     <span
       className={cn(
-        'inline-flex items-center h-6 px-2 rounded-full text-[11px] tabular-nums whitespace-nowrap',
+        'inline-flex items-center h-6 px-2 rounded-full text-xs tabular-nums whitespace-nowrap',
         neutral
           ? 'surface-well text-muted'
           : up
@@ -67,7 +67,7 @@ export function SetCompareRow({
     current && !previous && !firstTime ? (
       <span
         key="new"
-        className="inline-flex items-center h-6 px-2 rounded-full text-[11px] surface-well text-muted"
+        className="inline-flex items-center h-6 px-2 rounded-full text-xs surface-well text-muted"
       >
         serie nueva
       </span>
@@ -82,7 +82,7 @@ export function SetCompareRow({
       <DeltaPill key="rir" value={rirDelta} unit="RIR" neutral />
     ) : null,
     weightDelta === 0 && repsDelta === 0 && rirDelta === 0 ? (
-      <span key="same" className="inline-flex items-center h-6 text-[11px] text-muted">
+      <span key="same" className="inline-flex items-center h-6 text-xs text-muted">
         igual
       </span>
     ) : null,
@@ -90,7 +90,7 @@ export function SetCompareRow({
 
   return (
     <div className="flex items-start gap-3 py-2.5 border-t border-line first:border-t-0">
-      <span className="grid place-items-center size-6 mt-0.5 shrink-0 rounded-full bg-elevated text-[11px] text-muted tabular-nums">
+      <span className="grid place-items-center size-6 mt-0.5 shrink-0 rounded-full bg-elevated text-xs text-muted tabular-nums">
         {row.position}
       </span>
 

@@ -31,7 +31,7 @@ type Props = {
   onSwitchType: () => void
 }
 
-/** "+2.5 kg", "+1 rep", "= que la vez pasada": lo que cambio frente a la vez pasada. */
+/** "+2.5 kg", "+1 rep", "Igual": lo que cambio frente a la vez pasada. */
 function deltaOf(draft: SetDraft, previous: SetDraft | null): { text: string; up: boolean } | null {
   if (!previous) return null
   const weight = Math.round((draft.weightKg - previous.weightKg) * 100) / 100
@@ -40,7 +40,7 @@ function deltaOf(draft: SetDraft, previous: SetDraft | null): { text: string; up
   if (reps !== 0) {
     return { text: `${formatSigned(reps)} ${Math.abs(reps) === 1 ? 'rep' : 'reps'}`, up: reps > 0 }
   }
-  return { text: 'Igual que la vez pasada', up: false }
+  return { text: 'Igual', up: false }
 }
 
 export function SetRow({
@@ -68,22 +68,23 @@ export function SetRow({
         type="button"
         onClick={onOpen}
         className={cn(
-          'w-full flex items-center gap-3 min-h-14 px-3 py-2 rounded-control text-left',
+          // Hechas: renglon delgado y tranquilo. Pendientes: apenas un contorno.
+          'w-full flex items-center gap-3 px-3 rounded-control text-left',
           'transition-[background-color,transform] duration-150 active:scale-[0.99]',
-          logged ? 'surface-card' : 'border border-dashed border-line bg-white/[0.015]',
+          logged ? 'min-h-12 py-1.5 bg-white/[0.03]' : 'min-h-13 py-2 border border-white/[0.07]',
         )}
       >
         <span
           className={cn(
-            'grid place-items-center size-8 shrink-0 rounded-full text-sm font-semibold tabular-nums',
+            'grid place-items-center size-7 shrink-0 rounded-full text-sm font-semibold tabular-nums',
             logged ? 'surface-glow animate-pop' : 'surface-well text-muted',
           )}
         >
-          {logged ? <Check size={16} strokeWidth={2.6} /> : position}
+          {logged ? <Check size={15} strokeWidth={2.6} /> : position}
         </span>
 
         <span className="flex-1 min-w-0">
-          <span className={cn('block text-[15px] tabular-nums', logged ? 'text-text font-medium' : 'text-muted')}>
+          <span className={cn('block text-[15px] tabular-nums truncate', logged ? 'text-text font-medium' : 'text-muted')}>
             {formatWeight(draft.weightKg)} kg &times; {draft.reps}
             {isWork && logged ? ` · RIR ${draft.rir}` : ''}
           </span>
@@ -93,7 +94,7 @@ export function SetRow({
         </span>
 
         {isRecord ? (
-          <span className="shrink-0 inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-violet bg-violet-soft border border-violet-dim px-2 py-1 rounded-full">
+          <span className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-violet bg-violet-soft border border-violet-dim px-2 py-1 rounded-full">
             <Award size={12} />
             Récord
           </span>
@@ -101,7 +102,7 @@ export function SetRow({
           delta && (
             <span
               className={cn(
-                'shrink-0 text-[11px] tabular-nums px-2 py-1 rounded-full whitespace-nowrap',
+                'shrink-0 text-xs tabular-nums px-2 py-1 rounded-full whitespace-nowrap',
                 delta.up ? 'bg-accent-soft text-accent-hi' : 'text-muted',
               )}
             >
@@ -114,7 +115,7 @@ export function SetRow({
   }
 
   return (
-    <div className="flex flex-col gap-3.5 p-3.5 rounded-card surface-card border-accent-dim shadow-[0_0_0_1px_rgb(76_141_255/0.15),0_18px_40px_-20px_rgb(76_141_255/0.35)] animate-rise">
+    <div className="flex flex-col gap-3.5 p-3.5 rounded-card surface-card border-accent-dim/70 animate-rise">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-[15px] font-bold">
@@ -175,7 +176,7 @@ export function SetRow({
                   onClick={() => onChange({ ...draft, rir: value })}
                   className={cn(
                     'flex-1 h-12 rounded-[12px] text-base tabular-nums transition-[transform,background-color] duration-150 active:scale-95',
-                    selected ? 'surface-glow font-extrabold' : 'surface-well text-muted',
+                    selected ? 'surface-glow font-bold' : 'surface-well text-muted',
                   )}
                 >
                   {value}
@@ -195,7 +196,7 @@ export function SetRow({
         <button
           type="button"
           onClick={onSwitchType}
-          className="inline-flex items-center gap-1.5 h-9 px-1 text-xs text-muted hover:text-text transition-colors duration-150"
+          className="inline-flex items-center gap-1.5 h-11 px-1 text-sm text-muted hover:text-text transition-colors duration-150"
         >
           <ArrowLeftRight size={14} />
           {isWork ? 'Es de calentamiento' : 'Es de trabajo'}
@@ -204,7 +205,7 @@ export function SetRow({
           <button
             type="button"
             onClick={onDelete}
-            className="inline-flex items-center gap-1.5 h-9 px-1 text-xs text-muted hover:text-text transition-colors duration-150"
+            className="inline-flex items-center gap-1.5 h-11 px-1 text-sm text-muted hover:text-text transition-colors duration-150"
           >
             <Trash size={14} />
             Borrar serie

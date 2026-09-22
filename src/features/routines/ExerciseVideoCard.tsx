@@ -20,7 +20,7 @@ export function ExerciseVideoCard({ exerciseId, exerciseName }: Props) {
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">Video de referencia</span>
+      <span className="section-label">Video de referencia</span>
 
       <input
         ref={inputRef}
@@ -53,7 +53,7 @@ export function ExerciseVideoCard({ exerciseId, exerciseName }: Props) {
             <Button size="sm" onClick={() => inputRef.current?.click()}>
               Cambiar
             </Button>
-            <IconButton icon={Trash} label="Quitar video" size={16} className="size-10" onClick={() => void remove()} />
+            <IconButton icon={Trash} label="Quitar video" size={16} onClick={() => void remove()} />
           </div>
         </div>
       ) : (

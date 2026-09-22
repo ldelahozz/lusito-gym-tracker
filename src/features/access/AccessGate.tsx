@@ -34,7 +34,7 @@ function NotInvitedScreen({ email }: { email: string }) {
         <span className="grid place-items-center size-12 rounded-2xl bg-accent-soft text-accent-hi">
           <MailQuestion size={22} />
         </span>
-        <h1 className="text-2xl font-extrabold tracking-tight text-shine">Esta app es por invitación</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-shine">Esta app es por invitación</h1>
         <p className="text-sm text-muted leading-relaxed">
           Entraste como <span className="text-text font-medium break-all">{email}</span>. Pídele a quien
           te compartió la app que agregue este correo a su lista de invitados, y vuelve a abrirla.
