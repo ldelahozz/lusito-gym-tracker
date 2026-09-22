@@ -65,6 +65,12 @@ export function PreferencesCard() {
           onChange={(warmupStartsTimer) => update({ warmupStartsTimer })}
         />
         <Switch
+          label="Sugerir cuándo subir de peso"
+          description="Según tus series de la vez pasada, tu rango de reps y tu RIR."
+          checked={settings.progressionHints}
+          onChange={(progressionHints) => update({ progressionHints })}
+        />
+        <Switch
           label="Sonido al terminar el descanso"
           checked={settings.sound}
           onChange={(sound) => update({ sound })}

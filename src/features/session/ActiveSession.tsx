@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowLeftRight,
+  Check,
   ChevronLeft,
   ChevronRight,
   Flag,
@@ -10,6 +11,7 @@ import {
   Play,
   Plus,
   SkipForward,
+  TrendingUp,
   Undo2,
 } from 'lucide-react'
 import { Button } from '@/core/ui/Button'
@@ -34,6 +36,7 @@ import { detectRecords, recordMessage, topRecord, type PrSet } from '@/core/logi
 import { renumberSets, rowCount, switchSetType } from '@/core/logic/setRows'
 import { finalSkipped, setSkipped, skippedLastTime, skippedOf } from '@/core/logic/skips'
 import { canSwap, effectiveLinks, setSwap, swapsOf } from '@/core/logic/swaps'
+import { suggestProgression } from '@/core/logic/suggest'
 import { endSession, isPaused, pauseSession, resumeSession, sessionElapsedMs } from '@/core/logic/sessionDuration'
 import { newId } from '@/core/model/ids'
 import type { Session, SetLog, SetType } from '@/core/model/types'
@@ -621,6 +624,47 @@ export function ActiveSession({
       ? `${link.workSets.length} × ${formatRepRange(firstTarget.repsMin, firstTarget.repsMax)} · RIR ${firstTarget.rir}`
       : `${link.workSets.length} series`
 
+  /** Sugerencia de peso para hoy, segun la vez pasada (doble progresion). */
+  const suggestion = useMemo(() => {
+    if (!settings.progressionHints || !link) return null
+    return suggestProgression({
+      previous: previousSets.filter((set) => set.type === 'work'),
+      targets: link.workSets,
+      weightStep: settings.weightStep,
+    })
+  }, [settings.progressionHints, settings.weightStep, link, previousSets])
+
+  const pendingWorkRows = rows.filter((row) => row.type === 'work' && !row.log)
+  const suggestedFor = (index: number) =>
+    suggestion?.kind === 'increase' ? suggestion.sets[Math.min(index, suggestion.sets.length - 1)] : undefined
+  const suggestionApplied =
+    suggestion?.kind === 'increase' &&
+    pendingWorkRows.every((row) => draftOf(row).weightKg === suggestedFor(row.index)?.weightKg)
+
+  /** Pone el peso sugerido (y el minimo del rango) en las series de trabajo que faltan. */
+  const applySuggestion = () => {
+    if (suggestion?.kind !== 'increase') return
+    tapFeedback(settings.vibration)
+    setDrafts((current) => {
+      const next = { ...current }
+      for (const row of pendingWorkRows) {
+        const proposal = suggestedFor(row.index)
+        if (proposal) next[`${currentExerciseId}:${row.key}`] = proposal
+      }
+      return next
+    })
+    showToast(`Listo: ${formatWeight(suggestion.sets[0].weightKg)} kg en tus series de trabajo`)
+  }
+
+  const suggestionNote =
+    suggestion?.kind === 'more-reps'
+      ? 'Mismo peso que la vez pasada: busca una repetición más.'
+      : suggestion?.kind === 'too-hard'
+        ? `Mismo peso: llegaste al tope, pero con RIR ${suggestion.rir} en lugar de ${suggestion.target}.`
+        : suggestion?.kind === 'below-range'
+          ? `Mismo peso: la vez pasada quedaste abajo de ${suggestion.repsMin} reps en alguna serie.`
+          : null
+
   /** Lo que sigue, para ir preparando la barra mientras descansas. */
   const nextRow = rows.find((row) => !row.log && (row.type === 'work' || workDone === 0))
   const nextLink = links[exerciseIndex + 1]
@@ -800,6 +844,38 @@ export function ActiveSession({
                   )}
                 </div>
               )
+            )}
+
+            {!isSkipped && workDone === 0 && suggestion?.kind === 'increase' && (
+              <div className="flex items-center gap-3 p-3 pl-3.5 rounded-card surface-hero">
+                <span className="grid place-items-center size-10 shrink-0 rounded-full bg-accent-soft text-accent-hi">
+                  <TrendingUp size={19} />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold flex items-center gap-2">
+                    Hoy toca subir {formatWeight(suggestion.increment)} kg
+                    <InfoTip topic="suggestion" />
+                  </p>
+                  <p className="text-xs text-muted">La vez pasada llegaste al tope del rango en todas las series.</p>
+                </div>
+                {suggestionApplied ? (
+                  <span className="flex items-center gap-1 text-xs font-semibold text-accent-hi shrink-0">
+                    <Check size={15} />
+                    Aplicado
+                  </span>
+                ) : (
+                  <Button size="sm" variant="primary" className="shrink-0" onClick={applySuggestion}>
+                    Aplicar
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {!isSkipped && workDone === 0 && suggestionNote && (
+              <p className="flex items-center justify-center gap-2 px-2 -mt-2 text-xs text-muted text-center">
+                <span>{suggestionNote}</span>
+                <InfoTip topic="suggestion" />
+              </p>
             )}
 
             {(['warmup', 'work'] as const).map((type) => {

@@ -131,6 +131,8 @@ export type Settings = SyncFields & {
   weeklySplit: (string | null)[]
   /** Cuando se exporto el ultimo respaldo, o null si nunca. */
   lastExportAt: number | null
+  /** Si se sugiere cuando subir de peso (doble progresion). */
+  progressionHints: boolean
 }
 
 export const SETTINGS_ID = 'app'
@@ -143,6 +145,7 @@ export const DEFAULT_SETTINGS = {
   vibration: true,
   weeklySplit: [null, null, null, null, null, null, null] as (string | null)[],
   lastExportAt: null as number | null,
+  progressionHints: true,
 } as const
 
 export const DEFAULT_REST_SECONDS = 120
