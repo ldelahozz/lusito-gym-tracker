@@ -11,10 +11,10 @@ el entrenamiento y se sincroniza sola entre celular y PC. Tema oscuro, en españ
 
 | Sección | Para qué sirve |
 |---|---|
-| **Entrenar** | Te dice qué rutina toca hoy según tu split semanal. Durante la sesión ves un ejercicio a la vez, con peso, reps y RIR de la vez pasada ya escritos: registrar una serie es un toque. Descanso con cuenta regresiva, vibración y sonido. Avisa récords al momento. Puedes saltarte un ejercicio y la próxima vez te lo recuerda. |
+| **Entrenar** | Te dice qué rutina toca hoy según tu split semanal. Durante la sesión ves un ejercicio a la vez, con peso, reps y RIR de la vez pasada ya escritos: registrar una serie es un toque (y se puede deshacer). Sugiere cuándo subir de peso con doble progresión. Descanso con cuenta regresiva que dice qué sigue, vibración y sonido. Avisa récords al momento. Puedes saltarte un ejercicio o cambiarlo solo por hoy. |
 | **Rutinas** | Rutinas con sus ejercicios en orden. Cada serie con su rango de reps (6-8) y RIR objetivo, descanso con ruedita de minutos y segundos. Split semanal (qué rutina va cada día). Catálogo de ejercicios: renombrar, fusionar, archivar. |
-| **Progreso** | Por rutina, sesión contra sesión: qué ejercicios subieron, se quedaron igual o bajaron, con la diferencia de peso, reps y RIR serie por serie. Detalle por ejercicio con gráfica e historial, incluidas las veces que te lo saltaste. |
-| **Ajustes** | Paso del peso, calentamientos, sonido, vibración y avisos. Respaldo en archivo, borrado definitivo y, para el dueño, la lista de invitados. |
+| **Progreso** | Por rutina, sesión contra sesión: qué ejercicios subieron, se quedaron igual o bajaron, con la diferencia de peso, reps y RIR serie por serie. Detalle por ejercicio con gráfica, historial y fuerza relativa. Tu cuerpo: peso, proteína de referencia y calorías de mantenimiento estimadas. |
+| **Ajustes** | Tus datos (sexo, año de nacimiento, altura), paso del peso, calentamientos, sugerencias, sonido, vibración, tamaño del texto y guía rápida. Respaldo en archivo, borrado definitivo y, para el dueño, la lista de invitados. |
 
 ## Correr en local
 
@@ -139,3 +139,19 @@ src/
     ui/       botones, campos, ventanas, avisos
   features/   pantallas: auth, access (invitados), session (Entrenar), routines, progress, settings
 ```
+
+## De dónde salen las pautas
+
+Los globos "?" de la app y la guía rápida (Ajustes) explican cada pauta con su fuente
+(`src/core/help.ts`):
+
+- **Subir de peso:** ACSM 2009, subir 2 a 10% al superar las repeticiones buscadas. La app
+  sugiere ~2.5% (el lado prudente), redondeado a tu paso de peso, cuando llegas al tope del
+  rango en todas las series con el RIR planeado (`src/core/logic/suggest.ts`).
+- **Descansos:** ACSM 2009 (2-3 min en ejercicios grandes, 1-2 min en chicos); Singer y
+  cols. 2024 (más de 60-90 s ayuda un poco al músculo).
+- **Proteína:** Morton y cols. 2018, 1.6 g/kg al día (hasta ~2.2 g/kg).
+- **Calorías:** fórmula de Mifflin-St Jeor (1990) por un factor de actividad según tus días
+  de entreno (`src/core/logic/body.ts`).
+
+Son referencias generales, no indicaciones médicas.
