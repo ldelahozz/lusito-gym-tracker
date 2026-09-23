@@ -140,6 +140,7 @@ export type Settings = SyncFields & {
   weightStep: number
   defaultWarmupSets: number
   /** Si las series de calentamiento tambien arrancan el timer de descanso. */
+  /** Ya no se usa: el descanso de calentamiento depende del tiempo que pongas en la rutina. */
   warmupStartsTimer: boolean
   sound: boolean
   vibration: boolean

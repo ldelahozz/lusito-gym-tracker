@@ -29,9 +29,11 @@ import { equivalentPreviousSet, prefillFor, previousSessionSets } from '@/core/l
 import {
   adjustRest,
   isFinished,
+  remainingMs,
   startRest,
   type RestTimer,
 } from '@/core/logic/restTimer'
+import { canFloat, closeFloating, isFloating, openFloating } from '@/core/floatingTimer'
 import { detectRecords, recordMessage, topRecord, type PrSet } from '@/core/logic/prs'
 import { renumberSets, rowCount, switchSetType } from '@/core/logic/setRows'
 import { finalSkipped, setSkipped, skippedLastTime, skippedOf } from '@/core/logic/skips'
@@ -65,6 +67,9 @@ type Row = {
   targetText: string | null
   defaults: SetDraft
 }
+
+/** Cuanto se queda la barra de descanso despues de terminar, antes de quitarse sola. */
+const REST_DONE_LINGER_MS = 4000
 
 export type SessionSummary = {
   routineName: string
@@ -249,6 +254,21 @@ export function ActiveSession({
     setDrafts((current) => ({ ...current, [`${currentExerciseId}:${row.key}`]: draft }))
   }
 
+  /**
+   * Al terminar el descanso, la barra dice "¡A la siguiente!" unos segundos y se
+   * quita sola: no hace falta tocar "Listo". Si volviste a la app mucho despues,
+   * ya no aparece.
+   */
+  useEffect(() => {
+    if (!restTimer) return
+    const endAt = restTimer.endAt
+    const wait = Math.max(0, endAt + REST_DONE_LINGER_MS - Date.now())
+    const timer = window.setTimeout(() => {
+      setRestTimer((current) => (current && current.endAt === endAt ? null : current))
+    }, wait)
+    return () => window.clearTimeout(timer)
+  }, [restTimer])
+
   /** Avisos cuando termina el descanso: vibracion, pitido y notificacion. */
   useEffect(() => {
     if (!restTimer || !isFinished(restTimer, now)) return
@@ -369,9 +389,9 @@ export function ActiveSession({
       if (row.type === 'work' && skipped.includes(currentExerciseId)) {
         save('sessions', { ...session, skippedExerciseIds: setSkipped(skipped, currentExerciseId, false) })
       }
-      const shouldStartRest = row.type === 'work' || settings.warmupStartsTimer
+      // Calentamientos y series de trabajo arrancan su descanso. Con 0:00 en la rutina, no hay descanso.
       const restSeconds = row.type === 'warmup' ? link?.warmupRestSeconds : link?.restSeconds
-      if (shouldStartRest && link && restSeconds && restSeconds > 0) {
+      if (link && restSeconds && restSeconds > 0) {
         alertedFor.current = null
         restStartedBy.current = created.id
         setRestTimer(startRest(currentExerciseId, restSeconds, Date.now()))
@@ -624,6 +644,27 @@ export function ActiveSession({
       ? `${link.workSets.length} × ${formatRepRange(firstTarget.repsMin, firstTarget.repsMax)} · RIR ${firstTarget.rir}`
       : `${link.workSets.length} series`
 
+  /**
+   * Temporizador flotante: lee siempre lo mas reciente, porque sigue dibujando
+   * aunque estes en otra app.
+   */
+  const restTimerRef = useRef(restTimer)
+  const nextUpRef = useRef('')
+  const readFloating = useCallback(() => {
+    const timer = restTimerRef.current
+    if (!timer) return null
+    return {
+      remainingMs: remainingMs(timer, Date.now()),
+      totalMs: timer.totalSeconds * 1000,
+      nextUp: nextUpRef.current,
+    }
+  }, [])
+  const openFloat = () => {
+    void openFloating(readFloating).then((opened) => {
+      if (!opened) showToast('Tu celular no permitió abrir el temporizador flotante')
+    })
+  }
+
   /** Sugerencia de peso para hoy, segun la vez pasada (doble progresion). */
   const suggestion = useMemo(() => {
     if (!settings.progressionHints || !link) return null
@@ -673,6 +714,28 @@ export function ActiveSession({
     : nextLink
       ? exerciseName(state, nextLink.exerciseId)
       : 'Terminaste los ejercicios'
+
+  useEffect(() => {
+    restTimerRef.current = restTimer
+    nextUpRef.current = nextUp
+  })
+
+  // Sin descanso (terminado, saltado o al salir de la sesion), la ventanita se cierra.
+  useEffect(() => {
+    if (!restTimer) closeFloating()
+  }, [restTimer])
+  useEffect(() => () => closeFloating(), [])
+
+  // Al volver a la app ya ves la barra del descanso: la ventanita sobra.
+  useEffect(() => {
+    let wasHidden = false
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') wasHidden = true
+      else if (wasHidden && isFloating()) closeFloating()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [])
 
   const smallButton =
     'inline-flex items-center gap-1 h-11 px-3.5 rounded-full surface-key text-sm text-muted hover:text-text transition-transform duration-100 active:scale-95 disabled:opacity-30 disabled:pointer-events-none'
@@ -746,7 +809,7 @@ export function ActiveSession({
       <div
         className={cn(
           'flex-1 mx-auto w-full max-w-3xl px-3 pt-4 flex flex-col gap-5',
-          restTimer ? 'pb-48' : 'pb-16',
+          restTimer ? 'pb-60' : 'pb-16',
         )}
         ref={swipeRef}
         onTouchStart={onTouchStart}
@@ -962,6 +1025,7 @@ export function ActiveSession({
           now={now}
           nextUp={nextUp}
           aboveNav={!hideNav}
+          onFloat={canFloat() ? openFloat : undefined}
           onAdjust={(delta) => setRestTimer((current) => adjustRest(current, delta, Date.now()))}
           onSkip={() => setRestTimer(null)}
         />

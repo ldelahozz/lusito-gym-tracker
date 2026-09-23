@@ -39,11 +39,6 @@
   --animate-num-tick: num-tick 200ms var(--ease-out-soft);
 }
 
-/* Grano fino tipo papel: le da textura a fondos y tarjetas sin ensuciar. */
-:root {
-  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .075 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
 @layer base {
   :root {
     color-scheme: dark;
@@ -64,6 +59,11 @@
   body {
     margin: 0;
     background-color: var(--color-canvas);
+    /* Solo una luz azul-violeta muy tenue arriba, que se desvanece: fondo limpio. */
+    background-image:
+      radial-gradient(90% 32rem at 85% -8rem, rgb(124 92 255 / 0.1), transparent 70%),
+      radial-gradient(110% 30rem at 10% -6rem, rgb(76 141 255 / 0.13), transparent 70%);
+    background-repeat: no-repeat;
     color: var(--color-text);
     font-family: var(--font-sans);
     -webkit-tap-highlight-color: transparent;
@@ -71,23 +71,6 @@
     overscroll-behavior-y: none;
     /* Sin retardo de 300 ms ni zoom por doble toque. */
     touch-action: manipulation;
-  }
-
-  /*
-   * Una luz azul-violeta muy tenue arriba y el grano encima de todo el fondo.
-   * Vive en una capa fija detras de todo: no se corta ni cambia de tono al bajar.
-   */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-image:
-      var(--grain),
-      radial-gradient(90% 32rem at 85% -8rem, rgb(124 92 255 / 0.1), transparent 70%),
-      radial-gradient(110% 30rem at 10% -6rem, rgb(76 141 255 / 0.13), transparent 70%);
-    background-repeat: repeat, no-repeat, no-repeat;
   }
 
   /* Los controles nativos (inputs, selects, scrollbars) tambien en oscuro. */
@@ -159,7 +142,7 @@
 /* ------------------------------------------------------------------
    Superficies. Regla general: ligeras. Las tarjetas son capas apenas mas
    claras que el fondo, sin sombra; solo lo que flota (ventanas, descanso,
-   avisos) lleva sombra. La textura de grano vive solo en el fondo.
+   avisos) lleva sombra.
 ------------------------------------------------------------------- */
 @layer components {
   /* Tarjeta normal: una capa translucida, sin sombra. */

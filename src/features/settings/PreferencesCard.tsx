@@ -59,12 +59,6 @@ export function PreferencesCard() {
 
       <div className="flex flex-col divide-y divide-line">
         <Switch
-          label="El calentamiento arranca el descanso"
-          description="Por defecto el timer solo arranca en las series de trabajo."
-          checked={settings.warmupStartsTimer}
-          onChange={(warmupStartsTimer) => update({ warmupStartsTimer })}
-        />
-        <Switch
           label="Sugerir cuándo subir de peso"
           description="Según tus series de la vez pasada, tu rango de reps y tu RIR."
           checked={settings.progressionHints}

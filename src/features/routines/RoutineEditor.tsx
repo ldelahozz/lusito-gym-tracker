@@ -211,7 +211,7 @@ function ExerciseCard({
           </Field>
 
           {link.warmupSets > 0 && (
-            <Field label="Descanso entre calentamientos">
+            <Field label="Descanso entre calentamientos" hint="Con 0:00 no arranca el descanso tras un calentamiento.">
               <DurationWheel
                 value={link.warmupRestSeconds}
                 onChange={(warmupRestSeconds) => onChange({ ...link, warmupRestSeconds })}
